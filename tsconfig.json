@@ -14,10 +14,10 @@
       "DOM"
     ],
     "skipLibCheck": true,
-    "baseUrl": "./packages",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./vswift-epc/src/*"
+        "./packages/designer/src/*"
       ]
     },
   }

@@ -1,8 +1,8 @@
 /*
  * @Author: Lvshang vsdeeper@qq.com
  * @Date: 2024-03-02 15:57:28
- * @LastEditTime: 2024-03-02 16:40:50
- * @LastEditors: Lvshang vsdeeper@qq.com
+ * @LastEditTime: 2024-03-02 20:03:29
+ * @LastEditors: vsdeeper vsdeeper@qq.com
  * @Description:
  */
 import { defineConfig } from 'eslint-define-config';
@@ -17,7 +17,7 @@ module.exports = defineConfig({
     'plugin:@typescript-eslint/recommended',
     'plugin:vue/vue3-essential',
     'plugin:prettier/recommended',
-    './vswift-epc/.eslintrc-auto-import.json',
+    './designer/.eslintrc-auto-import.json',
   ],
   overrides: [
     {

@@ -1,0 +1,25 @@
+{
+  "name": "@vswift/utils",
+  "version": "0.0.3",
+  "description": "Common method for swift development.",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.umd.cjs",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "vswift-cli build -dt tsc",
+    "release": "pnpm build && release-it"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "release-it": "^15.5.1",
+    "@vswift/cli": "workspace:*"
+  }
+}
