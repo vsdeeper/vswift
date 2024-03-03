@@ -1,4 +1,4 @@
-import { DateType, SearchConditionType } from "designer/src/components";
+import { DateType, SearchConditionType } from "@/components";
 
 export const SEARCH_TYPE_OPTIONS: { label: string; value: SearchConditionType }[] = [
   { label: '输入框', value: 'Input' },

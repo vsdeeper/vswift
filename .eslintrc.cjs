@@ -1,10 +1,3 @@
-/*
- * @Author: Lvshang vsdeeper@qq.com
- * @Date: 2024-03-02 15:57:28
- * @LastEditTime: 2024-03-02 20:03:29
- * @LastEditors: vsdeeper vsdeeper@qq.com
- * @Description:
- */
 import { defineConfig } from 'eslint-define-config';
 
 module.exports = defineConfig({

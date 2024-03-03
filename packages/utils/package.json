@@ -17,9 +17,9 @@
     "build": "vswift-cli build -dt tsc",
     "release": "pnpm build && release-it"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@vswift/cli": "workspace:*",
     "release-it": "^15.5.1",
-    "@vswift/cli": "workspace:*"
+    "vite": "^5.0.8"
   }
 }

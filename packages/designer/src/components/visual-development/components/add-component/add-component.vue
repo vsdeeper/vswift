@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { InputInstance } from 'element-plus';
 import { AddComponentOptionItem, AddComponentGroupOptionItem } from '.';
-import { ActiveDesignData } from '../..';
 import { useGlobal } from '@/stores';
 
 const props = defineProps<{

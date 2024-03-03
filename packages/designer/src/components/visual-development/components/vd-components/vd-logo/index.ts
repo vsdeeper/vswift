@@ -1,4 +1,4 @@
-import { BaseDesignData } from 'designer/src/components'
+import { BaseDesignData } from '@/components'
 import { Component } from 'vue'
 
 export interface LogoDesignDataOptions {

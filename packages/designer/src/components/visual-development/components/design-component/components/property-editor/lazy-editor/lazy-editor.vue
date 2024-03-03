@@ -21,7 +21,7 @@ const emit = defineEmits<{
 
 const options = toRef(props, 'options');
 
-function change(val: string | number | boolean, options: DesignDataOptions) {
+function change(val: unknown, options: DesignDataOptions) {
   if (val) options.loadApiMethod = 'GET';
 }
 </script>

@@ -1,0 +1,43 @@
+{
+  "name": "@vswift/components",
+  "version": "0.0.8",
+  "description": "UI components based on Vue and Element Plus for swift development.",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.umd.cjs",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "release": "pnpm build && release-it"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "element-plus": "^2.4.4",
+    "lodash-es": "^4.17.21",
+    "nanoid": "^5.0.4",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.15",
+    "vuedraggable": "^4.1.0"
+  },
+  "devDependencies": {
+    "@vswift/cli": "workspace:*",
+    "@types/lodash-es": "^4.17.12",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "release-it": "^15.5.1",
+    "sass": "^1.69.7",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "unplugin-auto-import": "^0.17.3",
+    "vue-tsc": "^1.8.25"
+  }
+}

@@ -1,4 +1,4 @@
-import { Method, BaseDesignData } from 'designer/src/components';
+import { Method, BaseDesignData } from '@/components';
 
 export type SearchConditionType = 'Input' | 'InputNumber' | 'Select' | 'Cascader' | 'DatePicker';
 export type DateType =

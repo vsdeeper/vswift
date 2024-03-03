@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { MergeDesignData } from '@/components';
-import { ColorEditor, FontSizeEditor, HeightEditor, IdEditor, NameEditor, SuffixIconEditor } from '../property-editor';
-import { ROW_GUTTER } from '../constants';
 
 defineProps<{
   formData: MergeDesignData;

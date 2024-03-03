@@ -1,4 +1,4 @@
-import { ActiveDesignData, MergeDesignData } from 'designer/src/components';
+import { ActiveDesignData, MergeDesignData } from '@/components';
 import { defineStore } from 'pinia';
 
 const useGlobal = defineStore('global', () => {

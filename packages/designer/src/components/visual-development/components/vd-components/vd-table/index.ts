@@ -1,4 +1,4 @@
-import { BaseDesignData, Method } from 'designer/src/components';
+import { BaseDesignData, Method } from '@/components';
 import { Sort } from 'element-plus';
 
 export type TableColumnItemFormatterType =
