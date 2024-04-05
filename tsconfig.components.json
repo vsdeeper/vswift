@@ -1,12 +1,16 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.lib.json",
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["packages/components/src/**/*", "auto-imports.d.ts"],
   "exclude": ["packages/components/src/**/__tests__/*"],
   "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "declarationDir": "packages/components/dist/types",
     "baseUrl": "./packages/components",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "types": ["element-plus/global"]
   }
 }

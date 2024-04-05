@@ -5,6 +5,7 @@ const msg = ref('test')
 <template>
   <dvi class="my-color-picker">
     {{ msg }}
+    <el-input placeholder="fdsafda" clearable></el-input>
   </dvi>
 </template>
 

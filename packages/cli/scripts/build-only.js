@@ -1,8 +1,11 @@
 import { consola } from 'consola'
+import path from 'path'
 import { build } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
-import path from 'path'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import Components from 'unplugin-vue-components/vite'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 
 export async function buildOnly(options) {
   try {
@@ -15,9 +18,19 @@ export async function buildOnly(options) {
           root: path.resolve(process.cwd(), `./packages/${pkg}`),
           plugins: [
             vue(),
+            cssInjectedByJsPlugin(),
             AutoImport({
               imports: ['vue'],
               dts: false,
+              resolvers: [
+                ElementPlusResolver({
+                  importStyle: 'sass',
+                }),
+              ],
+            }),
+            Components({
+              dts: false,
+              resolvers: [ElementPlusResolver()],
             }),
           ],
           build: {

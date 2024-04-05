@@ -3,7 +3,7 @@ import { consola } from 'consola'
 import { createSpinner } from 'nanospinner'
 
 export async function typeCheck(options) {
-  const spinner = createSpinner('Type checking...').start()
+  const spinner = createSpinner('type checking...', { color: 'green' }).start()
   try {
     const start = Date.now()
     const { pkg } = options

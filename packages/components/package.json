@@ -2,8 +2,8 @@
   "name": "@vswift/components",
   "version": "0.0.2",
   "type": "module",
-  "module": "src/index.ts",
-  "types": "src/index.ts",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
@@ -15,12 +15,10 @@
     "registry": "https://registry.npmjs.org/"
   },
   "peerDependencies": {
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "element-plus": "^2.6.3"
   },
   "devDependencies": {
     "sass": "^1.74.1"
-  },
-  "dependencies": {
-    "element-plus": "^2.6.3"
   }
 }
