@@ -5,11 +5,13 @@
     "start": "vite",
     "type-check": "vswift type-check",
     "type-emit": "vswift type-emit",
+    "build-only": "vswift build-only",
     "build": "vswift build",
     "release": "vswift release"
   },
   "dependencies": {
     "@vswift/components": "workspace:*",
+    "@vswift/utils": "workspace:*",
     "pinia": "^2.1.7",
     "vue": "^3.4.21"
   },

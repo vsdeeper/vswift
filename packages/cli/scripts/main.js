@@ -38,6 +38,18 @@ program
   })
 
 program
+  .command('build-only')
+  .description('build only')
+  .option(
+    '-p, --pkg <name>',
+    'package name to perform build only, optional value: components | utils | visual-development',
+  )
+  .action(async options => {
+    const { buildOnly } = await import('./build-only.js')
+    return buildOnly(options)
+  })
+
+program
   .command('build')
   .description('build')
   .option('-p, --pkg <name>', 'package name to perform build, optional value: components | utils | visual-development')

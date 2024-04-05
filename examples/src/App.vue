@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import TheWelcome from './components/TheWelcome.vue'
 import { HelloWorld } from '@/components'
-import { MyDemo } from '@vswift/components'
+import { MyColorPicker } from '@vswift/components'
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import { MyDemo } from '@vswift/components'
 
   <main>
     <TheWelcome />
-    <MyDemo />
+    <MyColorPicker />
   </main>
 </template>
 

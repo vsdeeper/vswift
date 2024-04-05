@@ -1,7 +1,7 @@
 {
   "extends": "@vue/tsconfig/tsconfig.lib.json",
-  "include": ["packages/utils/**/*.ts"],
-  "exclude": ["packages/utils/**/__tests__/*", "packages/utils/dist/**/*"],
+  "include": ["packages/utils/core/*.ts"],
+  "exclude": ["packages/utils/core/**/__tests__/*"],
   "compilerOptions": {
     "declarationDir": "packages/utils/dist/types",
     "baseUrl": "./packages/utils",

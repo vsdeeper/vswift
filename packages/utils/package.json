@@ -2,7 +2,8 @@
   "name": "@vswift/utils",
   "version": "0.0.5",
   "type": "module",
-  "module": "index.ts",
+  "module": "core/index.ts",
+  "types": "core/index.ts",
   "files": [
     "dist"
   ],
