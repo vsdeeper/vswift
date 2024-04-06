@@ -1,11 +1,30 @@
 <script setup lang="ts">
-const msg = ref('test')
+import { type ColorPickerInstance } from 'element-plus'
+
+withDefaults(
+  defineProps<{
+    showAlpha?: boolean
+    placeholder?: string
+  }>(),
+  {
+    placeholder: '请选择',
+  },
+)
+const model = defineModel<string>()
+const colorPickerRef = ref<ColorPickerInstance>()
+
+defineExpose({
+  colorPickerRef,
+})
+
+function clickInput() {
+  colorPickerRef.value?.show()
+}
 </script>
 
 <template>
   <dvi class="my-color-picker">
-    {{ msg }}
-    <el-input placeholder="fdsafda" clearable></el-input>
+    <el-input v-model="model" :placeholder="placeholder" readonly @click="clickInput"> </el-input>
   </dvi>
 </template>
 

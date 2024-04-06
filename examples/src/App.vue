@@ -2,6 +2,8 @@
 import TheWelcome from './components/TheWelcome.vue'
 import { HelloWorld } from '@/components'
 import { MyColorPicker } from '@vswift/components'
+
+const color = ref()
 </script>
 
 <template>
@@ -15,7 +17,8 @@ import { MyColorPicker } from '@vswift/components'
 
   <main>
     <TheWelcome />
-    <MyColorPicker />
+    {{ color }}
+    <MyColorPicker v-model="color" placeholder="fdsafdsaf" />
   </main>
 </template>
 

@@ -2,7 +2,7 @@
 
 快捷开发的 monorepo 框架，主要包含 @vswift/cli, @vswift/components, @vswift/utils, visual-development 通用脚手架、组件、方法及可视化开发组件。
 
-## 打包发布
+## 发布
 
 - 运行 pnpm changeset 命令，填写基本信息
 - 运行 pnpm changeset version 命令生成 changelog 信息（CHANGELOG.md）

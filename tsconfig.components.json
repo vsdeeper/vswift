@@ -1,6 +1,6 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["packages/components/src/**/*", "auto-imports.d.ts"],
+  "include": ["packages/components/src/**/*.ts", "auto-imports.d.ts", "components.d.ts"],
   "exclude": ["packages/components/src/**/__tests__/*"],
   "compilerOptions": {
     "noEmit": false,

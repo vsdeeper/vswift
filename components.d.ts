@@ -7,14 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    ElInput: typeof import('element-plus/es')['ElInput']
-    HelloWorld: typeof import('./examples/src/components/HelloWorld.vue')['default']
-    IconCommunity: typeof import('./examples/src/components/icons/IconCommunity.vue')['default']
-    IconDocumentation: typeof import('./examples/src/components/icons/IconDocumentation.vue')['default']
-    IconEcosystem: typeof import('./examples/src/components/icons/IconEcosystem.vue')['default']
-    IconSupport: typeof import('./examples/src/components/icons/IconSupport.vue')['default']
-    IconTooling: typeof import('./examples/src/components/icons/IconTooling.vue')['default']
-    TheWelcome: typeof import('./examples/src/components/TheWelcome.vue')['default']
-    WelcomeItem: typeof import('./examples/src/components/WelcomeItem.vue')['default']
+    MyColorPicker: typeof import('./packages/components/src/my-color-picker/my-color-picker.vue')['default']
   }
 }
