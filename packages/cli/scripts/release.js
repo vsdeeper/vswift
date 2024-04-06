@@ -5,13 +5,19 @@ import path from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 
 export async function release(options) {
+  let publishPackageJson
   const { pkg } = options
+  if (!pkg) {
+    consola.error('Requires pkg parameter, optional value: components | utils | visual-development')
+    return
+  }
   const { parsePackage } = await import('../utils/index.js')
   const spinner = createSpinner(`version ${parsePackage(pkg).version} releasing...`, { color: 'green' }).start()
-  const toPkg = toPackageJson(pkg)
   try {
     const start = Date.now()
-    if (!pkg) throw new Error('Requires pkg parameter, optional value: components | utils | visual-development')
+    const { buildTask } = await import('./build.js')
+    if (!(await buildTask(options))) return
+    publishPackageJson = toPublishPackageJson(pkg)
     const cwd = process.cwd()
     const dir = path.resolve(cwd, `packages/${pkg}`)
     await $`pnpm --dir ${dir} release --registry=https://registry.npmjs.org/`
@@ -21,10 +27,10 @@ export async function release(options) {
     spinner.error({ text: 'release failed' })
     consola.error(error)
   }
-  toPkg.revert()
+  publishPackageJson.revert()
 }
 
-function toPackageJson(pkgName) {
+function toPublishPackageJson(pkgName) {
   try {
     const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
     const storePackage = readFileSync(pkgPath)

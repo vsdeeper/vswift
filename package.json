@@ -7,8 +7,7 @@
     "type-emit": "vswift type-emit",
     "build-only": "vswift build-only",
     "build": "vswift build",
-    "release": "vswift release",
-    "dddd": "vue-tsc --project tsconfig.components.json"
+    "release": "vswift release"
   },
   "dependencies": {
     "@vswift/components": "workspace:*",

@@ -3,11 +3,14 @@ import { consola } from 'consola'
 import { createSpinner } from 'nanospinner'
 
 export async function typeCheck(options) {
+  const { pkg } = options
+  if (!pkg) {
+    consola.error('Requires pkg parameter, optional value: components | utils | visual-development')
+    return
+  }
   const spinner = createSpinner('type checking...', { color: 'green' }).start()
   try {
     const start = Date.now()
-    const { pkg } = options
-    if (!pkg) throw new Error('Requires pkg parameter, optional value: components | utils | visual-development')
     switch (pkg) {
       case 'components':
       case 'visual-development': {

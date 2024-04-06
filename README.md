@@ -4,7 +4,6 @@
 
 ## 打包发布
 
-- 运行 pnpm build <-p | --pkg> <components | visual-development | utils> 命令，打包选择的 package
 - 运行 pnpm changeset 命令，填写基本信息
 - 运行 pnpm changeset version 命令生成 changelog 信息（CHANGELOG.md）
 - 运行 pnpm release <-p | --pkg> <components | visual-development | utils> 命令，发布选择的 package，也可切换到想要发布的 package 目录，运行 pnpm release 命令
