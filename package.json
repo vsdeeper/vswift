@@ -1,41 +1,29 @@
 {
+  "name": "vue-demo",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "type-check": "vswift type-check",
-    "type-emit": "vswift type-emit",
-    "build-only": "vswift build-only",
+    "dev": "pnpm --dir ./packages/components dev",
+    "preview": "pnpm --dir ./packages/components preview",
     "build": "vswift build",
-    "release": "vswift release"
-  },
-  "dependencies": {
-    "@element-plus/icons-vue": "^2.3.1",
-    "@vswift/components": "workspace:*",
-    "@vswift/utils": "workspace:*",
-    "element-plus": "^2.6.3",
-    "pinia": "^2.1.7",
-    "vue": "^3.4.21"
+    "release": "vswift release",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write packages/"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "@rushstack/eslint-patch": "^1.3.3",
-    "@tsconfig/node20": "^20.1.2",
-    "@types/node": "^20.11.28",
-    "@vitejs/plugin-vue": "^5.0.4",
     "@vswift/cli": "workspace:*",
-    "@vue/eslint-config-prettier": "^8.0.0",
-    "@vue/eslint-config-typescript": "^12.0.0",
+    "@rushstack/eslint-patch": "^1.8.0",
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.12.5",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
-    "eslint": "^8.49.0",
-    "eslint-plugin-vue": "^9.17.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.23.0",
     "npm-run-all2": "^6.1.2",
-    "prettier": "^3.0.3",
-    "typescript": "^5.4.3",
-    "unplugin-auto-import": "^0.17.5",
-    "unplugin-vue-components": "^0.26.0",
-    "vite": "^5.1.6",
-    "vite-plugin-css-injected-by-js": "^3.5.0",
-    "vue-tsc": "1.0.24"
+    "prettier": "^3.2.5",
+    "typescript": "~5.4.0"
   }
 }

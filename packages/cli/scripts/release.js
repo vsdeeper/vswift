@@ -1,36 +1,32 @@
 import { $ } from 'execa'
-import { createSpinner } from 'nanospinner'
 import { consola } from 'consola'
 import path from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 
 export async function release(options) {
-  let publishPackageJson
   const { pkg } = options
-  if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: components | utils | visual-development')
-    return
-  }
-  const { parsePackage } = await import('../utils/index.js')
-  const spinner = createSpinner(`version ${parsePackage(pkg).version} releasing...`, { color: 'green' }).start()
+  if (!pkg) throw new Error('Requires pkg parameter, optional value: components | utils')
+  let releasePackageJson
+
   try {
-    const start = Date.now()
-    const { buildTask } = await import('./build.js')
-    if (!(await buildTask(options))) return
-    publishPackageJson = toPublishPackageJson(pkg)
+    if (pkg === 'utils') {
+      releasePackageJson = toReleasePackageJson(pkg)
+    }
     const cwd = process.cwd()
     const dir = path.resolve(cwd, `packages/${pkg}`)
-    await $`pnpm --dir ${dir} release --registry=https://registry.npmjs.org/`
-    const end = Date.now()
-    spinner.success({ text: `release done in ${(end - start) / 1000}s` })
+    await $({ stdio: 'inherit' })`pnpm --dir ${dir} release --registry=https://registry.npmjs.org/`
+    if (pkg === 'utils') {
+      releasePackageJson.revert()
+    }
   } catch (error) {
-    spinner.error({ text: 'release failed' })
+    if (pkg === 'utils') {
+      releasePackageJson.revert()
+    }
     consola.error(error)
   }
-  publishPackageJson.revert()
 }
 
-function toPublishPackageJson(pkgName) {
+function toReleasePackageJson(pkgName) {
   try {
     const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
     const storePackage = readFileSync(pkgPath)
@@ -42,7 +38,7 @@ function toPublishPackageJson(pkgName) {
     return {
       revert: () => {
         writeFileSync(pkgPath, storePackage)
-      },
+      }
     }
   } catch (error) {
     throw new Error(error)

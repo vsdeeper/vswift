@@ -1,27 +1,41 @@
 {
   "name": "@vswift/components",
-  "version": "0.0.3",
+  "version": "0.0.0",
   "type": "module",
-  "module": "src/index.ts",
-  "types": "src/index.ts",
+  "module": "dist/index.ts",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
-  "scripts": {
-    "release": "npm publish"
-  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "peerDependencies": {
+  "scripts": {
+    "dev": "vite",
+    "build": "run-s clean type-emit \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build --force",
+    "type-emit": "vue-tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "element-plus": "^2.7.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {
-    "sass": "^1.74.1"
-  },
-  "dependencies": {
-    "@element-plus/icons-vue": "^2.3.1",
-    "element-plus": "^2.6.3"
+    "@vue/tsconfig": "^0.5.1",
+    "npm-run-all2": "^6.1.2",
+    "prettier": "^3.2.5",
+    "sass": "^1.75.0",
+    "typescript": "~5.4.0",
+    "unplugin-auto-import": "^0.17.5",
+    "unplugin-vue-components": "^0.26.0",
+    "vite": "^5.2.8",
+    "vite-plugin-css-injected-by-js": "^3.5.0",
+    "vue-tsc": "^2.0.11"
   }
 }

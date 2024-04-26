@@ -1,6 +1,7 @@
-function n(e) {
-  return e++;
+import { sleep as o } from "radash";
+async function t(e) {
+  return await o(3e3), e++;
 }
 export {
-  n as MyDemo
+  t as MyDemo
 };
