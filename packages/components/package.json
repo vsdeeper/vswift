@@ -14,9 +14,7 @@
   "scripts": {
     "dev": "vite",
     "build": "run-s clean type-emit \"build-only {@}\" --",
-    "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build --force",
     "type-emit": "vue-tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",

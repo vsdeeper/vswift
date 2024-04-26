@@ -1,7 +1,7 @@
 import { Command } from 'commander'
-import { parsePackage } from './utils'
-import { buildTask } from './scripts'
-import { release } from './scripts'
+import { parsePackage } from './utils/index.js'
+import { buildTask } from './scripts/index.js'
+import { release } from './scripts/index.js'
 
 const program = new Command()
 

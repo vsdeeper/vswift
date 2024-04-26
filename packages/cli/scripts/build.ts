@@ -2,8 +2,8 @@ import { $ } from 'execa'
 import { consola } from 'consola'
 import { remove } from 'fs-extra'
 import path from 'path'
-import { buildOnly } from './build-only'
-import { typeEmit } from './type-emit'
+import { buildOnly } from './build-only.js'
+import { typeEmit } from './type-emit.js'
 
 export async function buildTask(options) {
   const { pkg } = options

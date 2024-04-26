@@ -3,7 +3,6 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --dir ./packages/components dev",
-    "preview": "pnpm --dir ./packages/components preview",
     "build": "vswift build",
     "release": "vswift release",
     "watch:cli": "tsc --watch --project tsconfig.cli.json",

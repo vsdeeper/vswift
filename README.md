@@ -6,9 +6,23 @@
 - @vswift/components - 通用组件库，主要基于element-plus组件的二次封装。
 - @vswift/utils - 公用方法，业务开发中常用的方法。
 
+## 开发
+
+开发组件运行：
+
+```
+pnpm dev
+```
+
+开发cli脚手架并实时调试运行：
+
+```
+pnpm watch:cli
+```
+
 ## 打包发布
 
-- 运行 pnpm build <-p | --pkg> <components | utils> 命令，打包选择的 package
+- 运行 pnpm build <-p | --pkg> <cli | utils | components> 命令，打包选择的 package
 - 运行 pnpm changeset 命令，填写基本信息
 - 运行 pnpm changeset version 命令生成 changelog 信息（CHANGELOG.md）
-- 运行 pnpm release <-p | --pkg> <components | utils> 命令，发布选择的 package，也可切换到想要发布的 package 目录，运行 pnpm release 命令
+- 运行 pnpm release <-p | --pkg> <cli | utils | components> 命令，发布选择的 package，也可切换到想要发布的 package 目录，运行 pnpm release 命令
