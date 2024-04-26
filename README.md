@@ -1,6 +1,10 @@
 # vswift
 
-快捷开发的 monorepo 框架，主要包含 @vswift/cli, @vswift/components, @vswift/utils 通用脚手架、组件、方法。
+基于 monorepo 架构的快捷开发包，主要包含 @vswift/cli, @vswift/components, @vswift/utils。
+
+- @vswift/cli - 快捷开发脚手架，包含框架初始化、页面组件动态生成。
+- @vswift/components - 通用组件库，主要基于element-plus组件的二次封装。
+- @vswift/utils - 公用方法，业务开发中常用的方法。
 
 ## 打包发布
 

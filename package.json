@@ -1,13 +1,12 @@
 {
-  "name": "vue-demo",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "scripts": {
     "dev": "pnpm --dir ./packages/components dev",
     "preview": "pnpm --dir ./packages/components preview",
     "build": "vswift build",
     "release": "vswift release",
+    "watch:cli": "tsc --watch --project tsconfig.cli.json",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write packages/"
   },

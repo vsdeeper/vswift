@@ -2,6 +2,8 @@ import { $ } from 'execa'
 import { consola } from 'consola'
 import { remove } from 'fs-extra'
 import path from 'path'
+import { buildOnly } from './build-only'
+import { typeEmit } from './type-emit'
 
 export async function buildTask(options) {
   const { pkg } = options
@@ -14,17 +16,15 @@ export async function buildTask(options) {
       case 'components': {
         await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
         await $({
-          stdio: 'inherit'
+          stdio: 'inherit',
         })`pnpm --dir ${path.resolve(process.cwd(), `./packages/${pkg}`)} build`
-        return true
+        break
       }
       case 'utils': {
         await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
-        const { typeEmit } = await import('./type-emit.js')
         if (!(await typeEmit(options))) return
-        const { buildOnly } = await import('./build-only.js')
         await buildOnly(options)
-        return true
+        break
       }
       default: {
         throw new Error('Optional value: utils | components for pkg parameter')

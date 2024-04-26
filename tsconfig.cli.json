@@ -1,0 +1,16 @@
+{
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "include": ["packages/cli/**/*.ts"],
+  "exclude": ["packages/cli/**/__tests__/*", "packages/cli/dist/**/*"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": true,
+    "outDir": "packages/cli/dist"
+  }
+}

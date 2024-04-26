@@ -2,8 +2,9 @@
   "name": "@vswift/cli",
   "version": "0.0.0",
   "type": "module",
+  "main": "dist/index.js",
   "files": [
-    "scripts",
+    "dist",
     "bin.js"
   ],
   "bin": {

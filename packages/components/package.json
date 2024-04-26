@@ -2,7 +2,7 @@
   "name": "@vswift/components",
   "version": "0.0.0",
   "type": "module",
-  "module": "dist/index.ts",
+  "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
     "dist"

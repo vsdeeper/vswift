@@ -16,11 +16,11 @@ export async function release(options) {
     const dir = path.resolve(cwd, `packages/${pkg}`)
     await $({ stdio: 'inherit' })`pnpm --dir ${dir} release --registry=https://registry.npmjs.org/`
     if (pkg === 'utils') {
-      releasePackageJson.revert()
+      releasePackageJson?.revert()
     }
   } catch (error) {
     if (pkg === 'utils') {
-      releasePackageJson.revert()
+      releasePackageJson?.revert()
     }
     consola.error(error)
   }
@@ -30,7 +30,7 @@ function toReleasePackageJson(pkgName) {
   try {
     const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
     const storePackage = readFileSync(pkgPath)
-    const parsePackage = JSON.parse(readFileSync(pkgPath))
+    const parsePackage = JSON.parse(readFileSync(pkgPath).toString())
     parsePackage.main = 'dist/index.umd.cjs'
     parsePackage.module = 'dist/index.js'
     parsePackage.types = 'dist/types/index.d.ts'
@@ -38,9 +38,9 @@ function toReleasePackageJson(pkgName) {
     return {
       revert: () => {
         writeFileSync(pkgPath, storePackage)
-      }
+      },
     }
   } catch (error) {
-    throw new Error(error)
+    consola.error(error)
   }
 }
