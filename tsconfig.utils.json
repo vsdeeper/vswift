@@ -3,7 +3,11 @@
   "include": ["packages/utils/**/*.ts"],
   "exclude": ["packages/utils/**/__tests__/*", "packages/utils/dist/**/*"],
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
     "declarationDir": "packages/utils/dist/types"
   }
 }
