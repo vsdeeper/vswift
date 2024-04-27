@@ -20,9 +20,11 @@ When developing cli scaffolding run:
 pnpm watch:cli
 ```
 
+This command will dynamically generate the dist directory without specifically packaging the cli.
+
 ## Publish
 
-- Run `pnpm build <-p | --pkg> <cli | utils | components>` command to build.
+- Run `pnpm build <-p | --pkg> <utils | components>` command to build.
 - Run `pnpm changeset` command and fill in the basic information.
 - Run `pnpm changeset version` command to generate changelog information (CHANGELOG.md)
 - Run `pnpm release <-p | --pkg> <cli | utils | components>` command to publish the selected package. You can also switch to the package directory you want to publish and run the pnpm release command.
