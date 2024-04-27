@@ -4,6 +4,7 @@ import { remove } from 'fs-extra'
 import path from 'path'
 import { buildOnly, typeEmit, typeCheck } from './index.js'
 import type { CommandOptions } from './index.js'
+import { createSpinner } from 'nanospinner'
 
 export async function buildTask(options: CommandOptions) {
   const { pkg } = options
@@ -16,9 +17,13 @@ export async function buildTask(options: CommandOptions) {
       case 'cli': {
         if (!(await typeCheck(options))) return
         await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
+        const spinner = createSpinner('building...', { color: 'green' }).start()
+        const start = Date.now()
         await $({
           stdio: 'inherit',
         })`pnpm tsc --project tsconfig.cli.json`
+        const end = Date.now()
+        spinner.success({ text: `build done in ${(end - start) / 1000}s` })
         break
       }
       case 'components': {
