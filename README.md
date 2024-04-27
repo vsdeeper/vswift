@@ -1,26 +1,26 @@
 # vswift
 
-基于 monorepo 架构的快捷开发包，主要包含 @vswift/cli, @vswift/components, @vswift/utils。
+A quick development package based on the monorepo architecture, mainly including @vswift/cli, @vswift/components, @vswift/utils.
 
-- @vswift/cli - 快捷开发脚手架，包含框架初始化、页面组件动态生成。
-- @vswift/components - 通用组件库，主要基于element-plus组件的二次封装。
-- @vswift/utils - 公用方法，业务开发中常用的方法。
+- @vswift/cli - quick development scaffolding, including framework initialization, dynamic generation of pages and components.
+- @vswift/components - a general component library, mainly based on the secondary development of element-plus.
+- @vswift/utils - public methods, methods commonly used in business development.
 
-## 开发
+## Develop
 
-开发组件运行：
+when developing components run:
 
 ```
 pnpm dev
 ```
 
-开发cli脚手架并实时调试运行：
+when developing cli scaffolding run:
 
 ```
 pnpm watch:cli
 ```
 
-## 打包发布
+## Publish
 
 - 运行 pnpm build <-p | --pkg> <cli | utils | components> 命令，打包选择的 package
 - 运行 pnpm changeset 命令，填写基本信息

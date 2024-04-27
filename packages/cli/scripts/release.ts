@@ -2,19 +2,20 @@ import { $ } from 'execa'
 import { consola } from 'consola'
 import path from 'path'
 import { readFileSync, writeFileSync } from 'fs'
+import type { CommandOptions, PkgName } from './index.js'
 
-export async function release(options) {
+export async function release(options: CommandOptions) {
   const { pkg } = options
-  if (!pkg) throw new Error('Requires pkg parameter, optional value: components | utils')
-  let releasePackageJson
+  if (!pkg) throw new Error('Requires pkg parameter, optional value: cli | components | utils')
 
+  let releasePackageJson: Record<string, any> | undefined
   try {
     if (pkg === 'utils') {
       releasePackageJson = toReleasePackageJson(pkg)
     }
     const cwd = process.cwd()
     const dir = path.resolve(cwd, `packages/${pkg}`)
-    await $({ stdio: 'inherit' })`pnpm --dir ${dir} release --registry=https://registry.npmjs.org/`
+    await $({ stdio: 'inherit' })`pnpm --dir ${dir} release`
     if (pkg === 'utils') {
       releasePackageJson?.revert()
     }
@@ -26,7 +27,7 @@ export async function release(options) {
   }
 }
 
-function toReleasePackageJson(pkgName) {
+function toReleasePackageJson(pkgName: PkgName) {
   try {
     const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
     const storePackage = readFileSync(pkgPath)

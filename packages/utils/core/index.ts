@@ -7,5 +7,6 @@ export * from './is-async-function'
 export * from './image-compress'
 export * from './data-url-to-blob'
 export * from './recursive-tree-data'
+export * from './count-down'
 
 export type NodeKey = string | number

@@ -8,6 +8,9 @@
     "moduleResolution": "Bundler",
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
+    "noImplicitAny": false,
+    "strict": true,
+    "outDir": "packages/utils/dist",
     "declarationDir": "packages/utils/dist/types"
   }
 }

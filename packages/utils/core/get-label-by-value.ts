@@ -17,7 +17,7 @@ export function getLabelByValue(
   try {
     const { label = 'label', value = 'value', emptyText = '--' } = options ?? {}
     const find = data.find(e => e[value] === target)
-    return find[label] ?? emptyText
+    return (find && find[label]) ?? emptyText
   } catch (error) {
     console.error('getLabelByValue: ', error)
   }

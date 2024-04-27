@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "vite",
     "build": "run-s clean type-emit \"build-only {@}\" --",
+    "release": "npm publish",
     "build-only": "vite build",
     "type-emit": "vue-tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",

@@ -52,6 +52,7 @@ export function toFlatten(
     }, [])
   } catch (error) {
     console.error('toFlatten: ', error)
+    return []
   }
 }
 
@@ -69,7 +70,7 @@ function getIds(targetId: NodeKey, flatData: Record<string, any>[], options?: { 
 function getLabels(targetId: NodeKey, flatData: Record<string, any>[], options?: { id?: string; label?: string }) {
   const { id = 'id', label = 'label' } = options ?? {}
   let child = flatData.find(e => e[id] === targetId)
-  let labels: string[] = child[label] ? [child[label]] : []
+  let labels: string[] = child && child[label] ? [child[label]] : []
   while (child && typeof child.parentId !== 'undefined') {
     const find = flatData.find(e => e[id] === child!.parentId)
     labels = [find![label], ...labels]
@@ -79,7 +80,7 @@ function getLabels(targetId: NodeKey, flatData: Record<string, any>[], options?:
 }
 
 function getNodes(targetId: NodeKey, flatData: Record<string, any>[], options?: { id?: string }) {
-  const { id } = options ?? {}
+  const { id = 'id' } = options ?? {}
   let child = flatData.find(e => e[id] === targetId)
   let nodes = child ? [child] : []
   while (child && typeof child.parentId !== 'undefined') {

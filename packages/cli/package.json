@@ -10,6 +10,13 @@
   "bin": {
     "vswift": "bin.js"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "release": "npm publish"
+  },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "commander": "^12.0.0",

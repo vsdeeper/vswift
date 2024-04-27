@@ -3,17 +3,17 @@ import { consola } from 'consola'
 import { createSpinner } from 'nanospinner'
 import type { CommandOptions } from './index.js'
 
-export async function typeEmit(options: CommandOptions) {
+export async function typeCheck(options: CommandOptions) {
   const { pkg } = options
   if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: utils')
+    consola.error('Requires pkg parameter, optional value: cli')
     return
   }
-  const spinner = createSpinner('type emitting...', { color: 'green' }).start()
+  const spinner = createSpinner('type checking...', { color: 'green' }).start()
   try {
     const start = Date.now()
     switch (pkg) {
-      case 'utils': {
+      case 'cli': {
         await $({ stdio: 'inherit' })`pnpm tsc --project tsconfig.${pkg}.json`
         break
       }
@@ -22,10 +22,10 @@ export async function typeEmit(options: CommandOptions) {
       }
     }
     const end = Date.now()
-    spinner.success({ text: `type emit done in ${(end - start) / 1000}s` })
+    spinner.success({ text: `type check done in ${(end - start) / 1000}s` })
     return true
   } catch (error) {
-    spinner.error({ text: 'type emit failed' })
+    spinner.error({ text: 'type check failed' })
     consola.error(error)
   }
 }

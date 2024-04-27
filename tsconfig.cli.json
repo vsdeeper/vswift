@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/node20/tsconfig.json",
   "include": ["packages/cli/**/*.ts"],
   "exclude": ["packages/cli/**/__tests__/*", "packages/cli/dist/**/*"],
   "compilerOptions": {
@@ -7,10 +6,13 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": false,
     "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "noImplicitAny": false,
+    "noEmit": false,
+    "declaration": false,
     "strict": true,
     "outDir": "packages/cli/dist"
   }
