@@ -3,9 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --dir ./packages/components dev",
+    "dev:cli": "tsc --watch --project tsconfig.cli.json",
     "build": "vswift build",
     "release": "vswift release",
-    "watch:cli": "tsc --watch --project tsconfig.cli.json",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write packages/"
   },

@@ -17,10 +17,10 @@ pnpm dev
 When developing cli scaffolding run:
 
 ```
-pnpm watch:cli
+pnpm dev:cli
 ```
 
-This command will dynamically generate the dist directory without specifically packaging the cli.
+It will monitor the modification of the cli file and compile and generate the dist file in real time. There is no need to package it again when publishing, just publish the compiled dist directory directly.
 
 ## Publish
 

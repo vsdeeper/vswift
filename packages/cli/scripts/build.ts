@@ -1,10 +1,13 @@
 import { $ } from 'execa'
 import { consola } from 'consola'
 import { remove } from 'fs-extra'
-import path from 'path'
+import path from 'node:path'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { buildOnly, typeEmit, typeCheck } from './index.js'
 import type { CommandOptions } from './index.js'
 import { createSpinner } from 'nanospinner'
+import prettier from 'prettier'
+import { globSync } from 'glob'
 
 export async function buildTask(options: CommandOptions) {
   const { pkg } = options
@@ -12,16 +15,26 @@ export async function buildTask(options: CommandOptions) {
     consola.error('Requires pkg parameter, optional value: cli | components | utils')
     return
   }
+  const spinner = createSpinner('building...', { color: 'green' }).start()
   try {
     switch (pkg) {
       case 'cli': {
         if (!(await typeCheck(options))) return
         await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
-        const spinner = createSpinner('building...', { color: 'green' }).start()
         const start = Date.now()
         await $({
-          stdio: 'inherit',
+          stdio: 'inherit'
         })`pnpm tsc --project tsconfig.cli.json`
+        // 格式化遍以后的文件
+        const jsfiles = globSync(path.resolve(process.cwd(), `packages/${pkg}/dist/**/*.js`))
+        const formattedFilePath = path.resolve(process.cwd(), `packages/${pkg}/index.ts`)
+        const formatOptions = await prettier.resolveConfig(formattedFilePath)
+        for (const filePath of jsfiles) {
+          const text = readFileSync(filePath, 'utf-8')
+          const formatted = await prettier.format(text, formatOptions!)
+          writeFileSync(filePath, formatted)
+        }
+        // 打包结束
         const end = Date.now()
         spinner.success({ text: `build done in ${(end - start) / 1000}s` })
         break
@@ -29,7 +42,7 @@ export async function buildTask(options: CommandOptions) {
       case 'components': {
         await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
         await $({
-          stdio: 'inherit',
+          stdio: 'inherit'
         })`pnpm --dir ${path.resolve(process.cwd(), `./packages/${pkg}`)} build`
         break
       }
@@ -44,6 +57,7 @@ export async function buildTask(options: CommandOptions) {
       }
     }
   } catch (error) {
+    spinner.stop()
     consola.error(error)
   }
 }
