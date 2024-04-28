@@ -1,6 +1,12 @@
 {
   "name": "@vswift/utils",
-  "version": "0.0.5",
+  "version": "1.0.0",
+  "description": "Quickly develop public methods",
+  "keywords": [
+    "utils",
+    "esm",
+    "typescript"
+  ],
   "type": "module",
   "module": "core/index.ts",
   "types": "core/index.ts",
@@ -13,8 +19,5 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "dependencies": {
-    "radash": "^12.1.0"
   }
 }

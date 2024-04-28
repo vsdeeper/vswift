@@ -6,7 +6,7 @@ import { type NodeKey } from '.';
  * @param options.id id别名
  * @param options.children children别名
  */
-export declare function findNodeFromTreeData(targetId: NodeKey, treeData: Record<string, any>[], options?: {
+export declare function findNodeObjectFromTreeData(targetId: NodeKey, treeData: Record<string, any>[], options?: {
     id?: string;
     children?: string;
 }): Record<string, any> | undefined;

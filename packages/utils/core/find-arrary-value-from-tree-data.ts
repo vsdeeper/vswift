@@ -9,7 +9,7 @@ import { type NodeKey } from '.'
  * @param options.children children子节点别名，默认children
  * @param options.returnType 返回所查找元素的类别，可选'ids'(默认)|'labels'|'nodes'
  */
-export function findArraryValuesFromTreeData(
+export function findArraryValueFromTreeData(
   targetId: NodeKey,
   treeData: Record<string, any>[],
   options?: {
@@ -17,7 +17,7 @@ export function findArraryValuesFromTreeData(
     label?: string
     children?: string
     returnType?: 'ids' | 'labels' | 'nodes'
-  },
+  }
 ) {
   try {
     const { returnType = 'ids' } = options ?? {}
@@ -39,7 +39,7 @@ export function findArraryValuesFromTreeData(
  */
 export function toFlatten(
   treeData: Record<string, any>[],
-  options?: { id?: string; children?: string; parentId?: NodeKey },
+  options?: { id?: string; children?: string; parentId?: NodeKey }
 ): Record<string, any>[] {
   try {
     const { id = 'id', children = 'children', parentId } = options ?? {}
@@ -47,7 +47,7 @@ export function toFlatten(
       return [
         ...pre,
         typeof parentId === 'undefined' ? cur : { ...cur, parentId },
-        ...(cur[children]?.length ? toFlatten(cur[children], cur[id]) : []),
+        ...(cur[children]?.length ? toFlatten(cur[children], cur[id]) : [])
       ]
     }, [])
   } catch (error) {
@@ -59,34 +59,38 @@ export function toFlatten(
 function getIds(targetId: NodeKey, flatData: Record<string, any>[], options?: { id?: string }) {
   const { id = 'id' } = options ?? {}
   let ids = [targetId]
-  let child = flatData.find(e => e[id] === targetId)
+  let child = flatData.find((e) => e[id] === targetId)
   while (child && typeof child.parentId !== 'undefined') {
     ids = [child.parentId, ...ids]
-    child = flatData.find(e => e[id] === child!.parentId)
+    child = flatData.find((e) => e[id] === child!.parentId)
   }
   return ids
 }
 
-function getLabels(targetId: NodeKey, flatData: Record<string, any>[], options?: { id?: string; label?: string }) {
+function getLabels(
+  targetId: NodeKey,
+  flatData: Record<string, any>[],
+  options?: { id?: string; label?: string }
+) {
   const { id = 'id', label = 'label' } = options ?? {}
-  let child = flatData.find(e => e[id] === targetId)
+  let child = flatData.find((e) => e[id] === targetId)
   let labels: string[] = child && child[label] ? [child[label]] : []
   while (child && typeof child.parentId !== 'undefined') {
-    const find = flatData.find(e => e[id] === child!.parentId)
+    const find = flatData.find((e) => e[id] === child!.parentId)
     labels = [find![label], ...labels]
-    child = flatData.find(e => e[id] === child!.parentId)
+    child = flatData.find((e) => e[id] === child!.parentId)
   }
   return labels
 }
 
 function getNodes(targetId: NodeKey, flatData: Record<string, any>[], options?: { id?: string }) {
   const { id = 'id' } = options ?? {}
-  let child = flatData.find(e => e[id] === targetId)
+  let child = flatData.find((e) => e[id] === targetId)
   let nodes = child ? [child] : []
   while (child && typeof child.parentId !== 'undefined') {
-    const find = flatData.find(e => e[id] === child!.parentId)
+    const find = flatData.find((e) => e[id] === child!.parentId)
     nodes = [find!, ...nodes]
-    child = flatData.find(e => e[id] === child!.parentId)
+    child = flatData.find((e) => e[id] === child!.parentId)
   }
   return nodes
 }

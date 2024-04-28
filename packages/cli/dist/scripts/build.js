@@ -13,10 +13,11 @@ export async function buildTask(options) {
         consola.error('Requires pkg parameter, optional value: cli | components | utils');
         return;
     }
-    const spinner = createSpinner('building...', { color: 'green' }).start();
+    let spinner;
     try {
         switch (pkg) {
             case 'cli': {
+                spinner = createSpinner('building...', { color: 'green' }).start();
                 if (!(await typeCheck(options)))
                     return;
                 await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`));
@@ -58,7 +59,7 @@ export async function buildTask(options) {
         }
     }
     catch (error) {
-        spinner.stop();
+        spinner?.error({ text: 'build failed' });
         consola.error(error);
     }
 }

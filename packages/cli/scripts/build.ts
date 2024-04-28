@@ -5,7 +5,7 @@ import path from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { buildOnly, typeEmit, typeCheck } from './index.js'
 import type { CommandOptions } from './index.js'
-import { createSpinner } from 'nanospinner'
+import { createSpinner, type Spinner } from 'nanospinner'
 import prettier from 'prettier'
 import { globSync } from 'glob'
 
@@ -15,10 +15,11 @@ export async function buildTask(options: CommandOptions) {
     consola.error('Requires pkg parameter, optional value: cli | components | utils')
     return
   }
-  const spinner = createSpinner('building...', { color: 'green' }).start()
+  let spinner: Spinner | undefined
   try {
     switch (pkg) {
       case 'cli': {
+        spinner = createSpinner('building...', { color: 'green' }).start()
         if (!(await typeCheck(options))) return
         await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
         const start = Date.now()
@@ -57,7 +58,7 @@ export async function buildTask(options: CommandOptions) {
       }
     }
   } catch (error) {
-    spinner.stop()
+    spinner?.error({ text: 'build failed' })
     consola.error(error)
   }
 }

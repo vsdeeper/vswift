@@ -1,1 +1,1 @@
-export * from './parse-package.js'
+export * from './parse-package.js';

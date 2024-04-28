@@ -9,7 +9,7 @@ import { type NodeKey } from '.';
  * @param options.children children子节点别名，默认children
  * @param options.returnType 返回所查找元素的类别，可选'ids'(默认)|'labels'|'nodes'
  */
-export declare function findArraryValuesFromTreeData(targetId: NodeKey, treeData: Record<string, any>[], options?: {
+export declare function findArraryValueFromTreeData(targetId: NodeKey, treeData: Record<string, any>[], options?: {
     id?: string;
     label?: string;
     children?: string;

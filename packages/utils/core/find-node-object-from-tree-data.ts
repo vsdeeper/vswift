@@ -6,10 +6,10 @@ import { type NodeKey } from '.'
  * @param options.id id别名
  * @param options.children children别名
  */
-export function findNodeFromTreeData(
+export function findNodeObjectFromTreeData(
   targetId: NodeKey,
   treeData: Record<string, any>[],
-  options?: { id?: string; children?: string },
+  options?: { id?: string; children?: string }
 ) {
   try {
     return findHandler(targetId, treeData, options)
@@ -18,7 +18,11 @@ export function findNodeFromTreeData(
   }
 }
 
-function findHandler(targetId: NodeKey, treeData: Record<string, any>[], options?: { id?: string; children?: string }) {
+function findHandler(
+  targetId: NodeKey,
+  treeData: Record<string, any>[],
+  options?: { id?: string; children?: string }
+) {
   const { id = 'id', children = 'children' } = options ?? {}
   let find: Record<string, any> | undefined
   for (const node of treeData) {
