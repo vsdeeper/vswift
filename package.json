@@ -6,6 +6,11 @@
     "npm": ">=10",
     "pnpm": ">=8"
   },
+  "keywords": [
+    "@vswift/cli",
+    "@vswift/components",
+    "@vswift/utils"
+  ],
   "scripts": {
     "dev": "pnpm --dir ./packages/components dev",
     "dev:cli": "tsc --watch --project tsconfig.cli.json",

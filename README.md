@@ -1,6 +1,6 @@
 # vswift
 
-A quick development package based on the monorepo architecture, mainly including @vswift/cli, @vswift/components, @vswift/utils.
+A quick development package based on the monorepo architecture, mainly including [@vswift/cli](https://github.com/vsdeeper/vswift/tree/master/packages/cli), [@vswift/components](https://github.com/vsdeeper/vswift/tree/master/packages/components), [@vswift/utils](https://github.com/vsdeeper/vswift/tree/master/packages/utils).
 
 - @vswift/cli - quick development scaffolding, including framework initialization, dynamic generation of pages and components.
 - @vswift/components - a general component library, mainly based on the secondary development of [element-plus](https://element-plus.gitee.io/).
@@ -24,7 +24,7 @@ Develop scaffolding
 pnpm dev:cli
 ```
 
-It will monitor the modification of the cli file and compile and generate the dist file in real time. There is no need to package it again when publishing, just publish the compiled dist directory directly.
+It will monitor the modification of the cli file and compile and generate the dist file in real time. There is no need to build it again when publishing, just publish the compiled dist directory directly.
 
 ## Publish
 
