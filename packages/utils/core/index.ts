@@ -8,5 +8,6 @@ export * from './image-compress'
 export * from './data-url-to-blob'
 export * from './recursive-tree-data'
 export * from './count-down'
+export * from './xlsx-export'
 
 export type NodeKey = string | number

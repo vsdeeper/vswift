@@ -31,4 +31,4 @@ It will monitor the modification of the cli file and compile and generate the di
 - Run `pnpm build <-p | --pkg> <utils | components>` command to build package.
 - Run `pnpm changeset` command and fill in the basic information.
 - Run `pnpm changeset version` command to generate changelog information (CHANGELOG.md)
-- Run `pnpm release <-p | --pkg> <cli | utils | components>` command to publish the selected package. You can also switch to the package directory you want to publish and run the pnpm release command.
+- Run `pnpm release <-p | --pkg> <cli | utils | components>` command to publish the selected package.

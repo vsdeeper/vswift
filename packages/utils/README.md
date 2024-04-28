@@ -47,4 +47,4 @@ const finds = findArraryValueFromTreeData('1-1-1', treeData, { id: 'key', label:
 - `recursiveTreeData` - Recursive tree data, modify and return the original data object.
 - `isArraryObject` - Judgment object array.
 - `isAsyncFunction` - Determine asynchronous function.
-- `xlsxExport` - TODO
+- `xlsxExport` - Xlsx file export.
