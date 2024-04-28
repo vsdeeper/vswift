@@ -19,19 +19,19 @@ export async function buildOnly(options: CommandOptions) {
             lib: {
               entry: `core/index.ts`,
               name: `vswift-${pkg}`,
-              fileName: 'index',
+              fileName: 'index'
             },
             rollupOptions: {
               // 确保外部化处理那些你不想打包进库的依赖
-              external: ['radash'],
+              external: ['xlsx-js-style'],
               output: {
                 // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
                 globals: {
-                  radash: 'Radash',
-                },
-              },
-            },
-          },
+                  'xlsx-js-style': 'XlsxJsStyle'
+                }
+              }
+            }
+          }
         })
         break
       }
