@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { MyDemo } from './components'
+import { MyLabel } from './components'
 </script>
 
 <template>
-  <MyDemo name="dddd" />
+  <MyLabel label="fdsafdsa" />
+  <MyColorPicker />
 </template>
 
 <style scoped>

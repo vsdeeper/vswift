@@ -43,12 +43,13 @@ export default defineConfig({
     },
 
     rollupOptions: {
-      external: ['vue', '@element-plus/icons-vue', 'element-plus'],
+      external: ['vue', '@element-plus/icons-vue', 'element-plus', 'radash'],
       output: {
         globals: {
           vue: 'Vue',
           '@element-plus/icons-vue': 'ElementPlusIconsVue',
-          'element-plus': 'ElementPlus'
+          'element-plus': 'ElementPlus',
+          radash: 'Radash'
         }
       }
     }

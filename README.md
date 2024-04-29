@@ -15,7 +15,7 @@ pnpm install
 
 Develop components
 ```
-pnpm dev
+pnpm dev:com
 ```
 
 Develop scaffolding

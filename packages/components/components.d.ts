@@ -7,8 +7,14 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ElButton: typeof import('element-plus/es')['ElButton']
     ElColorPicker: typeof import('element-plus/es')['ElColorPicker']
+    ElDivider: typeof import('element-plus/es')['ElDivider']
+    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
-    MyDemo: typeof import('./src/components/my-demo/my-demo.vue')['default']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    MyColorPicker: typeof import('./src/components/my-color-picker/my-color-picker.vue')['default']
+    MyDividerTitle: typeof import('./src/components/my-divider-title/my-divider-title.vue')['default']
+    MyLabel: typeof import('./src/components/my-label/my-label.vue')['default']
   }
 }

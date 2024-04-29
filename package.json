@@ -12,7 +12,7 @@
     "@vswift/utils"
   ],
   "scripts": {
-    "dev": "pnpm --dir ./packages/components dev",
+    "dev:com": "pnpm --dir ./packages/components dev",
     "dev:cli": "tsc --watch --project tsconfig.cli.json",
     "build": "vswift build",
     "release": "vswift release",
