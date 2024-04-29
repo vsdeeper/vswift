@@ -26,7 +26,7 @@ export async function buildTask(options: CommandOptions) {
         await $({
           stdio: 'inherit'
         })`pnpm tsc --project tsconfig.cli.json`
-        // 格式化遍以后的文件
+        // 格式化编译后的文件
         const jsfiles = globSync(path.resolve(process.cwd(), `packages/${pkg}/dist/**/*.js`))
         const formattedFilePath = path.resolve(process.cwd(), `packages/${pkg}/index.ts`)
         const formatOptions = await prettier.resolveConfig(formattedFilePath)
@@ -54,7 +54,7 @@ export async function buildTask(options: CommandOptions) {
         break
       }
       default: {
-        throw new Error('Uknown pkg parameter')
+        throw new Error('Unknown pkg parameter')
       }
     }
   } catch (error) {
