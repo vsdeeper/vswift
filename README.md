@@ -2,9 +2,9 @@
 
 A quick development package based on the monorepo architecture, mainly including [@vswift/cli](https://github.com/vsdeeper/vswift/tree/master/packages/cli), [@vswift/components](https://github.com/vsdeeper/vswift/tree/master/packages/components), [@vswift/utils](https://github.com/vsdeeper/vswift/tree/master/packages/utils).
 
-- @vswift/cli - quick development scaffolding, including framework initialization, dynamic generation of pages and components.
-- @vswift/components - a general component library, mainly based on the secondary development of [element-plus](https://element-plus.gitee.io/).
-- @vswift/utils - public methods, methods commonly used in business development.
+- @vswift/cli - Quick development scaffolding, including framework initialization, dynamic generation of pages and components.
+- @vswift/components - A general component library, mainly based on the secondary development of [element-plus](https://element-plus.gitee.io/).
+- @vswift/utils - Public methods, methods commonly used in business development.
 
 ## Develop
 
