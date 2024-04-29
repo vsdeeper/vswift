@@ -1,8 +1,6 @@
 import { type AsyncComponentLoader } from 'vue'
 import { last, pascal } from 'radash'
-import type { MyColorPickerInstance } from './my-color-picker'
-import type { MyDividerTitleInstance } from './my-divider-title'
-import type { MyLabelInstance } from './my-label'
+import type { MyColorPickerInstance, MyDividerTitleInstance, MyLabelInstance } from '.'
 
 export * from './my-color-picker'
 export * from './my-divider-title'
