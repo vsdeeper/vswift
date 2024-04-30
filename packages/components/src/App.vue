@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { getLabelByValue } from "@vswift/utils";
 </script>
 
 <template>
+  {{ getLabelByValue(1, [{ label: "333", value: 1 }]) }}
   <el-tabs tab-position="left">
     <el-tab-pane label="User">User</el-tab-pane>
     <el-tab-pane label="Config">Config</el-tab-pane>

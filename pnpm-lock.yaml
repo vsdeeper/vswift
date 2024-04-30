@@ -52,6 +52,10 @@ importers:
         version: 5.4.5
 
   packages/cli:
+    dependencies:
+      radash:
+        specifier: ^12.1.0
+        version: 12.1.0
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -89,6 +93,9 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.1(vue@3.4.23)
+      '@vswift/utils':
+        specifier: workspace:*
+        version: link:../utils
       element-plus:
         specifier: ^2.7.0
         version: 2.7.0(vue@3.4.23)

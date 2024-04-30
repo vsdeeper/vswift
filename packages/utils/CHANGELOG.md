@@ -1,5 +1,11 @@
 # @vswift/utils
 
+## 1.1.1
+
+### Patch Changes
+
+- perf: code split
+
 ## 1.1.0
 
 ### Minor Changes
