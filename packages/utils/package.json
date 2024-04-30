@@ -2,11 +2,6 @@
   "name": "@vswift/utils",
   "version": "1.1.0",
   "description": "Quickly develop public methods",
-  "keywords": [
-    "utils",
-    "esm",
-    "typescript"
-  ],
   "type": "module",
   "module": "core/index.ts",
   "types": "core/index.ts",
@@ -22,5 +17,10 @@
   },
   "dependencies": {
     "xlsx-js-style": "^1.2.0"
-  }
+  },
+  "keywords": [
+    "utils",
+    "esm",
+    "typescript"
+  ]
 }

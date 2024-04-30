@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});function c(l,a,r){try{const{label:e="label",value:o="value",emptyText:n="--"}=r??{},t=a.find(u=>u[o]===l);return(t&&t[e])??n}catch(e){console.error("getLabelByValue: ",e)}}exports.getLabelByValue=c;

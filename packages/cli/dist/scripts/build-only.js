@@ -1,6 +1,7 @@
 import { consola } from 'consola';
 import path from 'path';
 import { build } from 'vite';
+import { globSync } from 'glob';
 import {} from './index.js';
 export async function buildOnly(options) {
     const { pkg } = options;
@@ -11,26 +12,26 @@ export async function buildOnly(options) {
     try {
         switch (pkg) {
             case 'utils': {
+                const matchFiles = globSync(path.resolve(process.cwd(), 'packages/utils/core/*.ts'));
                 await build({
-                    root: path.resolve(process.cwd(), `./packages/${pkg}`),
+                    root: path.resolve(process.cwd(), `packages/${pkg}`),
                     build: {
                         emptyOutDir: false,
                         lib: {
-                            entry: `core/index.ts`,
-                            name: `vswift-${pkg}`,
-                            fileName: 'index',
+                            entry: matchFiles.map((filePath) => filePath.split(`/packages/${pkg}/`)[1]),
+                            fileName: '[name]'
                         },
                         rollupOptions: {
                             // 确保外部化处理那些你不想打包进库的依赖
-                            external: ['radash'],
+                            external: ['xlsx-js-style'],
                             output: {
-                                // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
-                                globals: {
-                                    radash: 'Radash',
-                                },
-                            },
-                        },
-                    },
+                            // 手动处理
+                            // manualChunks: {
+                            //   'xlsx-js-style': ['xlsx-js-style']
+                            // }
+                            }
+                        }
+                    }
                 });
                 break;
             }
