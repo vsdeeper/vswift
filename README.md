@@ -32,3 +32,9 @@ It will monitor the modification of the cli file and compile and generate the di
 - Run `pnpm changeset` command and fill in the basic information.
 - Run `pnpm changeset version` command to generate changelog information (CHANGELOG.md)
 - Run `pnpm release <-p | --pkg> <cli | utils | components>` command to publish the selected package.
+
+## Todo
+
+- Develop `unplugin-vswift/vite` and import plugins on demand.
+- Organize common components.
+- Develop dynamically generated program of `visual-development`.
