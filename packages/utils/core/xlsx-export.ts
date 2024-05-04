@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx-js-style'
+// import * as XLSX from 'xlsx-js-style'
 import type { XLSX$Utils, WorkSheet } from 'xlsx-js-style'
 
 /**
@@ -8,12 +8,13 @@ import type { XLSX$Utils, WorkSheet } from 'xlsx-js-style'
  * @param name 导出文件名，包含文件格式后缀
  * @param addStyleExc 自定义样式执行
  */
-export function xlsxExport(
+export async function xlsxExport(
   exportData: Record<string, any>[],
   name?: string,
   addStyleExc?: (xlsx: { utils: XLSX$Utils }, worksheet: WorkSheet) => void
 ) {
   try {
+    const XLSX = await import('xlsx-js-style')
     // 创建工作簿和工作表
     const workbook = XLSX.utils.book_new()
     const worksheet = XLSX.utils.json_to_sheet(exportData, { cellStyles: true, cellDates: true })

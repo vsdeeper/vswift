@@ -14,6 +14,7 @@
   "scripts": {
     "dev:com": "pnpm --dir ./packages/components dev",
     "dev:cli": "tsc --watch --project tsconfig.cli.json",
+    "dev:upg": "tsc --watch --project tsconfig.unplugin.json",
     "build": "vswift build",
     "release": "vswift release",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",

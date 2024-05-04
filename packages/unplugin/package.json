@@ -1,10 +1,14 @@
 {
-  "name": "@vswift/utils",
-  "version": "1.1.1-4",
-  "description": "Quickly develop public methods",
+  "name": "unplugin-vswift",
+  "version": "0.0.0",
+  "description": "Import on demand from vswift.",
+  "exports": {
+    "./vite": {
+      "import": "./dist/vite.js",
+      "types": "./dist/types/vite.d.ts"
+    }
+  },
   "type": "module",
-  "module": "core/index.ts",
-  "types": "core/index.ts",
   "files": [
     "dist"
   ],
@@ -15,11 +19,9 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "dependencies": {
-    "xlsx-js-style": "^1.2.0"
-  },
   "keywords": [
-    "utils",
+    "unplugin",
+    "vite",
     "esm",
     "typescript"
   ]

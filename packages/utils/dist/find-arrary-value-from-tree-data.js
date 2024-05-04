@@ -1,20 +1,19 @@
-import "xlsx-js-style";
-function y(l, d, t) {
+function h(l, r, t) {
   try {
     const { returnType: n = "ids" } = t ?? {};
-    return n === "labels" ? u(l, f(d), t) : n === "ids" ? s(l, f(d), t) : p(l, f(d), t);
+    return n === "labels" ? u(l, f(r), t) : n === "ids" ? s(l, f(r), t) : p(l, f(r), t);
   } catch (n) {
     console.error("findArraryValuesFromTreeData: ", n);
   }
 }
-function f(l, d) {
+function f(l, r) {
   try {
-    const { id: t = "id", children: n = "children", parentId: r } = d ?? {};
+    const { id: t = "id", children: n = "children", parentId: d } = r ?? {};
     return l.reduce((e, i) => {
       var o;
       return [
         ...e,
-        typeof r > "u" ? i : { ...i, parentId: r },
+        typeof d > "u" ? i : { ...i, parentId: d },
         ...(o = i[n]) != null && o.length ? f(i[n], i[t]) : []
       ];
     }, []);
@@ -22,28 +21,28 @@ function f(l, d) {
     return console.error("toFlatten: ", t), [];
   }
 }
-function s(l, d, t) {
+function s(l, r, t) {
   const { id: n = "id" } = t ?? {};
-  let r = [l], e = d.find((i) => i[n] === l);
+  let d = [l], e = r.find((i) => i[n] === l);
   for (; e && typeof e.parentId < "u"; )
-    r = [e.parentId, ...r], e = d.find((i) => i[n] === e.parentId);
-  return r;
+    d = [e.parentId, ...d], e = r.find((i) => i[n] === e.parentId);
+  return d;
 }
-function u(l, d, t) {
-  const { id: n = "id", label: r = "label" } = t ?? {};
-  let e = d.find((o) => o[n] === l), i = e && e[r] ? [e[r]] : [];
+function u(l, r, t) {
+  const { id: n = "id", label: d = "label" } = t ?? {};
+  let e = r.find((o) => o[n] === l), i = e && e[d] ? [e[d]] : [];
   for (; e && typeof e.parentId < "u"; )
-    i = [d.find((c) => c[n] === e.parentId)[r], ...i], e = d.find((c) => c[n] === e.parentId);
+    i = [r.find((c) => c[n] === e.parentId)[d], ...i], e = r.find((c) => c[n] === e.parentId);
   return i;
 }
-function p(l, d, t) {
+function p(l, r, t) {
   const { id: n = "id" } = t ?? {};
-  let r = d.find((i) => i[n] === l), e = r ? [r] : [];
-  for (; r && typeof r.parentId < "u"; )
-    e = [d.find((o) => o[n] === r.parentId), ...e], r = d.find((o) => o[n] === r.parentId);
+  let d = r.find((i) => i[n] === l), e = d ? [d] : [];
+  for (; d && typeof d.parentId < "u"; )
+    e = [r.find((o) => o[n] === d.parentId), ...e], d = r.find((o) => o[n] === d.parentId);
   return e;
 }
 export {
-  y as findArraryValueFromTreeData,
+  h as findArraryValueFromTreeData,
   f as toFlatten
 };

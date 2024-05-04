@@ -8,4 +8,4 @@ import type { XLSX$Utils, WorkSheet } from 'xlsx-js-style';
  */
 export declare function xlsxExport(exportData: Record<string, any>[], name?: string, addStyleExc?: (xlsx: {
     utils: XLSX$Utils;
-}, worksheet: WorkSheet) => void): void;
+}, worksheet: WorkSheet) => void): Promise<void>;

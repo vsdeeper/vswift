@@ -22,10 +22,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@vswift/utils": "workspace:*",
     "@element-plus/icons-vue": "^2.3.1",
+    "@vswift/utils": "workspace:*",
     "element-plus": "^2.7.0",
     "radash": "^12.1.0",
+    "unplugin-vswift": "workspace:*",
     "vue": "^3.4.21"
   },
   "devDependencies": {
@@ -39,6 +40,7 @@
     "unplugin-vue-components": "^0.26.0",
     "vite": "^5.2.8",
     "vite-plugin-css-injected-by-js": "^3.5.0",
+    "vite-plugin-inspect": "^0.8.4",
     "vue-tsc": "^2.0.11"
   }
 }

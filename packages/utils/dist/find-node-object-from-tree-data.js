@@ -1,24 +1,23 @@
-import "xlsx-js-style";
-function l(r, o, e) {
+function a(r, o, e) {
   try {
     return f(r, o, e);
-  } catch (i) {
-    console.error("findNodeFromTreeData: ", i);
+  } catch (d) {
+    console.error("findNodeFromTreeData: ", d);
   }
 }
 function f(r, o, e) {
   var c;
-  const { id: i = "id", children: t = "children" } = e ?? {};
-  let d;
+  const { id: d = "id", children: i = "children" } = e ?? {};
+  let t;
   for (const n of o) {
-    if (n[i] === r) {
-      d = n;
+    if (n[d] === r) {
+      t = n;
       break;
     }
-    (c = n[t]) != null && c.length && f(r, n[t], e);
+    (c = n[i]) != null && c.length && f(r, n[i], e);
   }
-  return d;
+  return t;
 }
 export {
-  l as findNodeObjectFromTreeData
+  a as findNodeObjectFromTreeData
 };

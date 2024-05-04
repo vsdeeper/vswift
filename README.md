@@ -24,6 +24,12 @@ Develop scaffolding
 pnpm dev:cli
 ```
 
+Develop unplugin
+
+```
+pnpm dev:upg
+```
+
 It will monitor the modification of the cli file and compile and generate the dist file in real time. There is no need to build it again when publishing, just publish the compiled dist directory directly.
 
 ## Publish

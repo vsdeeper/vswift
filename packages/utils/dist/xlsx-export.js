@@ -1,15 +1,14 @@
-import * as e from "xlsx-js-style";
-function w(i, a, c) {
+async function w(i, a, n) {
   try {
-    const o = e.utils.book_new(), t = e.utils.json_to_sheet(i, { cellStyles: !0, cellDates: !0 });
-    if (c)
-      c(e, t);
+    const e = await import("xlsx-js-style"), c = e.utils.book_new(), t = e.utils.json_to_sheet(i, { cellStyles: !0, cellDates: !0 });
+    if (n)
+      n(e, t);
     else {
-      const r = e.utils.decode_range(t["!ref"]), f = r.s.r, u = r.e.r;
-      for (let s = f; s <= u; s++)
-        for (let l = r.s.c; l <= r.e.c; l++) {
-          const n = e.utils.encode_cell({ c: l, r: s });
-          t[n] || (t[n] = {}), t[n].s = {
+      const o = e.utils.decode_range(t["!ref"]), u = o.s.r, f = o.e.r;
+      for (let r = u; r <= f; r++)
+        for (let s = o.s.c; s <= o.e.c; s++) {
+          const l = e.utils.encode_cell({ c: s, r });
+          t[l] || (t[l] = {}), t[l].s = {
             font: {
               sz: 10,
               name: "Arial"
@@ -18,9 +17,9 @@ function w(i, a, c) {
           };
         }
     }
-    e.utils.book_append_sheet(o, t, "Sheet1"), e.writeFile(o, a ?? "output.xlsx");
-  } catch (o) {
-    console.error(o);
+    e.utils.book_append_sheet(c, t, "Sheet1"), e.writeFile(c, a ?? "output.xlsx");
+  } catch (e) {
+    console.error(e);
   }
 }
 export {
