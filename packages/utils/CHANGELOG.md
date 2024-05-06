@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- perf: Optimize build
+
+## 1.1.1
+
+### Patch Changes
+
 - perf: code split
 
 ## 1.1.0

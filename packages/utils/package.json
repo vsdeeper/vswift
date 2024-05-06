@@ -1,6 +1,6 @@
 {
   "name": "@vswift/utils",
-  "version": "1.1.1-4",
+  "version": "1.1.2",
   "description": "Quickly develop public methods",
   "type": "module",
   "module": "core/index.ts",
@@ -20,7 +20,7 @@
   },
   "keywords": [
     "utils",
-    "esm",
+    "es",
     "typescript"
   ]
 }

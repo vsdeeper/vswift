@@ -1,6 +1,6 @@
 {
   "name": "@vswift/components",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
