@@ -1,8 +1,7 @@
 # @vswift/components
 
-## 0.0.4
+## 0.1.0
 
-### Patch Changes
+### Minor Changes
 
-- Updated dependencies
-  - @vswift/utils@1.1.1
+- feat: Add components

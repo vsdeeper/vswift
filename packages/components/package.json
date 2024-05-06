@@ -1,12 +1,18 @@
 {
   "name": "@vswift/components",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
     "dist"
+  ],
+  "keywords": [
+    "component",
+    "vue",
+    "element-plus",
+    "radash"
   ],
   "publishConfig": {
     "access": "public",
