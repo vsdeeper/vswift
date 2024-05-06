@@ -7,6 +7,19 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import Inspect from 'vite-plugin-inspect'
+import { globSync } from 'glob'
+
+const genEntry = () => {
+  try {
+    const matchFiles = globSync('src/components/my-*/*.ts')
+    const entryArr = matchFiles.map((filePath) => ({
+      [filePath.split('/index.ts')[0].split('src/components/')[1]]: filePath
+    }))
+    return Object.assign({ index: 'src/components/index.ts' }, ...entryArr)
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -42,21 +55,20 @@ export default defineConfig({
   },
   build: {
     emptyOutDir: false,
+    copyPublicDir: false,
     lib: {
-      entry: 'src/components/index.ts',
-      name: 'vswift-components',
-      fileName: 'index'
+      entry: genEntry(),
+      fileName: '[name]'
     },
-
     rollupOptions: {
       external: ['vue', '@element-plus/icons-vue', 'element-plus', 'radash'],
       output: {
-        globals: {
-          vue: 'Vue',
-          '@element-plus/icons-vue': 'ElementPlusIconsVue',
-          'element-plus': 'ElementPlus',
-          radash: 'Radash'
-        }
+        // globals: {
+        //   vue: 'Vue',
+        //   '@element-plus/icons-vue': 'ElementPlusIconsVue',
+        //   'element-plus': 'ElementPlus',
+        //   radash: 'Radash'
+        // }
       }
     }
   }

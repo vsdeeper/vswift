@@ -36,7 +36,7 @@ It will monitor the modification of the .ts file of unplugin folder, compile and
 
 - Run `pnpm build <-p | --pkg> <utils | components>` command to build package.
 - Run `pnpm changeset` command and fill in the basic information.
-- Run `pnpm changeset version` command to generate changelog information (CHANGELOG.md)
+- Run `pnpm changeset version` command to generate changelog information (CHANGELOG.md).
 - Run `pnpm release <-p | --pkg> <cli | utils | components | unplugin>` command to publish the selected package.
 
 ## Todo

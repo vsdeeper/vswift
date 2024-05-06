@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});function c(t){try{return Object.prototype.toString.call(t)==="[object AsyncFunction]"}catch(n){console.error("isAsyncFunction: ",n)}}exports.isAsyncFunction=c;

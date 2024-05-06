@@ -93,6 +93,9 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.1(vue@3.4.23)
+      '@vswift/unplugin':
+        specifier: workspace:*
+        version: link:../unplugin
       '@vswift/utils':
         specifier: workspace:*
         version: link:../utils
@@ -102,9 +105,6 @@ importers:
       radash:
         specifier: ^12.1.0
         version: 12.1.0
-      unplugin-vswift:
-        specifier: workspace:*
-        version: link:../unplugin
       vue:
         specifier: ^3.4.21
         version: 3.4.23(typescript@5.4.5)
@@ -112,6 +112,9 @@ importers:
       '@vue/tsconfig':
         specifier: ^0.5.1
         version: 0.5.1
+      glob:
+        specifier: ^10.3.12
+        version: 10.3.12
       npm-run-all2:
         specifier: ^6.1.2
         version: 6.1.2

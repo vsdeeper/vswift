@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});function a(e,o,r){try{return f(e,o,r)}catch(t){console.error("findNodeFromTreeData: ",t)}}function f(e,o,r){var c;const{id:t="id",children:d="children"}=r??{};let i;for(const n of o){if(n[t]===e){i=n;break}(c=n[d])!=null&&c.length&&f(e,n[d],r)}return i}exports.findNodeObjectFromTreeData=a;

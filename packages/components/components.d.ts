@@ -12,8 +12,6 @@ declare module 'vue' {
     ElDivider: typeof import('element-plus/es')['ElDivider']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
-    ElTabPane: typeof import('element-plus/es')['ElTabPane']
-    ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     MyColorPicker: typeof import('./src/components/my-color-picker/my-color-picker.vue')['default']
     MyDividerTitle: typeof import('./src/components/my-divider-title/my-divider-title.vue')['default']

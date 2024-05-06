@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});function n(r,t,c){const{children:i="children"}=c??{};return r.forEach(e=>{var u;t(e),(u=e[i])!=null&&u.length&&n(e[i],t,c)}),r}exports.recursiveTreeData=n;

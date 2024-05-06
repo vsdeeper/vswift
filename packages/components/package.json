@@ -2,6 +2,7 @@
   "name": "@vswift/components",
   "version": "0.0.4",
   "type": "module",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
@@ -23,14 +24,15 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@vswift/unplugin": "workspace:*",
     "@vswift/utils": "workspace:*",
     "element-plus": "^2.7.0",
     "radash": "^12.1.0",
-    "unplugin-vswift": "workspace:*",
     "vue": "^3.4.21"
   },
   "devDependencies": {
     "@vue/tsconfig": "^0.5.1",
+    "glob": "^10.3.12",
     "npm-run-all2": "^6.1.2",
     "prettier": "^3.2.5",
     "sass": "^1.75.0",

@@ -25,4 +25,4 @@ for (const filePath in matchFiles) {
   })
 }
 
-export default MyComponents
+export { MyComponents }
