@@ -23,21 +23,21 @@ Develop scaffolding
 ```
 pnpm dev:cli
 ```
+It will monitor the modification of the .ts file of cli folder, compile and generate the dist directory in real time. There is no need to build it again when publishing, just publish the compiled dist directory directly.
 
 Develop unplugin
 
 ```
 pnpm dev:upg
 ```
-
-It will monitor the modification of the cli file and compile and generate the dist file in real time. There is no need to build it again when publishing, just publish the compiled dist directory directly.
+It will monitor the modification of the .ts file of unplugin folder, compile and generate the dist directory in real time. There is no need to build it again when publishing, just publish the compiled dist directory directly.
 
 ## Publish
 
 - Run `pnpm build <-p | --pkg> <utils | components>` command to build package.
 - Run `pnpm changeset` command and fill in the basic information.
 - Run `pnpm changeset version` command to generate changelog information (CHANGELOG.md)
-- Run `pnpm release <-p | --pkg> <cli | utils | components>` command to publish the selected package.
+- Run `pnpm release <-p | --pkg> <cli | utils | components | unplugin>` command to publish the selected package.
 
 ## Todo
 

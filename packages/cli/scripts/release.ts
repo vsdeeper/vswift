@@ -9,7 +9,8 @@ import { camel } from 'radash'
 
 export async function release(options: CommandOptions) {
   const { pkg } = options
-  if (!pkg) throw new Error('Requires pkg parameter, optional value: cli | components | utils')
+  if (!pkg)
+    throw new Error('Requires pkg parameter, optional value: cli | components | utils | unplugin')
 
   let releasePackageJson: Record<string, any> | undefined
   try {

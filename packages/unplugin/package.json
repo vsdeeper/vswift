@@ -1,7 +1,7 @@
 {
-  "name": "unplugin-vswift",
+  "name": "@vswift/unplugin",
   "version": "0.0.0",
-  "description": "Import on demand from vswift.",
+  "description": "Import on demand for vswift.",
   "exports": {
     "./vite": {
       "import": "./dist/vite.js",
