@@ -1,6 +1,6 @@
 {
   "name": "@vswift/components",
-  "version": "0.1.3-3",
+  "version": "0.1.3-4",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -35,6 +35,7 @@
     "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
     "glob": "^10.3.12",
     "npm-run-all2": "^6.1.2",
