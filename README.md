@@ -8,19 +8,19 @@ A quick development package based on the monorepo architecture, mainly including
 
 ## Develop
 
-Develop components
+#### Develop components
 ```sh
 pnpm dev:com
 ```
 
-Develop scaffolding
+#### Develop scaffolding
 
 ```sh
 pnpm dev:cli
 ```
 It will monitor the modification of the .ts file of cli folder, compile and generate the dist directory in real time. There is no need to build it again when publishing, just publish the compiled dist directory directly.
 
-Develop unplugin
+#### Develop unplugin
 
 ```sh
 pnpm dev:upg
@@ -36,14 +36,14 @@ It will monitor the modification of the .ts file of unplugin folder, compile and
 
 ## Play
 
-### First, install `@vswift/cli` globally
+#### Install `@vswift/cli` globally
 
 ```sh
 npm install -g @vswift/cli
 ```
 Run `vswift -v` command to check if `@vswift/cli` is installed successfully.
 
-### Create your own initial project as needed
+#### Create your own initial project as needed
 
 ```sh
 vswift create
