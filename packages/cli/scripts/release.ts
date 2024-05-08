@@ -30,8 +30,8 @@ export async function release(options: CommandOptions) {
         writeFileSync(filePath, formatted)
       }
       // 拷贝templates到cli/dist
-      const dest = path.resolve(process.cwd(), 'packages/cli/dist')
-      const source = path.resolve(dirname(), `../../../../templates/${pkg}/`)
+      const dest = path.resolve(process.cwd(), 'packages/cli/dist/templates')
+      const source = path.resolve(dirname(), `../../../../templates`)
       await copy(source, dest, {
         filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
       })
