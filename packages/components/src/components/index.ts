@@ -5,6 +5,7 @@ import type { MyColorPickerInstance, MyDividerTitleInstance, MyLabelInstance } f
 export * from './my-color-picker'
 export * from './my-divider-title'
 export * from './my-label'
+export * from './my-tree-select'
 
 type ComponentsMap = {
   MyColorPicker?: MyColorPickerInstance
