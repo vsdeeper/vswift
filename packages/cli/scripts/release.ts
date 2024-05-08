@@ -6,6 +6,8 @@ import type { CommandOptions, PkgName } from './index.js'
 import prettier from 'prettier'
 import { globSync } from 'glob'
 import { camel } from 'radash'
+import { copy } from 'fs-extra/esm'
+import { dirname } from '../utils/index.js'
 
 export async function release(options: CommandOptions) {
   const { pkg } = options
@@ -27,6 +29,12 @@ export async function release(options: CommandOptions) {
         const formatted = await prettier.format(text, formatOptions!)
         writeFileSync(filePath, formatted)
       }
+      // 拷贝templates到cli/dist
+      const dest = path.resolve(process.cwd(), 'packages/cli/dist')
+      const source = path.resolve(dirname(), `../../../../templates/${pkg}/`)
+      await copy(source, dest, {
+        filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
+      })
     }
     const cwd = process.cwd()
     const dir = path.resolve(cwd, `packages/${pkg}`)

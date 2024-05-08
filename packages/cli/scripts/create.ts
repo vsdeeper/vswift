@@ -1,8 +1,11 @@
 import consola from 'consola'
-import { copy } from 'fs-extra/esm'
+import { copy, pathExists } from 'fs-extra/esm'
 import inquirer from 'inquirer'
-import { createSpinner } from 'nanospinner'
+import { createSpinner, type Spinner } from 'nanospinner'
 import path from 'path'
+import { dirname } from '../utils/index.js'
+
+let spinner: Spinner | undefined
 
 export async function create() {
   inquirer
@@ -27,15 +30,26 @@ export async function create() {
       }
       const dest = path.resolve(process.cwd(), `${projectName}`)
       if (templateName === 'vue-next-admin') {
-        const sourcePath = path.resolve(process.cwd(), `templates/${templateName}/`)
-        const spinner = createSpinner('downloading...', { color: 'green' }).start()
-        await copy(sourcePath, dest, {
+        const source = await getSource(templateName)
+        spinner = createSpinner('downloading...', { color: 'green' }).start()
+        await copy(source, dest, {
           filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
         })
         spinner.success({ text: `Your project template has been created, see: ${dest}` })
       }
     })
     .catch((error) => {
+      spinner?.error({ text: 'create failed' })
       consola.error(error)
     })
+}
+
+async function getSource(templateName: string) {
+  // 从dist目录中查找
+  const source = path.resolve(dirname(), `../templates/${templateName}/`)
+  if (await pathExists(source) /** source存在 */) return source
+  else {
+    // dist目录中不存在source，说明是开发环境
+    return path.resolve(dirname(), `../../../../templates/${templateName}/`)
+  }
 }
