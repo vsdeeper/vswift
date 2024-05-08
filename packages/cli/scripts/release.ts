@@ -35,7 +35,7 @@ export async function release(options: CommandOptions) {
       releasePackageJson?.revert()
     }
   } catch (error) {
-    if (pkg === 'utils') {
+    if (['utils', 'components'].includes(pkg)) {
       releasePackageJson?.revert()
     }
     consola.error(error)
@@ -43,11 +43,11 @@ export async function release(options: CommandOptions) {
 }
 
 function toReleasePackageJson(pkgName: PkgName) {
+  const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
+  const storePackage = readFileSync(pkgPath)
+  const parsePackage = JSON.parse(readFileSync(pkgPath).toString())
   try {
     if (pkgName === 'utils') {
-      const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
-      const storePackage = readFileSync(pkgPath)
-      const parsePackage = JSON.parse(readFileSync(pkgPath).toString())
       parsePackage.main = 'dist/index.cjs'
       parsePackage.module = 'dist/index.js'
       parsePackage.types = 'dist/types/index.d.ts'
@@ -78,9 +78,6 @@ function toReleasePackageJson(pkgName: PkgName) {
         }
       }
     } else if (pkgName === 'components') {
-      const pkgPath = path.resolve(process.cwd(), `packages/${pkgName}/package.json`)
-      const storePackage = readFileSync(pkgPath)
-      const parsePackage = JSON.parse(readFileSync(pkgPath).toString())
       const matchFiles = globSync(
         path.resolve(process.cwd(), 'packages/components/src/components/my-*/*.ts')
       )
@@ -101,14 +98,21 @@ function toReleasePackageJson(pkgName: PkgName) {
           types: `./dist/types/${fileName}/index.d.ts`
         }
       }
-      writeFileSync(pkgPath, JSON.stringify(parsePackage, null, 2))
-      return {
-        revert: () => {
-          writeFileSync(pkgPath, storePackage)
+      // 处理 workspace:
+      for (const key in parsePackage.dependencies) {
+        const val = parsePackage.dependencies[key]
+        if (val.includes('workspace:')) {
+          parsePackage.dependencies[key] = val.replace('workspace:', '')
         }
       }
+      writeFileSync(pkgPath, JSON.stringify(parsePackage, null, 2))
     }
   } catch (error) {
     consola.error(error)
+  }
+  return {
+    revert: () => {
+      writeFileSync(pkgPath, storePackage)
+    }
   }
 }

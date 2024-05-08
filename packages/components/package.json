@@ -1,6 +1,6 @@
 {
   "name": "@vswift/components",
-  "version": "0.1.3-4",
+  "version": "0.1.3-6",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -23,6 +23,7 @@
     "build": "run-s clean type-emit \"build-only {@}\" --",
     "release": "npm publish",
     "build-only": "vite build",
+    "type-check": "vue-tsc --build --force",
     "type-emit": "vue-tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
@@ -32,7 +33,8 @@
     "@element-plus/icons-vue": "^2.3.1",
     "element-plus": "^2.7.0",
     "radash": "^12.1.0",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "@vswift/utils": "^1.1.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
@@ -55,6 +57,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "types": "./dist/types/index.d.ts"
+    },
+    "./myTreeSelect": {
+      "import": "./dist/my-tree-select.js",
+      "require": "./dist/my-tree-select.cjs",
+      "types": "./dist/types/my-tree-select/index.d.ts"
     },
     "./myLabel": {
       "import": "./dist/my-label.js",
