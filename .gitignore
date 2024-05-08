@@ -14,6 +14,7 @@ coverage
 
 packages/components/dist
 packages/utils/dist
+templates/*/dist
 
 /cypress/videos/
 /cypress/screenshots/
