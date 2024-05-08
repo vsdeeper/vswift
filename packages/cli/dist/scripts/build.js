@@ -1,6 +1,6 @@
 import { $ } from 'execa';
 import { consola } from 'consola';
-import { remove } from 'fs-extra';
+import { remove } from 'fs-extra/esm';
 import path from 'node:path';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { buildOnly, typeEmit, typeCheck } from './index.js';

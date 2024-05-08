@@ -51,32 +51,5 @@
     "vite-plugin-css-injected-by-js": "^3.5.0",
     "vite-plugin-inspect": "^0.8.4",
     "vue-tsc": "^2.0.11"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./myTreeSelect": {
-      "import": "./dist/my-tree-select.js",
-      "require": "./dist/my-tree-select.cjs",
-      "types": "./dist/types/my-tree-select/index.d.ts"
-    },
-    "./myLabel": {
-      "import": "./dist/my-label.js",
-      "require": "./dist/my-label.cjs",
-      "types": "./dist/types/my-label/index.d.ts"
-    },
-    "./myDividerTitle": {
-      "import": "./dist/my-divider-title.js",
-      "require": "./dist/my-divider-title.cjs",
-      "types": "./dist/types/my-divider-title/index.d.ts"
-    },
-    "./myColorPicker": {
-      "import": "./dist/my-color-picker.js",
-      "require": "./dist/my-color-picker.cjs",
-      "types": "./dist/types/my-color-picker/index.d.ts"
-    }
   }
 }
