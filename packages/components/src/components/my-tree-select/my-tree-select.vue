@@ -73,12 +73,12 @@ const allSelected = computed(
 watch(
   [() => props.modelValue, () => props.data, () => props.sourceData],
   res => {
-    const [v, data, sourceData] = res
-
-    if (Array.isArray(v)) {
-      value.value = v || []
+    const [val, data, sourceData] = res
+    if (!data?.length) return
+    if (Array.isArray(val)) {
+      value.value = val ?? []
     } else {
-      value.value = v ? [v] : []
+      value.value = val ? [val] : []
     }
     // 选项渲染数据
     renderData.value = data
@@ -110,7 +110,6 @@ const confirm = () => {
       props.multiple ? checkedNodes.map(e => e[props.itemValue]) : checkedNodes.map(e => e[props.itemValue])[0],
     )
   }
-
   show.value = false
 }
 
@@ -199,7 +198,9 @@ const operate = (type: string, data?: unknown) => {
       } else {
         getTreeRef()?.setCheckedKeys(getAllKeys())
       }
-      renderCheckedNodes.value = getTreeRef()?.getCheckedNodes()
+      nextTick(() => {
+        renderCheckedNodes.value = getTreeRef()?.getCheckedNodes()
+      })
       break
     }
   }
@@ -493,22 +494,22 @@ defineExpose({
     display: flex;
     justify-content: flex-end;
   }
-  .zonst-components-row {
+  .el-row {
     border: 1px solid #dcdfe6;
     border-radius: 4px;
-    .zonst-components-col {
+    .el-col {
       padding: 15px;
       &:first-child {
         border-right: 1px solid #dcdfe6;
       }
     }
   }
-  .zonst-components-tree {
+  .el-tree {
     overflow: auto;
     max-height: 355px;
     &.single {
-      .zonst-components-checkbox__input {
-        .zonst-components-checkbox__inner {
+      .el-checkbox__input {
+        .el-checkbox__inner {
           border-radius: 50%;
           &::after {
             width: 4px;
@@ -524,14 +525,14 @@ defineExpose({
           }
         }
         &.is-checked {
-          .zonst-components-checkbox__inner::after {
+          .el-checkbox__inner::after {
             transform: translate(-50%, -50%) scale(1);
           }
         }
       }
     }
   }
-  .zonst-components-input {
+  .el-input {
     margin-bottom: 10px;
   }
   .topbar {
@@ -565,22 +566,22 @@ defineExpose({
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .zonst-components-button {
+      .el-button {
         margin-left: 5px;
       }
     }
   }
 }
-.el-components-tag.link-tag {
+.el-tag.link-tag {
   cursor: pointer;
-  .el-components-tag__content:hover {
+  .el-tag__content:hover {
     text-decoration: underline;
   }
 }
 .tag-tooltip-popper {
   max-height: 300px;
   overflow: auto;
-  .el-components-tag.link-tag {
+  .el-tag.link-tag {
     margin: 2px;
   }
 }
@@ -602,14 +603,14 @@ defineExpose({
   border-radius: var(--border-radius);
   box-sizing: border-box;
   background-color: #fff;
-  transition: border-color var(--el-components-transition-duration-fast)
-    var(--el-components-transition-function-ease-in-out-bezier);
+  transition: border-color var(--el-transition-duration-fast)
+    var(--el-transition-function-ease-in-out-bezier);
   &.disabled {
     cursor: not-allowed;
     background-color: var(--disabled-bg-color);
-    .el-components-tag {
+    .el-tag {
       :deep {
-        .el-components-icon {
+        .el-icon {
           cursor: not-allowed !important;
         }
       }
@@ -625,10 +626,10 @@ defineExpose({
     flex-wrap: wrap;
     .placeholder {
       color: var(--text-color-placeholder);
-      font-size: var(--el-components-font-size-base);
+      font-size: var(--el-font-size-base);
     }
 
-    & > .el-components-tag {
+    & > .el-tag {
       margin: 3px 3px 3px 0;
       height: auto;
       white-space: unset;

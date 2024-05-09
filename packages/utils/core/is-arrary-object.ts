@@ -6,7 +6,7 @@ export function isArraryObject(data: unknown) {
   try {
     if (Array.isArray(data)) {
       if (data.length) return !!data[0] && data[0].constructor === Object
-      throw new Error('data.length === 0, unable to judge.')
+      console.warn('data.length === 0, unable to judge.')
     }
     return false
   } catch (error) {
