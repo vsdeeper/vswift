@@ -31,14 +31,22 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@vswift/utils": "^1.1.2",
     "element-plus": "^2.7.0",
     "radash": "^12.1.0",
-    "vue": "^3.4.21",
-    "@vswift/utils": "^1.1.2"
+    "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@typescript-eslint/parser": "^7.8.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-define-config": "^2.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-vue": "^9.23.0",
     "glob": "^10.3.12",
     "npm-run-all2": "^6.1.2",
     "prettier": "^3.2.5",
@@ -50,6 +58,7 @@
     "vite": "^5.2.8",
     "vite-plugin-css-injected-by-js": "^3.5.0",
     "vite-plugin-inspect": "^0.8.4",
+    "vue-eslint-parser": "^9.4.2",
     "vue-tsc": "^2.0.11"
   }
 }

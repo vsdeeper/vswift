@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MyTreeSelectTest } from "@/test";
+import { MyTreeSelectTest } from '@/test'
 </script>
 
 <template>
@@ -7,15 +7,9 @@ import { MyTreeSelectTest } from "@/test";
     <el-tab-pane label="my-tree-select">
       <MyTreeSelectTest />
     </el-tab-pane>
-    <el-tab-pane label="Config">
-      
-    </el-tab-pane>
-    <el-tab-pane label="Role">
-      
-    </el-tab-pane>
-    <el-tab-pane label="Task">
-      
-    </el-tab-pane>
+    <el-tab-pane label="Config" />
+    <el-tab-pane label="Role" />
+    <el-tab-pane label="Task" />
   </el-tabs>
 </template>
 
