@@ -17,6 +17,7 @@ export async function release(options: CommandOptions) {
   let releasePackageJson: Record<string, any> | undefined
   try {
     if (['utils', 'components'].includes(pkg)) {
+      // 转换为发布时的package.json，将暂时修改package.json
       releasePackageJson = toReleasePackageJson(pkg)
     }
     if (pkg === 'cli') {
@@ -39,15 +40,11 @@ export async function release(options: CommandOptions) {
     const cwd = process.cwd()
     const dir = path.resolve(cwd, `packages/${pkg}`)
     await $({ stdio: 'inherit' })`pnpm --dir ${dir} release`
-    if (pkg === 'utils') {
-      releasePackageJson?.revert()
-    }
   } catch (error) {
-    if (['utils', 'components'].includes(pkg)) {
-      releasePackageJson?.revert()
-    }
     consola.error(error)
   }
+  // 恢复为开发时的package.json
+  releasePackageJson?.revert()
 }
 
 function toReleasePackageJson(pkgName: PkgName) {
