@@ -61,15 +61,7 @@ export default defineConfig({
       fileName: '[name]'
     },
     rollupOptions: {
-      external: ['vue', '@element-plus/icons-vue', 'element-plus', 'radash'],
-      output: {
-        // globals: {
-        //   vue: 'Vue',
-        //   '@element-plus/icons-vue': 'ElementPlusIconsVue',
-        //   'element-plus': 'ElementPlus',
-        //   radash: 'Radash'
-        // }
-      }
+      external: ['vue', '@element-plus/icons-vue', 'element-plus', 'radash', 'nanoid']
     }
   }
 })

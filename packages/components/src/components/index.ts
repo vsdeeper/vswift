@@ -6,7 +6,9 @@ export * from './my-color-picker'
 export * from './my-divider-title'
 export * from './my-label'
 export * from './my-tree-select'
+export * from './my-search'
 
+// 生成动态组件对象
 type ComponentsMap = {
   MyColorPicker?: MyColorPickerInstance
   MyDividerTitle?: MyDividerTitleInstance

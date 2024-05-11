@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { MyTreeSelectTest } from '@/test'
+import { MyTreeSelectTest, MySearchTest } from '@/test'
 </script>
 
 <template>
   <el-tabs tab-position="left">
-    <el-tab-pane label="my-tree-select">
+    <el-tab-pane label="MyTreeSelect">
       <MyTreeSelectTest />
     </el-tab-pane>
-    <el-tab-pane label="Config" />
+    <el-tab-pane label="MySearch">
+      <MySearchTest />
+    </el-tab-pane>
     <el-tab-pane label="Role" />
     <el-tab-pane label="Task" />
   </el-tabs>

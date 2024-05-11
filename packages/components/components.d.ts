@@ -24,9 +24,11 @@ declare module 'vue' {
     MyColorPicker: typeof import('./src/components/my-color-picker/my-color-picker.vue')['default']
     MyDividerTitle: typeof import('./src/components/my-divider-title/my-divider-title.vue')['default']
     MyLabel: typeof import('./src/components/my-label/my-label.vue')['default']
+    MySearch: typeof import('./src/components/my-search/my-search.vue')['default']
     MyTreeSelect: typeof import('./src/components/my-tree-select/my-tree-select.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SInput: typeof import('./src/components/my-search/components/s-input.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

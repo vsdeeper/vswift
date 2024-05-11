@@ -33,6 +33,7 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@vswift/utils": "workspace:^1.1.2",
     "element-plus": "^2.7.0",
+    "nanoid": "^5.0.7",
     "radash": "^12.1.0",
     "vue": "^3.4.21"
   },

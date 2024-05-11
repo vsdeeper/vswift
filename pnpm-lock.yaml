@@ -97,11 +97,14 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1(vue@3.4.27)
       '@vswift/utils':
-        specifier: ^1.1.2
+        specifier: workspace:^1.1.2
         version: link:../utils
       element-plus:
         specifier: ^2.7.0
         version: 2.7.2(vue@3.4.27)
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
       radash:
         specifier: ^12.1.0
         version: 12.1.0
@@ -4102,6 +4105,12 @@ packages:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanoid@5.0.7:
+    resolution: {integrity: sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    dev: false
 
   /nanospinner@1.1.0:
     resolution: {integrity: sha512-yFvNYMig4AthKYfHFl1sLj7B2nkHL4lzdig4osvl9/LdGbXwrdFRoqBS98gsEsOakr0yH+r5NZ/1Y9gdVB8trA==}
