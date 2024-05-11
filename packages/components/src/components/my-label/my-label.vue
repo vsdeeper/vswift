@@ -22,8 +22,10 @@ withDefaults(
     tooltipContent?: string;
   }>(),
   {
+    tooltipEffect: undefined,
     tooltipPlacement: 'top',
     tooltipIcon: () => InfoFilled,
+    tooltipContent: undefined
   },
 );
 
