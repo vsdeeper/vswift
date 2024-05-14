@@ -8,14 +8,7 @@ module.exports = defineConfig({
     node: true,
     commonjs: true
   },
-  extends: [
-    'eslint:recommended',
-    'standard',
-    'plugin:prettier/recommended',
-    'plugin:vue/vue3-recommended',
-    '@vue/eslint-config-typescript',
-    '@vue/eslint-config-prettier/skip-formatting'
-  ],
+  extends: ['eslint:recommended', 'standard', 'plugin:prettier/recommended'],
   parser: 'vue-eslint-parser',
   parserOptions: {
     ecmaVersion: 'latest',
@@ -27,5 +20,5 @@ module.exports = defineConfig({
       jsx: false
     }
   },
-  plugins: ['vue', 'prettier', 'import', 'promise', 'node']
+  plugins: ['prettier', 'import', 'promise', 'node']
 })

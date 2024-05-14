@@ -12,7 +12,7 @@ import { globSync } from 'glob'
 export async function buildTask(options: CommandOptions) {
   const { pkg } = options
   if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: cli | components | utils')
+    consola.error('Requires pkg parameter, optional value: cli | utils')
     return
   }
   let spinner: Spinner | undefined
@@ -38,13 +38,6 @@ export async function buildTask(options: CommandOptions) {
         // 打包结束
         const end = Date.now()
         spinner.success({ text: `build done in ${(end - start) / 1000}s` })
-        break
-      }
-      case 'components': {
-        await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
-        await $({
-          stdio: 'inherit'
-        })`pnpm --dir ${path.resolve(process.cwd(), `./packages/${pkg}`)} build`
         break
       }
       case 'utils': {

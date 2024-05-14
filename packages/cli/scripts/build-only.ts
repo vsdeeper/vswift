@@ -7,7 +7,7 @@ import { type CommandOptions } from './index.js'
 export async function buildOnly(options: CommandOptions) {
   const { pkg } = options
   if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: cli | components | utils')
+    consola.error('Requires pkg parameter, optional value: utils')
     return
   }
   try {

@@ -5,7 +5,7 @@ export * from './type-check.js'
 export * from './release.js'
 export * from './create.js'
 
-export type PkgName = 'cli' | 'components' | 'utils'
+export type PkgName = 'cli' | 'utils' | 'unplugin'
 export interface CommandOptions {
   pkg: PkgName
 }

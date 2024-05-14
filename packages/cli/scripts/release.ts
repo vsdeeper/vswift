@@ -11,12 +11,11 @@ import { dirname } from '../utils/index.js'
 
 export async function release(options: CommandOptions) {
   const { pkg } = options
-  if (!pkg)
-    throw new Error('Requires pkg parameter, optional value: cli | components | utils | unplugin')
+  if (!pkg) throw new Error('Requires pkg parameter, optional value: cli | utils | unplugin')
 
   let releasePackageJson: Record<string, any> | undefined
   try {
-    if (['utils', 'components'].includes(pkg)) {
+    if (['utils'].includes(pkg)) {
       // 转换为发布时的package.json，将暂时修改package.json
       releasePackageJson = toReleasePackageJson(pkg)
     }
@@ -82,35 +81,6 @@ function toReleasePackageJson(pkgName: PkgName) {
           writeFileSync(pkgPath, storePackage)
         }
       }
-    } else if (pkgName === 'components') {
-      const matchFiles = globSync(
-        path.resolve(process.cwd(), 'packages/components/src/components/my-*/*.ts')
-      )
-      const exportsFiles = matchFiles.map(
-        (filePath) => filePath.split('/index.ts')[0].split('src/components/')[1]
-      )
-      parsePackage.exports = {
-        '.': {
-          import: './dist/index.js',
-          require: './dist/index.cjs',
-          types: './dist/types/index.d.ts'
-        }
-      }
-      for (const fileName of exportsFiles) {
-        parsePackage.exports[`./${camel(fileName)}`] = {
-          import: `./dist/${fileName}.js`,
-          require: `./dist/${fileName}.cjs`,
-          types: `./dist/types/${fileName}/index.d.ts`
-        }
-      }
-      // 处理 workspace:
-      for (const key in parsePackage.dependencies) {
-        const val = parsePackage.dependencies[key]
-        if (val.includes('workspace:')) {
-          parsePackage.dependencies[key] = val.replace('workspace:', '')
-        }
-      }
-      writeFileSync(pkgPath, JSON.stringify(parsePackage, null, 2))
     }
   } catch (error) {
     consola.error(error)

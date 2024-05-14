@@ -8,11 +8,13 @@
   },
   "keywords": [
     "@vswift/cli",
-    "@vswift/components",
-    "@vswift/utils"
+    "@vswift/utils",
+    "@vswift/unplugin",
+    "typescript",
+    "javascript",
+    "esm"
   ],
   "scripts": {
-    "dev:com": "pnpm --dir ./packages/components dev",
     "dev:cli": "tsc --watch --project tsconfig.cli.json",
     "dev:upg": "tsc --watch --project tsconfig.unplugin.json",
     "build": "vswift build",
@@ -26,8 +28,6 @@
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.12.5",
     "@vswift/cli": "workspace:*",
-    "@vue/eslint-config-prettier": "^9.0.0",
-    "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
