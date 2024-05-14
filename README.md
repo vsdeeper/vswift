@@ -1,9 +1,9 @@
 # vswift
 
-A quick development package based on the monorepo architecture, mainly including [@vswift/cli](https://github.com/vsdeeper/vswift/tree/master/packages/cli), [@vswift/utils](https://github.com/vsdeeper/vswift/tree/master/packages/utils).
+A quick development package based on the monorepo architecture, mainly including @vswift/cli, @vswift/utils.
 
-- @vswift/cli - Quick development scaffolding, including framework initialization, dynamic generation of pages and components.
-- @vswift/utils - Public methods, methods commonly used in business development.
+- [@vswift/cli](https://github.com/vsdeeper/vswift/tree/master/packages/cli) - Quick development scaffolding, including framework initialization, dynamic generation of pages and components.
+- [@vswift/utils](https://github.com/vsdeeper/vswift/tree/master/packages/utils) - Public methods, methods commonly used in business development.
 
 ## Develop
 
