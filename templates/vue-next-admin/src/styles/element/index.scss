@@ -1,0 +1,32 @@
+// 自定义命名空间
+@forward 'element-plus/theme-chalk/src/mixins/config.scss' with (
+  $namespace: 'vs'
+);
+
+// 修改element-plus的样式变量
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #409eff
+    ),
+    'success': (
+      'base': #67c23a
+    ),
+    'warning': (
+      'base': #e6a23c
+    ),
+    'danger': (
+      'base': #f56c6c
+    ),
+    'error': (
+      'base': #f56c6c
+    ),
+    'info': (
+      'base': #909399
+    )
+  ),
+  $font-family: (
+    '':
+      "'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif"
+  )
+);
