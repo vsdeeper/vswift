@@ -1,8 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationRaw } from 'vue-router'
+import NProgress from 'nprogress'
 import HomeView from '../views/HomeView.vue'
+import { generateRoutes, resolveQuery } from './utils'
+import { useGlobalStore } from '@/stores'
 
+const BASE_URL = import.meta.env.BASE_URL
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(BASE_URL),
   routes: [
     {
       path: '/',
@@ -18,6 +22,47 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     }
   ]
+})
+
+// 添加路由导航守卫
+let isRefresh = true // 用户是否手动刷新
+router.beforeEach(async (to, from, next) => {
+  if (isRefresh) {
+    NProgress.start()
+    isRefresh = false
+    const { getUserInfo, getMenuData } = useGlobalStore()
+    try {
+      await getUserInfo()
+    } catch (err) {
+      console.log(err)
+    }
+    const menuData = await getMenuData()
+    const routes = generateRoutes(router, menuData)
+
+    // 处理手动刷新带参数的页面时参数丢失
+    let pathname = location.pathname.replace(/\/$/, '')
+    if (BASE_URL !== '/') pathname = '/' + pathname.split(BASE_URL)[1]
+    let findToRoute: RouteLocationRaw | undefined
+    if (pathname === '') {
+      findToRoute = routes.find((e) => e.path === '/')
+    } else {
+      findToRoute = routes.find((e) => {
+        let _path = e.path
+        if (e.path.includes('/:')) _path = e.path.split('/:')[0]
+        return pathname.startsWith(_path)
+      })
+    }
+    NProgress.done()
+    if (findToRoute) {
+      next({
+        ...findToRoute,
+        query: resolveQuery(decodeURIComponent(location.href)),
+        replace: true
+      })
+    } else next({ ...to, replace: true })
+  } else {
+    next()
+  }
 })
 
 export default router
