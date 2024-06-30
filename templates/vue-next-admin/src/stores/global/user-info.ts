@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { queryUserInfo } from '@/api/global'
 
-const useUserInfo = defineStore('global/user-info', () => {
+const useUserInfoStore = defineStore('global/user-info', () => {
   const userInfo = ref<Record<string, any>>()
 
   async function getUserInfo() {
@@ -9,14 +9,15 @@ const useUserInfo = defineStore('global/user-info', () => {
     return await queryUserInfo()
   }
 
-  function setUserInfo(data: Record<string, any>) {
+  function setUserInfo(data?: Record<string, any>) {
     userInfo.value = data
   }
 
   return {
+    userInfo,
     getUserInfo,
     setUserInfo
   }
 })
 
-export { useUserInfo }
+export { useUserInfoStore }

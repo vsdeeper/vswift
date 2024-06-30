@@ -6,6 +6,8 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
+import Icons from 'unplugin-icons/vite'
+import IconsResolver from 'unplugin-icons/resolver'
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import { globSync } from 'glob'
 
@@ -31,6 +33,10 @@ export default defineConfig(() => {
         resolvers: [
           ElementPlusResolver({
             importStyle: 'sass'
+          }),
+          // 自动导入图标组件
+          IconsResolver({
+            prefix: 'Icon'
           })
         ]
       }),
@@ -40,8 +46,15 @@ export default defineConfig(() => {
         resolvers: [
           ElementPlusResolver({
             importStyle: 'sass'
+          }),
+          // 自动注册图标组件
+          IconsResolver({
+            enabledCollections: ['ep']
           })
         ]
+      }),
+      Icons({
+        autoInstall: true
       }),
       ElementPlus({
         // 解决 Table-v2 AutoResizer with manual import: failed to resolve css file

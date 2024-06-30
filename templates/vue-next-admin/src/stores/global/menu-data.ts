@@ -1,7 +1,7 @@
 import { queryMenuData } from '@/api/global'
 import { defineStore } from 'pinia'
 
-const useMenuData = defineStore('global/menu-data', () => {
+const useMenuDataStore = defineStore('global/menu-data', () => {
   const menuData = ref<VsMenuDataItem[]>()
 
   async function getMenuData() {
@@ -9,14 +9,15 @@ const useMenuData = defineStore('global/menu-data', () => {
     return await queryMenuData()
   }
 
-  function setMenuData(data: VsMenuDataItem[]) {
+  function setMenuData(data?: VsMenuDataItem[]) {
     menuData.value = data
   }
 
   return {
+    menuData,
     getMenuData,
     setMenuData
   }
 })
 
-export { useMenuData }
+export { useMenuDataStore }

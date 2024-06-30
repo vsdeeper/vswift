@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory, type RouteLocationRaw } from 'vue-router'
 import NProgress from 'nprogress'
+import { MainLayout } from '@/layout'
 import HomeView from '../views/HomeView.vue'
 import { generateRoutes, resolveQuery } from './util'
-import { tryit } from 'radash'
-import { useMenuData, useUserInfo } from '@/stores/global'
+import { queryMenuData, queryUserInfo } from '@/api/global'
+import { useMenuDataStore, useUserInfoStore } from '@/stores/global'
 
 const BASE_URL = import.meta.env.BASE_URL
 
@@ -12,16 +13,29 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      name: 'MainLayout',
+      redirect: '/home',
+      component: MainLayout,
+      children: [
+        {
+          path: '/home',
+          name: 'Home',
+          component: HomeView
+        },
+        {
+          path: '/about',
+          name: 'about',
+          // route level code-splitting
+          // this generates a separate chunk (About.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import('../views/AboutView.vue')
+        }
+      ]
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/not-found/not-found.vue')
     }
   ]
 })
@@ -32,10 +46,12 @@ router.beforeEach(async (to, from, next) => {
   if (isRefresh) {
     NProgress.start()
     isRefresh = false
-    const { getUserInfo } = useUserInfo()
-    const { getMenuData } = useMenuData()
-    await getUserInfo()
-    const menuData = await getMenuData()
+    const { setUserInfo } = useUserInfoStore()
+    const userInfo = await queryUserInfo()
+    setUserInfo(userInfo)
+    const { setMenuData } = useMenuDataStore()
+    const menuData = await queryMenuData()
+    setMenuData(menuData)
     const routes = generateRoutes(router, menuData ?? [])
 
     // 处理手动刷新带参数的页面时参数丢失
