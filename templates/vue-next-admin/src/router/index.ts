@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory, type RouteLocationRaw } from 'vue-router'
 import NProgress from 'nprogress'
 import HomeView from '../views/HomeView.vue'
-import { generateRoutes, resolveQuery } from './utils'
-import { useGlobalStore } from '@/stores'
+import { generateRoutes, resolveQuery } from './util'
+import { tryit } from 'radash'
+import { useMenuData, useUserInfo } from '@/stores/global'
 
 const BASE_URL = import.meta.env.BASE_URL
+
 const router = createRouter({
   history: createWebHistory(BASE_URL),
   routes: [
@@ -30,14 +32,11 @@ router.beforeEach(async (to, from, next) => {
   if (isRefresh) {
     NProgress.start()
     isRefresh = false
-    const { getUserInfo, getMenuData } = useGlobalStore()
-    try {
-      await getUserInfo()
-    } catch (err) {
-      console.log(err)
-    }
+    const { getUserInfo } = useUserInfo()
+    const { getMenuData } = useMenuData()
+    await getUserInfo()
     const menuData = await getMenuData()
-    const routes = generateRoutes(router, menuData)
+    const routes = generateRoutes(router, menuData ?? [])
 
     // 处理手动刷新带参数的页面时参数丢失
     let pathname = location.pathname.replace(/\/$/, '')

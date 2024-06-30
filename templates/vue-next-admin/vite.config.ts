@@ -18,6 +18,9 @@ export default defineConfig(() => {
     ...matchElementPlusPath.map((path) => `${path.replace('node_modules/', '')}/css`)
   ]
   return {
+    // base 的设置映射 import.meta.env.BASE_URL 的值
+    // 原则上和 createWebHistory(src/router/index.ts) 的入参 base 保持一致
+    base: '/',
     plugins: [
       vue(),
       vueJsx(),

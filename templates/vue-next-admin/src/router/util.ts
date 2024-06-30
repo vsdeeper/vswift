@@ -39,9 +39,9 @@ export function resolveQuery(href: string) {
   return query
 }
 
-export function generateRoutes(router: Router, menuItems: VsMenuDataItem[]) {
+export function generateRoutes(router: Router, menuData: VsMenuDataItem[]) {
   try {
-    menuItems.forEach((item) => {
+    menuData.forEach((item) => {
       if (item.children?.length) {
         addRoute(router, 'MainLayout', item, true)
         generateRoutes(router, item.children)

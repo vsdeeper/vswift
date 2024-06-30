@@ -27,4 +27,12 @@ declare global {
     visible?: 1 | 2
     children?: VsMenuDataItem[]
   }
+
+  /**
+   * 自定义 import.meta.env 环境变量
+   * @interface ImportMetaEnv
+   */
+  interface ImportMetaEnv extends Readonly<Record<string, string>> {
+    // readonly VITE_ENV: 'dev' | 'test' | 'prod'
+  }
 }

@@ -1,3 +1,5 @@
+import 'element-plus/theme-chalk/src/message.scss'
+import 'element-plus/theme-chalk/src/message-box.scss'
 import './assets/main.css'
 
 import { createApp } from 'vue'

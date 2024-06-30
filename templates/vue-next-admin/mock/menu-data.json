@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "data": [
+    {
+      "menuID": 1,
+      "menuName": "系统管理",
+      "menuType": 1,
+      "permKey": "systemMgt",
+      "path": "/systemMgt",
+      "visible": 1,
+      "children": [
+        {
+          "menuID": 2,
+          "menuName": "数据字典",
+          "menuType": 2,
+          "permKey": "dictionaries",
+          "path": "/dictionaries",
+          "visible": 1,
+          "isExternalLink": 2
+        }
+      ]
+    }
+  ],
+  "msg": "success"
+}
