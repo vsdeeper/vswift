@@ -40,7 +40,7 @@ export default defineConfig(() => {
         ]
       }),
       Components({
-        dirs: ['src/components'],
+        dirs: ['src/components', 'src/layout'],
         dts: './types/components.d.ts',
         resolvers: [
           ElementPlusResolver({

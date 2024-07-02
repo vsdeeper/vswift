@@ -3,6 +3,14 @@
   "data": [
     {
       "menuID": 1,
+      "menuName": "首页",
+      "menuType": 1,
+      "permKey": "home",
+      "path": "/home/:id",
+      "visible": 1
+    },
+    {
+      "menuID": 2,
       "menuName": "系统管理",
       "menuType": 1,
       "permKey": "systemMgt",

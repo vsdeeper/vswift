@@ -19,9 +19,8 @@ const handleClose = (key: string, keyPath: string[]) => {
     class="my-menu"
     active-text-color="#ffd04b"
     background-color="#545c64"
-    default-active="2"
+    default-active="/home"
     text-color="#fff"
-    router
     @open="handleOpen"
     @close="handleClose"
   >

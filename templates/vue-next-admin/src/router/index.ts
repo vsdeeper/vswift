@@ -1,10 +1,18 @@
-import { createRouter, createWebHistory, type RouteLocationRaw } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  type RouteLocationNormalized,
+  type RouteLocationRaw,
+  type RouteRecordNormalized
+} from 'vue-router'
 import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 import { MainLayout } from '@/layout'
-import HomeView from '../views/HomeView.vue'
-import { generateRoutes, resolveQuery } from './util'
+import { generateRoutes, resolveParams, resolveQuery } from './util'
 import { queryMenuData, queryUserInfo } from '@/api/global'
 import { useMenuDataStore, useUserInfoStore } from '@/stores/global'
+
+NProgress.configure({ showSpinner: true, minimum: 0.1 })
 
 const BASE_URL = import.meta.env.BASE_URL
 
@@ -17,11 +25,6 @@ const router = createRouter({
       redirect: '/home',
       component: MainLayout,
       children: [
-        {
-          path: '/home',
-          name: 'Home',
-          component: HomeView
-        },
         {
           path: '/about',
           name: 'about',
@@ -46,38 +49,52 @@ router.beforeEach(async (to, from, next) => {
   if (isRefresh) {
     NProgress.start()
     isRefresh = false
+
+    // 获取用户信息并存储
     const { setUserInfo } = useUserInfoStore()
     const userInfo = await queryUserInfo()
     setUserInfo(userInfo)
+    // 获取菜单数据并存储
     const { setMenuData } = useMenuDataStore()
     const menuData = await queryMenuData()
     setMenuData(menuData)
+    // 生产路由数据
     const routes = generateRoutes(router, menuData ?? [])
+    console.log('routes ->', routes)
 
-    // 处理手动刷新带参数的页面时参数丢失
-    let pathname = location.pathname.replace(/\/$/, '')
-    if (BASE_URL !== '/') pathname = '/' + pathname.split(BASE_URL)[1]
-    let findToRoute: RouteLocationRaw | undefined
-    if (pathname === '') {
-      findToRoute = routes.find((e) => e.path === '/')
-    } else {
-      findToRoute = routes.find((e) => {
-        let _path = e.path
-        if (e.path.includes('/:')) _path = e.path.split('/:')[0]
-        return pathname.startsWith(_path)
-      })
-    }
-    NProgress.done()
-    if (findToRoute) {
+    const pathname = location.pathname.replace(/\/$/, '')
+    const findRouteHasParamsOrQuery = routeHasParamsOrQuery(pathname, routes)
+    if (findRouteHasParamsOrQuery) {
       next({
-        ...findToRoute,
+        ...findRouteHasParamsOrQuery,
+        params: resolveParams(pathname, findRouteHasParamsOrQuery.path),
         query: resolveQuery(decodeURIComponent(location.href)),
         replace: true
-      })
+      } as RouteLocationRaw)
     } else next({ ...to, replace: true })
   } else {
     next()
   }
 })
+
+router.afterEach((/**to, from*/) => {
+  NProgress.done()
+})
+
+function routeHasParamsOrQuery(pathname: string, routes: RouteRecordNormalized[]) {
+  // 处理手动刷新带参数的页面时参数丢失
+  let findToRoute: RouteRecordNormalized | undefined
+  if (BASE_URL !== '/') pathname = '/' + pathname.split(BASE_URL)[1]
+  if (pathname === '') {
+    findToRoute = routes.find((e) => e.path === '/')
+  } else {
+    findToRoute = routes.find((e) => {
+      let _path = e.path
+      if (e.path.includes('/:')) _path = e.path.split('/:')[0]
+      return pathname.startsWith(_path)
+    })
+  }
+  return findToRoute
+}
 
 export default router
