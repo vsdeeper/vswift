@@ -23,3 +23,24 @@ defineProps<{
     </template>
   </template>
 </template>
+
+<style lang="scss" scoped>
+li[class*='-menu-item'] {
+  margin-bottom: 4px;
+  border-radius: 7px;
+  &:hover {
+    color: var(--vs-color-primary);
+  }
+  &.is-active {
+    color: #fff;
+    background-color: var(--vs-color-primary);
+  }
+}
+:deep(div[class*='-sub-menu__title']) {
+  margin-bottom: 4px;
+  border-radius: 7px;
+  &:hover {
+    color: var(--vs-color-primary);
+  }
+}
+</style>

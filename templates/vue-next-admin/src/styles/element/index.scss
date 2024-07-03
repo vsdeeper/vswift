@@ -7,19 +7,19 @@
 @forward 'element-plus/theme-chalk/src/common/var.scss' with (
   $colors: (
     'primary': (
-      'base': #409eff
+      'base': #539bff
     ),
     'success': (
-      'base': #67c23a
+      'base': #05b187
     ),
     'warning': (
-      'base': #e6a23c
+      'base': #ffae1f
     ),
     'danger': (
-      'base': #f56c6c
+      'base': #fa896b
     ),
     'error': (
-      'base': #f56c6c
+      'base': #fa896b
     ),
     'info': (
       'base': #909399
@@ -28,5 +28,9 @@
   $font-family: (
     '':
       "'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif"
+  ),
+  $menu: (
+    'item-height': 45px,
+    'sub-item-height': 45px
   )
 );

@@ -4,8 +4,6 @@ import MenuItem from './menu-item.vue'
 
 const menuData = computed(() => useMenuDataStore().menuData)
 
-console.log(333, menuData.value)
-
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
@@ -15,15 +13,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 </script>
 
 <template>
-  <el-menu
-    class="my-menu"
-    active-text-color="#ffd04b"
-    background-color="#545c64"
-    default-active="/home"
-    text-color="#fff"
-    @open="handleOpen"
-    @close="handleClose"
-  >
+  <el-menu class="my-menu" default-active="/home" @open="handleOpen" @close="handleClose">
     <MenuItem :menu-data />
   </el-menu>
 </template>
@@ -31,5 +21,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 <style lang="scss" scoped>
 .my-menu {
   height: 100%;
+  border-right-width: 0;
+  padding: 0 16px;
 }
 </style>
