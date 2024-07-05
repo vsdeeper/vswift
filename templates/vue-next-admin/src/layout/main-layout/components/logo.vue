@@ -26,7 +26,7 @@ import logo from '@/assets/logo.svg'
   height: 60px;
   padding: 0 20px;
   .my-image {
-    flex: 0 0 32px;
+    flex: 0 0 30px;
   }
   .name {
     display: inline-flex;
