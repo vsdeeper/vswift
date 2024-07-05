@@ -37,7 +37,7 @@ import logo from '@/assets/logo.svg'
     letter-spacing: 1px;
     margin-left: 10px;
     a[class*='-link'] {
-      margin-left: 5px;
+      margin-left: 10px;
     }
   }
 }

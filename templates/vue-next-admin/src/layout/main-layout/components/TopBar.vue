@@ -19,15 +19,17 @@ function onAvatar() {}
         class="collapse-button"
         :icon="collapse ? Expand : Fold"
         size="large"
+        text
+        bg
         circle
         @click="onCollapse"
       />
     </div>
     <div class="right-side">
       <el-badge is-dot class="my-badge">
-        <el-button class="bell-button" :icon="Bell" size="large" circle @click="onBell" />
+        <el-button class="bell-button" :icon="Bell" size="large" text bg circle @click="onBell" />
       </el-badge>
-      <el-button class="avatar-button" size="large" circle @click="onAvatar">
+      <el-button class="avatar-button" size="large" text bg circle @click="onAvatar">
         <el-avatar
           :size="26"
           shape="circle"
@@ -48,6 +50,12 @@ function onAvatar() {}
     .collapse-button {
       border: 0 none;
       font-size: 22px;
+      &.is-text:not(.is-disabled).is-has-bg {
+        background-color: var(--vs-bg-color-page);
+        &:hover {
+          background-color: var(--vs-fill-color-darker);
+        }
+      }
     }
   }
   .right-side {
@@ -62,10 +70,22 @@ function onAvatar() {}
     .bell-button {
       border: 0 none;
       font-size: 22px;
+      &.is-text:not(.is-disabled).is-has-bg {
+        background-color: var(--vs-bg-color-page);
+        &:hover {
+          background-color: var(--vs-fill-color-darker);
+        }
+      }
     }
     .avatar-button {
       border: 0 none;
       margin-left: 10px;
+      &.is-text:not(.is-disabled).is-has-bg {
+        background-color: var(--vs-bg-color-page);
+        &:hover {
+          background-color: var(--vs-fill-color-darker);
+        }
+      }
     }
   }
 }

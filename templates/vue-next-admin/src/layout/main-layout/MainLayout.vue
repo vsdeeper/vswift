@@ -37,13 +37,15 @@ function onMouseoutAside() {
         <AsideMenu />
       </el-aside>
       <el-container>
-        <el-header>
+        <el-header class="my-header" :class="{ collapse }">
           <TopBar v-model="toggleCollapse" />
         </el-header>
-        <el-main>
-          <router-view />
+        <el-main class="my-main" :class="{ collapse }">
+          <el-container>
+            <router-view />
+          </el-container>
         </el-main>
-        <el-footer>Footer</el-footer>
+        <el-footer class="my-footer" :class="{ collapse }">Footer</el-footer>
       </el-container>
     </el-container>
   </div>
@@ -54,8 +56,13 @@ function onMouseoutAside() {
   display: flex;
   height: 100%;
   .my-aside {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
     box-shadow: 1px 0 20px #00000014;
     transition-duration: 0.2s;
+    background-color: #fff;
     &.collapse {
       :deep(.logo .name) {
         display: none;
@@ -69,6 +76,36 @@ function onMouseoutAside() {
       :deep(li[class*='-menu-item']) {
         padding-left: var(--vs-menu-base-level-padding) !important;
       }
+    }
+  }
+  .my-header {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: calc(100% - 250px);
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--vs-bg-color-page);
+    &.collapse {
+      width: calc(100% - 68px);
+    }
+  }
+  .my-main {
+    padding-left: calc(250px + var(--vs-main-padding));
+    padding-top: calc(60px + var(--vs-main-padding));
+    padding-bottom: calc(60px + var(--vs-main-padding));
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    &.collapse {
+      padding-left: calc(68px + var(--vs-main-padding));
+    }
+  }
+  .my-footer {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: calc(100% - 250px);
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    &.collapse {
+      width: calc(100% - 68px);
     }
   }
 }

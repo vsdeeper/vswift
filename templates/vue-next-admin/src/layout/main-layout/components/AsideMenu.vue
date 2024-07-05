@@ -20,7 +20,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 
 <style lang="scss" scoped>
 .my-menu {
-  height: 100%;
+  height: calc(100% - 60px);
   border-right-width: 0;
   padding: 0 15px;
 }
