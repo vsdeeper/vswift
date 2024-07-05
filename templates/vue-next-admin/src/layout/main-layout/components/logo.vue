@@ -7,7 +7,7 @@ import logo from '@/assets/logo.svg'
   <div class="logo">
     <el-image class="my-image" :src="logo" fit="contain" :lazy="true"></el-image>
     <span class="name">
-      Vsdeeper
+      <span>Vsdeeper</span>
       <el-link
         type="info"
         :icon="Promotion"
@@ -24,15 +24,21 @@ import logo from '@/assets/logo.svg'
   display: flex;
   align-items: center;
   height: 60px;
-  padding: 0 16px;
+  padding: 0 20px;
   .my-image {
-    width: 30px;
+    flex: 0 0 32px;
   }
   .name {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
     font-size: 20px;
     font-weight: bold;
     letter-spacing: 1px;
     margin-left: 10px;
+    a[class*='-link'] {
+      margin-left: 5px;
+    }
   }
 }
 </style>

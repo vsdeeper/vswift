@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useMenuDataStore } from '@/stores/global'
-import MenuItem from './menu-item.vue'
+import MenuItem from './MenuItem.vue'
 
 const menuData = computed(() => useMenuDataStore().menuData)
 
@@ -22,6 +22,6 @@ const handleClose = (key: string, keyPath: string[]) => {
 .my-menu {
   height: 100%;
   border-right-width: 0;
-  padding: 0 16px;
+  padding: 0 15px;
 }
 </style>

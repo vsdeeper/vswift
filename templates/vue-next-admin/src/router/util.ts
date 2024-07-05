@@ -1,5 +1,5 @@
 import type { LocationQueryRaw, RouteParamsRaw, Router } from 'vue-router'
-import { dash } from 'radash'
+import { dash, last, pascal } from 'radash'
 
 /**
  * 解析路由参数
@@ -72,15 +72,16 @@ export function addRoute(
       })
     } else {
       const viewComponents = import.meta.glob('../views/**/*.vue')
-      const viewName = menuDataItem
+      const viewPathArr = menuDataItem
         .path!.split('/')
+        .map((e) => dash(e))
         .filter((e: string) => !!e && !e.startsWith(':'))
-        .map((e: string) => dash(e))
-        .join('/')
+      const lastName = pascal(viewPathArr.pop()!)
+      const viewPath = viewPathArr.length ? viewPathArr.join('/') : dash(lastName)
       router.addRoute(parentName, {
         name: menuDataItem.permKey,
         path: menuDataItem.path!,
-        component: viewComponents[`../views/${viewName}/${viewName}.vue`],
+        component: viewComponents[`../views/${viewPath}/${lastName}.vue`],
         meta: { title: menuDataItem.menuName }
       })
     }

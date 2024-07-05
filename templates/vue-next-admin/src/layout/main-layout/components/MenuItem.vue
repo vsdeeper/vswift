@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { IconTablerCircleDot } from '@/components/icons'
+
 defineProps<{
   menuData?: VsMenuDataItem[]
 }>()
@@ -9,16 +11,16 @@ defineProps<{
     <template v-if="item.visible === 1 && item.children?.length">
       <el-sub-menu :index="item.path!">
         <template #title>
-          <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
-          <span>{{ item.menuName }}</span>
+          <el-icon v-if="item.icon" size="16px"><component :is="item.icon" /></el-icon>
+          <span class="menu-name">{{ item.menuName }}</span>
         </template>
         <MenuItem :menu-data="item.children" />
       </el-sub-menu>
     </template>
     <template v-else-if="item.visible === 1">
       <el-menu-item :index="item.path">
-        <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
-        <span>{{ item.menuName }}</span>
+        <el-icon size="16px"><component :is="item.icon ?? IconTablerCircleDot" /></el-icon>
+        <span class="menu-name">{{ item.menuName }}</span>
       </el-menu-item>
     </template>
   </template>
@@ -26,6 +28,7 @@ defineProps<{
 
 <style lang="scss" scoped>
 li[class*='-menu-item'] {
+  line-height: 1;
   margin-bottom: 4px;
   border-radius: 7px;
   &:hover {
@@ -37,6 +40,7 @@ li[class*='-menu-item'] {
   }
 }
 :deep(div[class*='-sub-menu__title']) {
+  line-height: 1;
   margin-bottom: 4px;
   border-radius: 7px;
   &:hover {

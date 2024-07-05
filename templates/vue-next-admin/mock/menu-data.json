@@ -7,6 +7,7 @@
       "menuType": 1,
       "permKey": "home",
       "path": "/home",
+      "icon": "HomeFilled",
       "visible": 1
     },
     {
@@ -15,14 +16,15 @@
       "menuType": 1,
       "permKey": "systemMgt",
       "path": "/systemMgt",
+      "icon": "Setting",
       "visible": 1,
       "children": [
         {
           "menuID": 2,
           "menuName": "数据字典",
           "menuType": 2,
-          "permKey": "dictionaries",
-          "path": "/dictionaries",
+          "permKey": "systemMgt:dictionaries",
+          "path": "/systemMgt/dictionaries",
           "visible": 1,
           "isExternalLink": 2
         }
