@@ -14,7 +14,7 @@ module.exports = {
   },
   rules: {
     'vue/multi-word-component-names': ['error', {
-      ignores: ['home', 'logo'] // 以单个词命名vue文件的白名单
+      ignores: ['Home', 'Logo'] // 以单个词命名vue文件的白名单
     }],
   }
 }
