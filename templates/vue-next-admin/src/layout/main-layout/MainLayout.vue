@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { AsideMenu, Logo, TopBar } from './components'
+import { Logo } from '@/components'
+import { AsideMenu, TopBar } from './components'
 
 const toggleCollapse = ref<boolean>()
 const hoverCollapse = ref<boolean>()

@@ -1,21 +1,11 @@
 <script setup lang="ts">
-import { Promotion } from '@element-plus/icons-vue'
 import logo from '@/assets/logo.svg'
 </script>
 
 <template>
   <div class="logo">
-    <el-image class="my-image" :src="logo" fit="contain" :lazy="true"></el-image>
-    <span class="name">
-      <span>Vsdeeper</span>
-      <el-link
-        type="info"
-        :icon="Promotion"
-        :underline="false"
-        href="https://github.com/vsdeeper"
-        target="_blank"
-      />
-    </span>
+    <el-image class="my-image" :src="logo" fit="contain"></el-image>
+    <span class="name"> Vsdeeper </span>
   </div>
 </template>
 
@@ -36,9 +26,6 @@ import logo from '@/assets/logo.svg'
     font-weight: bold;
     letter-spacing: 1px;
     margin-left: 10px;
-    a[class*='-link'] {
-      margin-left: 10px;
-    }
   }
 }
 </style>

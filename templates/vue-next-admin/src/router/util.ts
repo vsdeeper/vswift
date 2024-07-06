@@ -79,11 +79,11 @@ export function addRoute(
         .map((e) => dash(e))
         .filter((e: string) => !!e && !e.startsWith(':'))
       const lastName = viewPathArr.pop()!
-      const viewPath = viewPathArr.length ? viewPathArr.join('/') : dash(lastName)
+      const viewPath = viewPathArr.length ? viewPathArr.join('/') + '/' : ''
       router.addRoute(parentName, {
         name: menuDataItem.permKey,
         path: menuDataItem.path!,
-        component: matchViewPaths[`../views/${viewPath}/${dash(lastName)}/${pascal(lastName)}.vue`],
+        component: matchViewPaths[`../views/${viewPath}${dash(lastName)}/${pascal(lastName)}.vue`],
         meta: { title: menuDataItem.menuName }
       })
     }

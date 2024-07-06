@@ -7,17 +7,10 @@ defineProps<{
 }>()
 
 const menuData = computed(() => useMenuDataStore().menuData)
-
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
 </script>
 
 <template>
-  <el-menu class="my-menu" router :default-active @open="handleOpen" @close="handleClose">
+  <el-menu class="my-menu" router :default-active>
     <MenuItem :menu-data />
   </el-menu>
 </template>

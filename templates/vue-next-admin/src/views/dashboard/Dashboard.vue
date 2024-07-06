@@ -1,5 +1,5 @@
 <script setup lang="ts"></script>
 
 <template>
-  <main>首页</main>
+  <main>仪表盘</main>
 </template>

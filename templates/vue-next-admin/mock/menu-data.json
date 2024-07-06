@@ -73,6 +73,15 @@
               "path": "/system/log/operationLog",
               "visible": 1,
               "isExternalLink": 2
+            },
+            {
+              "menuID": 9,
+              "menuName": "登录日志",
+              "menuType": 2,
+              "permKey": "system:log:loginLog",
+              "path": "/system/log/loginLog",
+              "visible": 1,
+              "isExternalLink": 2
             }
           ]
         }
