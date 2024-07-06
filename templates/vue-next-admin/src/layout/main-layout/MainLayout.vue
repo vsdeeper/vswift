@@ -8,6 +8,18 @@ const collapse = computed(() =>
     ? toggleCollapse.value
     : toggleCollapse.value && hoverCollapse.value
 )
+const router = useRouter()
+const defaultActive = ref<string>()
+
+watch(
+  () => router.currentRoute.value,
+  (route) => {
+    defaultActive.value = route.path
+    // handleBreadcrumb(route)
+    // handleNavRecord(route.path)
+  },
+  { immediate: true }
+)
 
 function onMouseoverAside() {
   if (toggleCollapse.value) {
@@ -34,7 +46,7 @@ function onMouseoutAside() {
         @mouseout="onMouseoutAside"
       >
         <Logo />
-        <AsideMenu />
+        <AsideMenu :default-active />
       </el-aside>
       <el-container>
         <el-header class="my-header" :class="{ collapse }">
@@ -45,7 +57,17 @@ function onMouseoutAside() {
             <router-view />
           </el-container>
         </el-main>
-        <el-footer class="my-footer" :class="{ collapse }">Footer</el-footer>
+        <el-footer class="my-footer" :class="{ collapse }">
+          Made by
+          <el-link
+            type="primary"
+            :underline="false"
+            href="https://github.com/vsdeeper"
+            target="_blank"
+          >
+            Vsdeeper
+          </el-link>
+        </el-footer>
       </el-container>
     </el-container>
   </div>
@@ -59,6 +81,7 @@ function onMouseoutAside() {
     position: fixed;
     left: 0;
     top: 0;
+    z-index: 1;
     height: 100%;
     box-shadow: 1px 0 20px #00000014;
     transition-duration: 0.2s;
@@ -73,7 +96,8 @@ function onMouseoutAside() {
       :deep(li[class*='-sub-menu'] i[class*='-sub-menu__icon-arrow']) {
         display: none;
       }
-      :deep(li[class*='-menu-item']) {
+      :deep(li[class*='-menu-item']),
+      :deep(div[class*='-sub-menu__title']) {
         padding-left: var(--vs-menu-base-level-padding) !important;
       }
     }
@@ -102,10 +126,20 @@ function onMouseoutAside() {
     position: fixed;
     right: 0;
     bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: calc(100% - 250px);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--vs-bg-color-page);
+    font-size: 12px;
+    color: var(--vs-text-color-secondary);
     &.collapse {
       width: calc(100% - 68px);
+    }
+    a[class*='-link'] {
+      font-size: inherit;
+      margin-left: 5px;
     }
   }
 }

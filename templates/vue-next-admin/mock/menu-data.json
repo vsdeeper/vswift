@@ -3,30 +3,78 @@
   "data": [
     {
       "menuID": 1,
-      "menuName": "首页",
+      "menuName": "仪表盘",
       "menuType": 1,
-      "permKey": "home",
-      "path": "/home",
-      "icon": "HomeFilled",
+      "permKey": "dashboard",
+      "path": "/dashboard",
+      "icon": "Menu",
       "visible": 1
     },
     {
       "menuID": 2,
       "menuName": "系统管理",
       "menuType": 1,
-      "permKey": "systemMgt",
-      "path": "/systemMgt",
+      "permKey": "system",
+      "path": "/system",
       "icon": "Setting",
       "visible": 1,
       "children": [
         {
-          "menuID": 2,
-          "menuName": "数据字典",
+          "menuID": 3,
+          "menuName": "用户管理",
           "menuType": 2,
-          "permKey": "systemMgt:dictionaries",
-          "path": "/systemMgt/dictionaries",
+          "permKey": "system:user",
+          "path": "/system/user",
           "visible": 1,
           "isExternalLink": 2
+        },
+        {
+          "menuID": 4,
+          "menuName": "角色管理",
+          "menuType": 2,
+          "permKey": "system:role",
+          "path": "/system/role",
+          "visible": 1,
+          "isExternalLink": 2
+        },
+        {
+          "menuID": 5,
+          "menuName": "菜单管理",
+          "menuType": 2,
+          "permKey": "system:menu",
+          "path": "/system/menu",
+          "visible": 1,
+          "isExternalLink": 2
+        },
+        {
+          "menuID": 6,
+          "menuName": "字典管理",
+          "menuType": 2,
+          "permKey": "system:dict",
+          "path": "/system/dict",
+          "visible": 1,
+          "isExternalLink": 2
+        },
+        {
+          "menuID": 7,
+          "menuName": "日志管理",
+          "menuType": 1,
+          "permKey": "system:log",
+          "path": "/system/log",
+          "icon": "Edit",
+          "visible": 1,
+          "isExternalLink": 2,
+          "children": [
+            {
+              "menuID": 8,
+              "menuName": "操作日志",
+              "menuType": 2,
+              "permKey": "system:log:operationLog",
+              "path": "/system/log/operationLog",
+              "visible": 1,
+              "isExternalLink": 2
+            }
+          ]
         }
       ]
     }

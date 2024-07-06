@@ -2,6 +2,10 @@
 import { useMenuDataStore } from '@/stores/global'
 import MenuItem from './MenuItem.vue'
 
+defineProps<{
+  defaultActive?: string
+}>()
+
 const menuData = computed(() => useMenuDataStore().menuData)
 
 const handleOpen = (key: string, keyPath: string[]) => {
@@ -13,7 +17,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 </script>
 
 <template>
-  <el-menu class="my-menu" default-active="/home" @open="handleOpen" @close="handleClose">
+  <el-menu class="my-menu" router :default-active @open="handleOpen" @close="handleClose">
     <MenuItem :menu-data />
   </el-menu>
 </template>

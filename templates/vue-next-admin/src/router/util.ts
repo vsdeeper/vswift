@@ -1,10 +1,11 @@
-import type { LocationQueryRaw, RouteParamsRaw, Router } from 'vue-router'
-import { dash, last, pascal } from 'radash'
+import type { LocationQueryRaw, RouteParamsRaw, RouteRecordNormalized, Router } from 'vue-router'
+import { dash, pascal } from 'radash'
 
 /**
  * 解析路由参数
  */
-export function resolveParams(pathname: string, path: string) {
+export function resolveParams(pathname: string, path?: string) {
+  if (!path) return {}
   let params: RouteParamsRaw = {}
   try {
     if (path.includes('/:')) {
@@ -41,12 +42,13 @@ export function resolveQuery(href: string) {
 
 export function generateRoutes(router: Router, menuData: VsMenuDataItem[]) {
   try {
+    const matchViewPaths = import.meta.glob('../views/**/*.vue')
     menuData.forEach((item) => {
       if (item.children?.length) {
-        addRoute(router, 'MainLayout', item, true)
+        addRoute(matchViewPaths, router, 'MainLayout', item, true)
         generateRoutes(router, item.children)
       } else {
-        addRoute(router, 'MainLayout', item, false)
+        addRoute(matchViewPaths, router, 'MainLayout', item, false)
       }
     })
   } catch (error) {
@@ -56,6 +58,7 @@ export function generateRoutes(router: Router, menuData: VsMenuDataItem[]) {
 }
 
 export function addRoute(
+  matchViewPaths: Record<string, any>,
   router: Router,
   parentName: string,
   menuDataItem: VsMenuDataItem,
@@ -71,21 +74,54 @@ export function addRoute(
         children: []
       })
     } else {
-      const viewComponents = import.meta.glob('../views/**/*.vue')
       const viewPathArr = menuDataItem
         .path!.split('/')
         .map((e) => dash(e))
         .filter((e: string) => !!e && !e.startsWith(':'))
-      const lastName = pascal(viewPathArr.pop()!)
+      const lastName = viewPathArr.pop()!
       const viewPath = viewPathArr.length ? viewPathArr.join('/') : dash(lastName)
       router.addRoute(parentName, {
         name: menuDataItem.permKey,
         path: menuDataItem.path!,
-        component: viewComponents[`../views/${viewPath}/${lastName}.vue`],
+        component: matchViewPaths[`../views/${viewPath}/${dash(lastName)}/${pascal(lastName)}.vue`],
         meta: { title: menuDataItem.menuName }
       })
     }
   } catch (error) {
     console.error('addRoute ->', error)
   }
+}
+
+export function findRouteByLocationPath(pathname: string, routes: RouteRecordNormalized[]) {
+  const BASE_URL = import.meta.env.BASE_URL
+  let findToRoute: RouteRecordNormalized | undefined
+  try {
+    if (BASE_URL !== '/' /** 存在子目录，移除子目录路径 */) {
+      pathname = '/' + pathname.split(BASE_URL)[1]
+    }
+    if (pathname === '' /** 根目录路径，重定向 */) {
+      findToRoute = routes.find((e) => e.path === '/')
+    } else {
+      findToRoute = routes.find((e) => {
+        if (e.path === '/' || e.path === '/:pathMatch(.*)*') return false
+        if (e.path.includes('/:') /** path携带params参数，去除参数路径 */) {
+          const pathFromRoute = e.path.split('/:')[0]
+          const paramsLen = e.path.split('/:').slice(1).length
+          const pathLenFromPathname = pathname.split('/').slice(1).length - paramsLen
+          const pathFromPathname =
+            '/' +
+            pathname
+              .split('/')
+              .slice(1, pathLenFromPathname + 1)
+              .join('/')
+          return pathFromPathname === pathFromRoute
+        } else {
+          return pathname === e.path
+        }
+      })
+    }
+  } catch (error) {
+    console.error('routeHasParamsOrQuery ->', error)
+  }
+  return findToRoute
 }

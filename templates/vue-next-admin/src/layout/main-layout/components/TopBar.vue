@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Bell, Expand, Fold } from '@element-plus/icons-vue'
+import avatar from '@/assets/avatar.png'
 
 const collapse = defineModel<boolean>()
 
@@ -30,11 +31,7 @@ function onAvatar() {}
         <el-button class="bell-button" :icon="Bell" size="large" text bg circle @click="onBell" />
       </el-badge>
       <el-button class="avatar-button" size="large" text bg circle @click="onAvatar">
-        <el-avatar
-          :size="26"
-          shape="circle"
-          src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
-        />
+        <el-avatar :size="28" shape="circle" :src="avatar" />
       </el-button>
     </div>
   </div>
