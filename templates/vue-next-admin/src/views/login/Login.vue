@@ -9,11 +9,11 @@ import { LoginBox } from '@/components'
       <Logo />
     </el-header>
     <el-row>
-      <el-col class="left-col hidden-md-and-down" :span="16">
+      <el-col class="left-col hidden-md-and-down" :span="24" :lg="16">
         <Logo />
         <el-image class="login-bg" :src="loginBg" fit="contain"></el-image>
       </el-col>
-      <el-col class="right-col" :span="8" :md="24" :lg="8">
+      <el-col class="right-col" :span="24" :lg="8">
         <LoginBox />
       </el-col>
     </el-row>
