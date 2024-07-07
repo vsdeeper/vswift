@@ -21,9 +21,13 @@ onMounted(() => {
   const password = Cookies.get('password')
   if (username) {
     form.value.username = aesCbcDecrypt(username, KEY)
+  } else {
+    form.value.username = 'admin'
   }
   if (password) {
     form.value.password = aesCbcDecrypt(password, KEY)
+  } else {
+    form.value.password = 'admin'
   }
 })
 
@@ -60,6 +64,7 @@ async function onLogin() {
   if (errorMsg.value) {
     errorMsg.value = undefined
   }
+  Cookies.set('token', 'fake-jwt-token', { expires: 30 })
   if (remeber.value /** 记住密码 */) {
     Cookies.set('username', enUsername, { expires: 30 })
     Cookies.set('password', enPassword, { expires: 30 })
