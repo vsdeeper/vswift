@@ -4,11 +4,12 @@ import { AsideMenu, TopBar } from './components'
 
 const toggleCollapse = ref<boolean>()
 const hoverCollapse = ref<boolean>()
-const collapse = computed(() =>
-  typeof hoverCollapse.value === 'undefined'
-    ? toggleCollapse.value
-    : toggleCollapse.value && hoverCollapse.value
-)
+// const collapse = computed(() =>
+//   typeof hoverCollapse.value === 'undefined'
+//     ? toggleCollapse.value
+//     : toggleCollapse.value && hoverCollapse.value
+// )
+const collapse = ref(false)
 const router = useRouter()
 const defaultActive = ref<string>()
 
@@ -38,20 +39,13 @@ function onMouseoutAside() {
 <template>
   <div class="main-layout">
     <el-container>
-      <el-aside
-        class="my-aside"
-        :class="{ collapse }"
-        :collapse
-        :width="collapse ? '68px' : '250px'"
-        @mouseover="onMouseoverAside"
-        @mouseout="onMouseoutAside"
-      >
+      <el-aside class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
         <Logo />
-        <AsideMenu :default-active />
+        <AsideMenu :collapse :default-active />
       </el-aside>
       <el-container>
         <el-header class="my-header" :class="{ collapse }">
-          <TopBar v-model="toggleCollapse" />
+          <TopBar v-model="collapse" />
         </el-header>
         <el-main class="my-main" :class="{ collapse }">
           <el-container>
