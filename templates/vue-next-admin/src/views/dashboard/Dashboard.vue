@@ -1,5 +1,10 @@
 <script setup lang="ts"></script>
 
 <template>
-  <main>仪表盘</main>
+  <main>
+    <el-card shadow="always">
+      <template #header> 仪表盘 </template>
+      <!-- card body -->
+    </el-card>
+  </main>
 </template>

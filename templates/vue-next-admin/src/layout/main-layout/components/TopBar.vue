@@ -4,16 +4,22 @@ import avatar from '@/assets/avatar.png'
 import user1 from '@/assets/user-1.jpg'
 import user2 from '@/assets/user-2.jpg'
 import user3 from '@/assets/user-3.jpg'
+import Cookies from 'js-cookie'
 
 const collapse = defineModel<boolean>()
+const router = useRouter()
 
 function onCollapse() {
   collapse.value = !collapse.value
 }
 
-function onBell() {}
-
-function onAvatar() {}
+function onSignOut() {
+  Cookies.remove('token')
+  router.replace({
+    path: '/login',
+    replace: true
+  })
+}
 </script>
 
 <template>
@@ -32,7 +38,7 @@ function onAvatar() {}
     <div class="right-side">
       <el-dropdown popper-class="notification-dropdown-poper" trigger="click">
         <el-badge is-dot class="my-badge">
-          <el-button class="bell-button" :icon="Bell" size="large" text bg circle @click="onBell" />
+          <el-button class="bell-button" :icon="Bell" size="large" text bg circle />
         </el-badge>
         <template #dropdown>
           <header>
@@ -126,7 +132,7 @@ function onAvatar() {}
       </el-dropdown>
 
       <el-dropdown popper-class="profile-dropdown-poper" trigger="click">
-        <el-button class="avatar-button" size="large" text bg circle @click="onAvatar">
+        <el-button class="avatar-button" size="large" text bg circle>
           <el-avatar :size="28" shape="circle" :src="avatar" />
         </el-button>
         <template #dropdown>
@@ -194,7 +200,13 @@ function onAvatar() {}
               </el-dropdown-item>
             </el-dropdown-menu>
             <footer>
-              <el-button class="footer-button" type="danger" plain auto-insert-space>
+              <el-button
+                class="footer-button"
+                type="danger"
+                plain
+                auto-insert-space
+                @click="onSignOut"
+              >
                 登出
               </el-button>
             </footer>
@@ -297,7 +309,7 @@ function onAvatar() {}
     li[class*='-dropdown-menu__item'] {
       span[class*='-avatar'] {
         padding: 10px;
-        background-color: var(--vs-color-primary-light-8);
+        background-color: var(--vs-color-primary-light-9);
       }
     }
   }

@@ -1,37 +1,43 @@
 <script setup lang="ts">
 import { Logo } from '@/components'
-import { AsideMenu, TopBar } from './components'
+import { AsideMenu, TopBar, BreadcrumbBar } from './components'
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
-const toggleCollapse = ref<boolean>()
-const hoverCollapse = ref<boolean>()
-// const collapse = computed(() =>
-//   typeof hoverCollapse.value === 'undefined'
-//     ? toggleCollapse.value
-//     : toggleCollapse.value && hoverCollapse.value
-// )
 const collapse = ref(false)
 const router = useRouter()
 const defaultActive = ref<string>()
+const breadcrumbData = ref<Record<string, any>[]>([])
 
 watch(
   () => router.currentRoute.value,
   (route) => {
     defaultActive.value = route.path
-    // handleBreadcrumb(route)
+    handleBreadcrumb(route)
     // handleNavRecord(route.path)
   },
   { immediate: true }
 )
 
-function onMouseoverAside() {
-  if (toggleCollapse.value) {
-    hoverCollapse.value = false
-  }
-}
-
-function onMouseoutAside() {
-  if (toggleCollapse.value) {
-    hoverCollapse.value = true
+function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
+  if (route.matched.length) {
+    breadcrumbData.value.length = 0
+    let base = ''
+    const paths = route.path
+      .split('/')
+      .filter((e) => !!e)
+      .map((e) => {
+        return (base = `${base}/${e}`)
+      })
+    paths.forEach((path) => {
+      const routes = router.getRoutes()
+      const find = routes.find((e) => e.path === path)
+      if (find) {
+        breadcrumbData.value.push({
+          path: find.path,
+          name: find.meta.title as string
+        })
+      }
+    })
   }
 }
 </script>
@@ -48,7 +54,8 @@ function onMouseoutAside() {
           <TopBar v-model="collapse" />
         </el-header>
         <el-main class="my-main" :class="{ collapse }">
-          <el-container>
+          <el-container class="main-container">
+            <BreadcrumbBar :breadcrumb-data />
             <router-view />
           </el-container>
         </el-main>
@@ -109,12 +116,18 @@ function onMouseoutAside() {
     }
   }
   .my-main {
+    display: flex;
+    justify-content: center;
     padding-left: calc(250px + var(--vs-main-padding));
-    padding-top: calc(60px + var(--vs-main-padding));
-    padding-bottom: calc(60px + var(--vs-main-padding));
+    padding-top: 60px;
+    padding-bottom: 60px;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     &.collapse {
       padding-left: calc(68px + var(--vs-main-padding));
+    }
+    .main-container {
+      max-width: 1200px;
+      flex-direction: column;
     }
   }
   .my-footer {

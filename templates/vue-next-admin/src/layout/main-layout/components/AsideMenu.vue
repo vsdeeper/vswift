@@ -11,7 +11,14 @@ const menuData = computed(() => useMenuDataStore().menuData)
 </script>
 
 <template>
-  <el-menu class="my-menu" router :collapse :default-active popper-class="my-menu-popper">
+  <el-menu
+    class="my-menu"
+    router
+    :collapse
+    :default-active
+    :collapse-transition="false"
+    popper-class="my-menu-popper"
+  >
     <MenuItem :menu-data />
   </el-menu>
 </template>
@@ -33,6 +40,6 @@ const menuData = computed(() => useMenuDataStore().menuData)
   padding: 0 15px;
 }
 ul[class*='-menu--collapse'] {
-  width: unset;
+  width: 100%;
 }
 </style>
