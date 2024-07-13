@@ -52,6 +52,7 @@ declare module 'vue' {
     Logo: typeof import('./../src/components/logo/Logo.vue')['default']
     MainLayout: typeof import('./../src/layout/main-layout/MainLayout.vue')['default']
     MenuItem: typeof import('./../src/layout/main-layout/components/MenuItem.vue')['default']
+    NavigationRecordBar: typeof import('./../src/layout/main-layout/components/NavigationRecordBar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TheWelcome: typeof import('./../src/components/TheWelcome.vue')['default']

@@ -282,7 +282,7 @@ function onSignOut() {
       padding: 5px 16px;
       .info {
         padding: 5px 0;
-        margin-left: 10px;
+        margin-left: 15px;
         h3 {
           font-size: 14px;
           margin: 0;
@@ -293,7 +293,7 @@ function onSignOut() {
           font-size: 12px;
           &.email {
             letter-spacing: 1px;
-            margin-top: 3px;
+            margin-top: 5px;
             i[class*='-icon'] {
               margin-right: 5px;
             }
@@ -310,6 +310,11 @@ function onSignOut() {
       span[class*='-avatar'] {
         padding: 10px;
         background-color: var(--vs-color-primary-light-9);
+      }
+      &:not(.is-disabled):focus {
+        span[class*='-avatar'] {
+          background-color: rgba($color: #fff, $alpha: 0.35);
+        }
       }
     }
   }

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@vswift/utils": "^1.1.2",
     "axios": "^1.7.2",
     "crypto-js": "^4.2.0",
     "element-plus": "^2.7.0",

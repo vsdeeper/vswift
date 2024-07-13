@@ -1,19 +1,27 @@
 <script setup lang="ts">
 import { Logo } from '@/components'
-import { AsideMenu, TopBar, BreadcrumbBar } from './components'
+import {
+  AsideMenu,
+  TopBar,
+  BreadcrumbBar,
+  NavigationRecordBar,
+  type BreadcrumbDataItem
+} from './components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import { useMenuDataStore } from '@/stores/global'
 
 const collapse = ref(false)
 const router = useRouter()
-const defaultActive = ref<string>()
-const breadcrumbData = ref<Record<string, any>[]>([])
+const activePath = ref<string>()
+const breadcrumbData = ref<BreadcrumbDataItem[]>([])
+const navigationRecordData = ref<BreadcrumbDataItem[]>([])
 
 watch(
   () => router.currentRoute.value,
   (route) => {
-    defaultActive.value = route.path
+    activePath.value = route.path
     handleBreadcrumb(route)
-    // handleNavRecord(route.path)
+    handleNavRecord(route.path)
   },
   { immediate: true }
 )
@@ -40,6 +48,51 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
     })
   }
 }
+
+async function handleNavRecord(path: string) {
+  if (navigationRecordData.value.some((v) => v.path === path)) {
+    return
+  }
+  const menuData = await useMenuDataStore().getMenuData()
+  const findMenuItem: VsMenuDataItem | undefined = findNodeObjectFromTreeData(
+    path,
+    menuData ?? [],
+    { id: 'path' }
+  )
+  if (findMenuItem && findMenuItem.visible === 1) {
+    navigationRecordData.value.push({
+      path,
+      name: findMenuItem.menuName
+    })
+  }
+}
+
+function findNodeObjectFromTreeData(
+  target: string | number,
+  treeData: Record<string, any>[],
+  options?: { id?: string; children?: string }
+) {
+  try {
+    const { id = 'id', children = 'children' } = options ?? {}
+    let find: Record<string, any> | undefined
+    const findHandler = (treeData: Record<string, any>[]) => {
+      for (const node of treeData) {
+        if (node[id] === target) {
+          find = node
+          break
+        } else {
+          if (node[children]?.length) {
+            findHandler(node[children])
+          }
+        }
+      }
+      return find
+    }
+    return findHandler(treeData)
+  } catch (error) {
+    console.error('findNodeFromTreeData: ', error)
+  }
+}
 </script>
 
 <template>
@@ -47,16 +100,22 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
     <el-container>
       <el-aside class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
         <Logo />
-        <AsideMenu :collapse :default-active />
+        <AsideMenu :collapse :default-active="activePath" />
       </el-aside>
       <el-container>
         <el-header class="my-header" :class="{ collapse }">
           <TopBar v-model="collapse" />
         </el-header>
         <el-main class="my-main" :class="{ collapse }">
-          <el-container class="main-container">
-            <BreadcrumbBar :breadcrumb-data />
-            <router-view />
+          <el-container class="router-view-wrapper">
+            <section class="router-view">
+              <NavigationRecordBar
+                v-model="navigationRecordData"
+                v-model:active-path="activePath"
+              />
+              <BreadcrumbBar :breadcrumb-data />
+              <router-view />
+            </section>
           </el-container>
         </el-main>
         <el-footer class="my-footer" :class="{ collapse }">
@@ -117,7 +176,7 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
   }
   .my-main {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     padding-left: calc(250px + var(--vs-main-padding));
     padding-top: 60px;
     padding-bottom: 60px;
@@ -125,9 +184,13 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
     &.collapse {
       padding-left: calc(68px + var(--vs-main-padding));
     }
-    .main-container {
-      max-width: 1200px;
-      flex-direction: column;
+    .router-view-wrapper {
+      display: flex;
+      justify-content: center;
+      .router-view {
+        flex: 1;
+        max-width: 1200px;
+      }
     }
   }
   .my-footer {

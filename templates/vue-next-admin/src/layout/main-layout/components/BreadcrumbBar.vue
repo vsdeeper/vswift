@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ArrowRight } from '@element-plus/icons-vue'
+import type { BreadcrumbDataItem } from '.'
 
 defineProps<{
-  breadcrumbData?: Record<string, any>[]
+  breadcrumbData?: BreadcrumbDataItem[]
 }>()
 </script>
 
@@ -16,6 +17,6 @@ defineProps<{
 
 <style lang="scss" scoped>
 .my-breadcrumb {
-  padding: 20px 0;
+  padding: 16px 0;
 }
 </style>

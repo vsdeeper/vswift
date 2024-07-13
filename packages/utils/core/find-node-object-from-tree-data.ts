@@ -12,27 +12,23 @@ export function findNodeObjectFromTreeData(
   options?: { id?: string; children?: string }
 ) {
   try {
-    return findHandler(targetId, treeData, options)
+    const { id = 'id', children = 'children' } = options ?? {}
+    let find: Record<string, any> | undefined
+    const findHandler = (treeData: Record<string, any>[]) => {
+      for (const node of treeData) {
+        if (node[id] === targetId) {
+          find = node
+          break
+        } else {
+          if (node[children]?.length) {
+            findHandler(node[children])
+          }
+        }
+      }
+      return find
+    }
+    return findHandler(treeData)
   } catch (error) {
     console.error('findNodeFromTreeData: ', error)
   }
-}
-
-function findHandler(
-  targetId: NodeKey,
-  treeData: Record<string, any>[],
-  options?: { id?: string; children?: string }
-) {
-  const { id = 'id', children = 'children' } = options ?? {}
-  let find: Record<string, any> | undefined
-  for (const node of treeData) {
-    if (node[id] === targetId) {
-      find = node
-      break
-    }
-    if (node[children]?.length) {
-      findHandler(targetId, node[children], options)
-    }
-  }
-  return find
 }
