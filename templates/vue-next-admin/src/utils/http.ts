@@ -1,7 +1,8 @@
 import router from '@/router'
 import axios, { type AxiosInstance } from 'axios'
 import { ElMessage, ElMessageBox, type Action } from 'element-plus'
-import localforage from 'localforage'
+import Cookies from 'js-cookie'
+import { TOKEN_STORAGE_KEY } from './constants'
 
 const MODE = import.meta.env.MODE
 const BASE_URL = import.meta.env.BASE_URL
@@ -32,7 +33,7 @@ const http: AxiosInstance = axios.create({
 http.interceptors.request.use(
   async function (config) {
     // 在发送请求之前做些什么
-    const token: string | null = await localforage.getItem('token')
+    const token: string | undefined = Cookies.get(TOKEN_STORAGE_KEY)
     if (token) {
       // Authorization 根据需要修改
       config.headers.Authorization = token

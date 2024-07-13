@@ -1,16 +1,50 @@
 <script setup lang="ts">
-import { Avatar, Bell, Expand, Fold } from '@element-plus/icons-vue'
+import { Avatar, Bell, Expand, Fold, Search } from '@element-plus/icons-vue'
 import avatar from '@/assets/avatar.png'
 import user1 from '@/assets/user-1.jpg'
 import user2 from '@/assets/user-2.jpg'
 import user3 from '@/assets/user-3.jpg'
 import Cookies from 'js-cookie'
+import { useMenuDataStore } from '@/stores/global'
+import { throttle } from 'radash'
+import type { InputInstance } from 'element-plus'
+
+export interface FastLinkDataItem {
+  name?: string
+  path?: string
+}
 
 const collapse = defineModel<boolean>()
 const router = useRouter()
+const searchRef = ref<InputInstance>()
+const searchWord = ref<string>()
+const fastLinkData = ref<FastLinkDataItem[]>(
+  genFastLinkData(useMenuDataStore().menuData as VsMenuDataItem[])
+)
+const storeFastLinkData = ref<FastLinkDataItem[]>(JSON.parse(JSON.stringify(fastLinkData.value)))
+const messageData = ref<Record<string, any>[]>([
+  { id: 1, title: '收到新消息', desc: '影子给你发了新消息', avatar: user1, read: false },
+  { id: 2, title: '收到新消息', desc: '影子完成了审批', avatar: user2, read: false },
+  { id: 3, title: '收到新消息', desc: '有个流程需要您审批', avatar: user3, read: false },
+  { id: 4, title: '收到新消息', desc: '有个流程需要您审批', read: true },
+  { id: 5, title: '收到新消息', desc: '有个流程需要您审批', read: true },
+  { id: 6, title: '收到新消息', desc: '有个流程需要您审批', read: true },
+  { id: 7, title: '收到新消息', desc: '有个流程需要您审批', read: true }
+])
 
 function onCollapse() {
   collapse.value = !collapse.value
+}
+
+const onInputSearch = throttle({ interval: 500 }, (word: string) => {
+  fastLinkData.value =
+    storeFastLinkData.value.filter((e) => e.name?.includes(word) || e.path?.includes(word)) ?? []
+})
+
+function onSearchVisibleChange(visible: boolean) {
+  if (visible) {
+    searchRef.value?.focus()
+  }
 }
 
 function onSignOut() {
@@ -20,13 +54,24 @@ function onSignOut() {
     replace: true
   })
 }
+
+function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
+  return menuData.reduce((prev: FastLinkDataItem[], cur) => {
+    return [
+      ...prev,
+      ...(cur.children?.length
+        ? [{ name: cur.menuName, path: cur.path }, ...genFastLinkData(cur.children)]
+        : [{ name: cur.menuName, path: cur.path }])
+    ]
+  }, [])
+}
 </script>
 
 <template>
   <div class="top-bar">
     <div class="left-side">
       <el-button
-        class="collapse-button"
+        class="left-side-button"
         :icon="collapse ? Expand : Fold"
         size="large"
         text
@@ -34,6 +79,38 @@ function onSignOut() {
         circle
         @click="onCollapse"
       />
+      <el-dropdown
+        popper-class="top-bar-search-popper"
+        trigger="click"
+        placement="bottom-start"
+        @visible-change="onSearchVisibleChange"
+      >
+        <el-button class="left-side-button" :icon="Search" size="large" text bg circle />
+        <template #dropdown>
+          <el-input
+            ref="searchRef"
+            v-model="searchWord"
+            placeholder="请输入关键词"
+            size="large"
+            clearable
+            @input="onInputSearch"
+          />
+          <el-divider direction="horizontal" />
+          <el-tabs model-value="fast-link">
+            <el-tab-pane label="快捷导航" name="fast-link">
+              <el-scrollbar>
+                <el-dropdown-menu v-if="fastLinkData.length">
+                  <el-dropdown-item v-for="item in fastLinkData" :key="item.path">
+                    <h4>{{ item.name }}</h4>
+                    <div>{{ item.path }}</div>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+                <el-text class="no-data" v-else>暂无数据</el-text>
+              </el-scrollbar>
+            </el-tab-pane>
+          </el-tabs>
+        </template>
+      </el-dropdown>
     </div>
     <div class="right-side">
       <el-dropdown popper-class="notification-dropdown-poper" trigger="click">
@@ -46,83 +123,21 @@ function onSignOut() {
             <el-tag type="danger" effect="dark" size="small" round> 5 </el-tag>
           </header>
           <el-dropdown-menu>
-            <el-dropdown-item>
-              <el-badge is-dot :offset="[0, 10]">
-                <el-avatar :icon="Avatar" shape="circle" fit="contain" :src="user1"></el-avatar>
+            <el-dropdown-item v-for="item in messageData" :key="item.id">
+              <el-badge :is-dot="!item.read" :offset="[0, 10]">
+                <el-avatar
+                  :icon="Avatar"
+                  shape="circle"
+                  fit="contain"
+                  :src="item.avatar"
+                ></el-avatar>
                 <div class="info-box">
                   <div class="item">
-                    <h4>收到新消息</h4>
-                    <div>影子给你发了新消息</div>
+                    <h4>{{ item.title }}</h4>
+                    <div>{{ item.desc }}</div>
                   </div>
                 </div>
               </el-badge>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-badge is-dot :offset="[0, 10]">
-                <el-avatar :icon="Avatar" shape="circle" fit="contain" :src="user2"></el-avatar>
-                <div class="info-box">
-                  <div class="item">
-                    <h4>收到新消息</h4>
-                    <div>影子完成了审批</div>
-                  </div>
-                </div>
-              </el-badge>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-badge is-dot :offset="[0, 10]">
-                <el-avatar :icon="Avatar" shape="circle" fit="contain" :src="user3"></el-avatar>
-                <div class="info-box">
-                  <div class="item">
-                    <h4>收到新消息</h4>
-                    <div>有个流程需要您审批</div>
-                  </div>
-                </div>
-              </el-badge>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-avatar :icon="Avatar" shape="circle" fit="contain"></el-avatar>
-              <div class="info-box">
-                <div class="item">
-                  <h4>收到新消息</h4>
-                  <div>有个流程需要您审批</div>
-                </div>
-              </div>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-avatar :icon="Avatar" shape="circle" fit="contain"></el-avatar>
-              <div class="info-box">
-                <div class="item">
-                  <h4>收到新消息</h4>
-                  <div>有个流程需要您审批</div>
-                </div>
-              </div>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-avatar :icon="Avatar" shape="circle" fit="contain"></el-avatar>
-              <div class="info-box">
-                <div class="item">
-                  <h4>收到新消息</h4>
-                  <div>有个流程需要您审批</div>
-                </div>
-              </div>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-avatar :icon="Avatar" shape="circle" fit="contain"></el-avatar>
-              <div class="info-box">
-                <div class="item">
-                  <h4>收到新消息</h4>
-                  <div>有个流程需要您审批</div>
-                </div>
-              </div>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <el-avatar :icon="Avatar" shape="circle" fit="contain"></el-avatar>
-              <div class="info-box">
-                <div class="item">
-                  <h4>收到新消息</h4>
-                  <div>有个流程需要您审批</div>
-                </div>
-              </div>
             </el-dropdown-item>
           </el-dropdown-menu>
           <footer>
@@ -130,7 +145,6 @@ function onSignOut() {
           </footer>
         </template>
       </el-dropdown>
-
       <el-dropdown popper-class="profile-dropdown-poper" trigger="click">
         <el-button class="avatar-button" size="large" text bg circle>
           <el-avatar :size="28" shape="circle" :src="avatar" />
@@ -218,6 +232,46 @@ function onSignOut() {
 </template>
 
 <style lang="scss">
+.top-bar-search-popper {
+  div[class*='-dropdown__list'] {
+    min-width: 320px;
+    & > div[class*='-input'] {
+      padding: 16px;
+    }
+    & > div[class*='-divider'] {
+      margin: 0;
+    }
+    li[class*='-dropdown-menu__item'] {
+      flex-direction: column;
+      h4 {
+        width: 100%;
+        margin: 0;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      div {
+        width: 100%;
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    div[class*='-tabs__header'] {
+      padding: 0 16px;
+    }
+    div[class*='-tabs__content'] {
+      div[class*='-scrollbar'] {
+        max-height: 350px;
+        max-width: 350px;
+      }
+    }
+    .no-data {
+      display: flex;
+      padding: 16px;
+    }
+  }
+}
 .notification-dropdown-poper,
 .profile-dropdown-poper {
   div[class*='-dropdown__list'] {
@@ -327,7 +381,7 @@ function onSignOut() {
   align-items: center;
   justify-content: space-between;
   .left-side {
-    .collapse-button {
+    .left-side-button {
       border: 0 none;
       font-size: 22px;
       &.is-text:not(.is-disabled).is-has-bg {
@@ -335,6 +389,9 @@ function onSignOut() {
         &:hover {
           background-color: var(--vs-fill-color-darker);
         }
+      }
+      & + .left-side-button {
+        margin-left: 0;
       }
     }
   }

@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
 import { Check } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import localforage from 'localforage'
 
 export interface AppSetting {
   theme: {
     color?: string
+    mode?: 'light' | 'dark'
   }
   menu: {
     layout?: 'vertical' | 'horizontal'
@@ -18,9 +22,10 @@ export interface AppSetting {
 }
 const show = ref(false)
 const themeColorData = ['#1e4db7', '#00cec3', '#ff5c8e', '#7352ff']
-const appSetting = ref<AppSetting>({
+const appSettingConst: AppSetting = {
   theme: {
-    color: '#1e4db7'
+    color: '#1e4db7',
+    mode: 'light'
   },
   menu: {
     layout: 'vertical',
@@ -32,12 +37,23 @@ const appSetting = ref<AppSetting>({
     navRecord: true,
     breadcrumb: true
   }
-})
+}
+const appSetting = ref<AppSetting>(JSON.parse(JSON.stringify(appSettingConst)))
 
 function onToggleThemeColor(color: string) {
   if (appSetting.value.theme.color !== color) {
     appSetting.value.theme.color = color
   }
+}
+
+function onReset() {
+  appSetting.value = JSON.parse(JSON.stringify(appSettingConst))
+}
+
+function onSave() {
+  localforage.setItem(APP_SETTING_STORAGE_KEY, JSON.parse(JSON.stringify(appSetting.value)))
+  ElMessage.success('保存设置成功')
+  show.value = false
 }
 
 function open() {
@@ -50,7 +66,13 @@ defineExpose({
 </script>
 
 <template>
-  <el-drawer v-model="show" title="应用设置" direction="rtl" size="320px">
+  <el-drawer
+    v-model="show"
+    modal-class="app-setting-modal"
+    title="应用设置"
+    direction="rtl"
+    size="320px"
+  >
     <el-divider direction="horizontal" content-position="center">主题</el-divider>
     <div class="flex-box">
       <span class="label">颜色</span>
@@ -67,6 +89,13 @@ defineExpose({
           @click="onToggleThemeColor(color)"
         />
       </div>
+    </div>
+    <div class="flex-box">
+      <span class="label">模式</span>
+      <el-radio-group v-model="appSetting.theme.mode" size="small">
+        <el-radio-button label="明亮" value="light" />
+        <el-radio-button label="暗黑" value="dark" />
+      </el-radio-group>
     </div>
     <el-divider direction="horizontal" content-position="center">菜单</el-divider>
     <div class="flex-box">
@@ -110,7 +139,12 @@ defineExpose({
     </div>
     <el-divider direction="horizontal" content-position="center">主体</el-divider>
     <div class="flex-box">
-      <span class="label">宽度</span>
+      <span class="label">
+        宽度
+        <el-tooltip effect="dark" content="盒子表示设置最大宽度" placement="top">
+          <el-icon color="#ffae1f"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </span>
       <el-radio-group v-model="appSetting.main.width" size="small">
         <el-radio-button label="盒子" value="boxed" />
         <el-radio-button label="撑满" value="full" />
@@ -118,21 +152,51 @@ defineExpose({
     </div>
     <div class="flex-box">
       <span class="label">导航记录</span>
-      <el-radio-group v-model="appSetting.main.navRecord" size="small">
-        <el-radio-button label="显示" :value="true" />
-        <el-radio-button label="隐藏" :value="false" />
-      </el-radio-group>
+      <el-switch
+        v-model="appSetting.main.navRecord"
+        :active-value="true"
+        :inactive-value="false"
+        active-text="显示"
+        inactive-text="隐藏"
+        inline-prompt
+      />
     </div>
     <div class="flex-box">
       <span class="label">面包屑</span>
-      <el-radio-group v-model="appSetting.main.breadcrumb" size="small">
-        <el-radio-button label="显示" :value="true" />
-        <el-radio-button label="隐藏" :value="false" />
-      </el-radio-group>
+      <el-switch
+        v-model="appSetting.main.breadcrumb"
+        :active-value="true"
+        :inactive-value="false"
+        active-text="显示"
+        inactive-text="隐藏"
+        inline-prompt
+      />
     </div>
+    <template #footer>
+      <el-button @click="onReset">重置设置</el-button>
+      <el-button type="primary" @click="onSave">保存设置</el-button>
+    </template>
   </el-drawer>
 </template>
 
+<style lang="scss">
+.app-setting-modal {
+  div[class*='-divider'] {
+    margin: 30px 0;
+  }
+  div[class*='-drawer__body'] {
+    div[class*='-divider']:first-child {
+      margin-top: 0;
+    }
+  }
+  div[class*='-drawer__footer'] {
+    display: flex;
+    button[class*='-button'] {
+      flex: 1;
+    }
+  }
+}
+</style>
 <style lang="scss" scoped>
 .flex-box {
   display: flex;
