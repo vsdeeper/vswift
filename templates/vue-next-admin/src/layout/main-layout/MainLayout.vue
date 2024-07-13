@@ -3,18 +3,23 @@ import { Logo } from '@/components'
 import {
   AsideMenu,
   TopBar,
-  BreadcrumbBar,
   NavigationRecordBar,
-  type BreadcrumbDataItem
+  type NavigationRecordDataItem,
+  AppSetting
 } from './components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useMenuDataStore } from '@/stores/global'
+import type { BreadcrumbDataItem } from '@/components'
+import { Setting } from '@element-plus/icons-vue'
 
 const collapse = ref(false)
 const router = useRouter()
 const activePath = ref<string>()
 const breadcrumbData = ref<BreadcrumbDataItem[]>([])
-const navigationRecordData = ref<BreadcrumbDataItem[]>([])
+const navigationRecordData = ref<NavigationRecordDataItem[]>([])
+const AppSettingRef = ref<InstanceType<typeof AppSetting>>()
+
+provide('breadcrumbData', breadcrumbData)
 
 watch(
   () => router.currentRoute.value,
@@ -93,56 +98,59 @@ function findNodeObjectFromTreeData(
     console.error('findNodeFromTreeData: ', error)
   }
 }
+
+function onSetting() {
+  AppSettingRef.value?.open()
+}
 </script>
 
 <template>
-  <div class="main-layout">
+  <el-container class="main-layout">
+    <el-aside class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
+      <Logo />
+      <AsideMenu :collapse :default-active="activePath" />
+    </el-aside>
     <el-container>
-      <el-aside class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
-        <Logo />
-        <AsideMenu :collapse :default-active="activePath" />
-      </el-aside>
-      <el-container>
-        <el-header class="my-header" :class="{ collapse }">
-          <TopBar v-model="collapse" />
-        </el-header>
-        <el-main class="my-main" :class="{ collapse }">
-          <el-container class="router-view-wrapper">
-            <section class="router-view">
-              <NavigationRecordBar
-                v-model="navigationRecordData"
-                v-model:active-path="activePath"
-              />
-              <BreadcrumbBar :breadcrumb-data />
-              <router-view />
-            </section>
-          </el-container>
-        </el-main>
-        <el-footer class="my-footer" :class="{ collapse }">
-          Made by
-          <el-link
-            type="primary"
-            :underline="false"
-            href="https://github.com/vsdeeper"
-            target="_blank"
-          >
-            Vsdeeper
-          </el-link>
-        </el-footer>
-      </el-container>
+      <el-header class="my-header" :class="{ collapse }">
+        <TopBar v-model="collapse" />
+      </el-header>
+      <el-main class="my-main" :class="{ collapse }">
+        <el-container class="router-view-wrapper">
+          <section class="router-view">
+            <NavigationRecordBar v-model="navigationRecordData" v-model:active-path="activePath" />
+            <router-view />
+          </section>
+        </el-container>
+      </el-main>
+      <el-footer class="my-footer" :class="{ collapse }">
+        Made by
+        <el-link
+          type="primary"
+          :underline="false"
+          href="https://github.com/vsdeeper"
+          target="_blank"
+        >
+          Vsdeeper
+        </el-link>
+      </el-footer>
     </el-container>
-  </div>
+  </el-container>
+  <el-button class="setting-button" type="primary" size="large" circle @click="onSetting">
+    <el-icon class="is-loading">
+      <Setting />
+    </el-icon>
+  </el-button>
+  <AppSetting ref="AppSettingRef" />
 </template>
 
 <style lang="scss" scoped>
 .main-layout {
-  display: flex;
   height: 100%;
   .my-aside {
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 1;
+    z-index: 2;
     height: 100%;
     box-shadow: 1px 0 20px #00000014;
     transition-duration: 0.2s;
@@ -167,6 +175,7 @@ function findNodeObjectFromTreeData(
     position: fixed;
     right: 0;
     top: 0;
+    z-index: 1;
     width: calc(100% - 250px);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
@@ -179,8 +188,8 @@ function findNodeObjectFromTreeData(
     flex-direction: column;
     padding-left: calc(250px + var(--vs-main-padding));
     padding-top: 60px;
-    padding-bottom: 60px;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: unset;
     &.collapse {
       padding-left: calc(68px + var(--vs-main-padding));
     }
@@ -190,28 +199,35 @@ function findNodeObjectFromTreeData(
       .router-view {
         flex: 1;
         max-width: 1200px;
+        width: 100%;
       }
     }
   }
   .my-footer {
-    position: fixed;
-    right: 0;
-    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     width: calc(100% - 250px);
+    margin-left: 250px;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
     font-size: 12px;
     color: var(--vs-text-color-secondary);
     &.collapse {
       width: calc(100% - 68px);
+      margin-left: 68px;
     }
     a[class*='-link'] {
       font-size: inherit;
       margin-left: 5px;
     }
   }
+}
+.setting-button {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  font-size: 18px;
+  pointer-events: all;
 }
 </style>

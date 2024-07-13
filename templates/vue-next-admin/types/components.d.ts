@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AppSetting: typeof import('./../src/layout/main-layout/components/AppSetting.vue')['default']
     AsideMenu: typeof import('./../src/layout/main-layout/components/AsideMenu.vue')['default']
     BreadcrumbBar: typeof import('./../src/layout/main-layout/components/BreadcrumbBar.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
@@ -22,6 +23,7 @@ declare module 'vue' {
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDivider: typeof import('element-plus/es')['ElDivider']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -37,8 +39,12 @@ declare module 'vue' {
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElMenuItemGroup: (typeof import('element-plus/es'))['ElMenuItemGroup']
+    ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
+    ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
+    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTag: typeof import('element-plus/es')['ElTag']
     HelloWorld: typeof import('./../src/components/HelloWorld.vue')['default']
     IconCommunity: typeof import('./../src/components/icons/IconCommunity.vue')['default']
@@ -57,6 +63,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TheWelcome: typeof import('./../src/components/TheWelcome.vue')['default']
     TopBar: typeof import('./../src/layout/main-layout/components/TopBar.vue')['default']
+    ViewWrapper: typeof import('./../src/components/view-wrapper/ViewWrapper.vue')['default']
     WelcomeItem: typeof import('./../src/components/WelcomeItem.vue')['default']
   }
 }
