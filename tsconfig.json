@@ -12,9 +12,6 @@
     },
     {
       "path": "./tsconfig.utils.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
+    }
   ]
 }

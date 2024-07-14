@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { Logo } from '@/components'
-import {
-  AsideMenu,
-  TopBar,
-  NavigationRecordBar,
-  type NavigationRecordDataItem,
-  AppSetting
-} from './components'
+import { AsideMenu, TopBar, NavRecordBar, type NavRecordDataItem, AppSetting } from './components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useMenuDataStore } from '@/stores/global'
 import type { BreadcrumbDataItem } from '@/components'
@@ -16,7 +10,7 @@ const collapse = ref(false)
 const router = useRouter()
 const activePath = ref<string>()
 const breadcrumbData = ref<BreadcrumbDataItem[]>([])
-const navigationRecordData = ref<NavigationRecordDataItem[]>([])
+const navigationRecordData = ref<NavRecordDataItem[]>([])
 const AppSettingRef = ref<InstanceType<typeof AppSetting>>()
 
 provide('breadcrumbData', breadcrumbData)
@@ -117,7 +111,7 @@ function onSetting() {
       <el-main class="my-main" :class="{ collapse }">
         <el-container class="router-view-wrapper">
           <section class="router-view">
-            <NavigationRecordBar v-model="navigationRecordData" v-model:active-path="activePath" />
+            <NavRecordBar v-model="navigationRecordData" v-model:active-path="activePath" />
             <router-view />
           </section>
         </el-container>
