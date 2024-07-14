@@ -2,11 +2,13 @@
 import { Logo } from '@/components'
 import { AsideMenu, TopBar, NavRecordBar, type NavRecordDataItem, AppSetting } from './components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { useMenuDataStore } from '@/stores/global'
+import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import type { BreadcrumbDataItem } from '@/components'
 import { Setting } from '@element-plus/icons-vue'
+import { storeToRefs } from 'pinia'
 
-const collapse = ref(false)
+const { appSettingData } = storeToRefs(useAppSettingDataStore())
+const collapse = ref()
 const router = useRouter()
 const activePath = ref<string>()
 const breadcrumbData = ref<BreadcrumbDataItem[]>([])
@@ -21,6 +23,14 @@ watch(
     activePath.value = route.path
     handleBreadcrumb(route)
     handleNavRecord(route.path)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => appSettingData.value?.menu.collapse,
+  (val) => {
+    collapse.value = val
   },
   { immediate: true }
 )
@@ -110,8 +120,12 @@ function onSetting() {
       </el-header>
       <el-main class="my-main" :class="{ collapse }">
         <el-container class="router-view-wrapper">
-          <section class="router-view">
-            <NavRecordBar v-model="navigationRecordData" v-model:active-path="activePath" />
+          <section class="router-view" :class="[appSettingData?.main.width ?? 'boxed']">
+            <NavRecordBar
+              v-if="appSettingData?.main.navRecord"
+              v-model="navigationRecordData"
+              v-model:active-path="activePath"
+            />
             <router-view />
           </section>
         </el-container>
@@ -146,7 +160,7 @@ function onSetting() {
     top: 0;
     z-index: 2;
     height: 100%;
-    box-shadow: 1px 0 20px #00000014;
+    box-shadow: var(--vs-box-shadow);
     transition-duration: 0.2s;
     background-color: var(--vs-bg-color-overlay);
     &.collapse {
@@ -192,8 +206,10 @@ function onSetting() {
       justify-content: center;
       .router-view {
         flex: 1;
-        max-width: 1200px;
         width: 100%;
+        &.boxed {
+          max-width: 1200px;
+        }
       }
     }
   }

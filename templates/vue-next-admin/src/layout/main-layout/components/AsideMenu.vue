@@ -1,13 +1,16 @@
 <script lang="ts" setup>
-import { useMenuDataStore } from '@/stores/global'
+import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import MenuItem from './MenuItem.vue'
+import { storeToRefs } from 'pinia'
 
 defineProps<{
   collapse?: boolean
   defaultActive?: string
 }>()
 
+const { appSettingData } = storeToRefs(useAppSettingDataStore())
 const menuData = computed(() => useMenuDataStore().menuData)
+const uniqueOpened = computed(() => appSettingData.value?.menu.uniqueOpened)
 </script>
 
 <template>
@@ -17,6 +20,7 @@ const menuData = computed(() => useMenuDataStore().menuData)
     :collapse
     :default-active
     :collapse-transition="false"
+    :unique-opened
     popper-class="my-menu-popper"
   >
     <MenuItem :menu-data />

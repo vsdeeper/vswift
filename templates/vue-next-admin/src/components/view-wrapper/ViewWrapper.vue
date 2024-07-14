@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ArrowRight } from '@element-plus/icons-vue'
 import type { BreadcrumbDataItem } from '.'
+import { useAppSettingDataStore } from '@/stores/global'
+import { storeToRefs } from 'pinia'
+const { appSettingData } = storeToRefs(useAppSettingDataStore())
 
 const breadcrumbData = inject<Ref<BreadcrumbDataItem[]>>('breadcrumbData')
 </script>
 
 <template>
   <el-card class="view-wrapper">
-    <template #header>
+    <template v-if="appSettingData?.main.breadcrumb" #header>
       <el-breadcrumb class="my-breadcrumb" :separator-icon="ArrowRight">
         <el-breadcrumb-item
           v-for="item in breadcrumbData"

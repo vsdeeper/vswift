@@ -1,25 +1,11 @@
 <script setup lang="ts">
+import { useAppSettingDataStore, type AppSetting } from '@/stores/global'
 import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
 import { Check } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import localforage from 'localforage'
+import { storeToRefs } from 'pinia'
 
-export interface AppSetting {
-  theme: {
-    color?: string
-    mode?: 'light' | 'dark'
-  }
-  menu: {
-    layout?: 'vertical' | 'horizontal'
-    collapse?: boolean
-    uniqueOpened?: boolean
-  }
-  main: {
-    width?: 'boxed' | 'full'
-    navRecord?: boolean
-    breadcrumb?: boolean
-  }
-}
 const show = ref(false)
 const themeColorData = ['#1e4db7', '#00cec3', '#ff5c8e', '#7352ff']
 const appSettingConst: AppSetting = {
@@ -29,8 +15,8 @@ const appSettingConst: AppSetting = {
   },
   menu: {
     layout: 'vertical',
-    collapse: true,
-    uniqueOpened: true
+    collapse: false,
+    uniqueOpened: false
   },
   main: {
     width: 'boxed',
@@ -38,20 +24,79 @@ const appSettingConst: AppSetting = {
     breadcrumb: true
   }
 }
-const appSetting = ref<AppSetting>(JSON.parse(JSON.stringify(appSettingConst)))
+const appSetting = ref<AppSetting>({
+  theme: {},
+  menu: {},
+  main: {}
+})
+const { getAppSettingData, setAppSettingData } = useAppSettingDataStore()
 
-function onToggleThemeColor(color: string) {
-  if (appSetting.value.theme.color !== color) {
-    appSetting.value.theme.color = color
-  }
-}
-
-function onToggleDark(mode: unknown) {
-  const el = document.documentElement
-  if (mode === 'dark') {
-    el.classList.add('dark')
+onMounted(async () => {
+  if (getAppSettingData()) {
+    appSetting.value = getAppSettingData()!
   } else {
-    el.classList.remove('dark')
+    appSetting.value = JSON.parse(JSON.stringify(appSettingConst))
+  }
+})
+
+function onChange(key: string, val: any) {
+  const { appSettingData } = storeToRefs(useAppSettingDataStore())
+  switch (key) {
+    case 'appSetting.theme.color': {
+      if (appSetting.value.theme.color !== val) {
+        appSetting.value.theme.color = val
+      }
+      break
+    }
+    case 'appSetting.theme.mode': {
+      const el = document.documentElement
+      if (val === 'dark') {
+        el.classList.add('dark')
+      } else {
+        el.classList.remove('dark')
+      }
+      break
+    }
+    case 'appSetting.menu.collapse': {
+      if (appSettingData.value) {
+        appSetting.value.menu.collapse = val
+      } else {
+        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
+      }
+      break
+    }
+    case 'appSetting.menu.uniqueOpened': {
+      if (appSettingData.value) {
+        appSetting.value.menu.uniqueOpened = val
+      } else {
+        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
+      }
+      break
+    }
+    case 'appSetting.main.width': {
+      if (appSettingData.value) {
+        appSetting.value.main.width = val
+      } else {
+        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
+      }
+      break
+    }
+    case 'appSetting.main.navRecord': {
+      if (appSettingData.value) {
+        appSetting.value.main.navRecord = val
+      } else {
+        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
+      }
+      break
+    }
+    case 'appSetting.main.breadcrumb': {
+      if (appSettingData.value) {
+        appSetting.value.main.breadcrumb = val
+      } else {
+        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
+      }
+      break
+    }
   }
 }
 
@@ -60,7 +105,9 @@ function onReset() {
 }
 
 function onSave() {
-  localforage.setItem(APP_SETTING_STORAGE_KEY, JSON.parse(JSON.stringify(appSetting.value)))
+  const data = JSON.parse(JSON.stringify(appSetting.value))
+  setAppSettingData(data)
+  localforage.setItem(APP_SETTING_STORAGE_KEY, data)
   ElMessage.success('保存设置成功')
   show.value = false
 }
@@ -92,16 +139,18 @@ defineExpose({
           :key="color"
           type="primary"
           circle
-          size="small"
           :icon="appSetting.theme.color === color ? Check : undefined"
           :color
-          @click="onToggleThemeColor(color)"
+          @click="onChange('appSetting.theme.color', color)"
         />
       </div>
     </div>
     <div class="flex-box">
       <span class="label">模式</span>
-      <el-radio-group v-model="appSetting.theme.mode" size="small" @change="onToggleDark">
+      <el-radio-group
+        v-model="appSetting.theme.mode"
+        @change="(val) => onChange('appSetting.theme.mode', val)"
+      >
         <el-radio-button label="明亮" value="light" />
         <el-radio-button label="暗黑" value="dark" />
       </el-radio-group>
@@ -109,7 +158,7 @@ defineExpose({
     <el-divider direction="horizontal" content-position="center">菜单</el-divider>
     <div class="flex-box">
       <span class="label">布局</span>
-      <el-radio-group v-model="appSetting.menu.layout" size="small">
+      <el-radio-group v-model="appSetting.menu.layout">
         <el-radio-button label="垂直" value="vertical" />
         <el-radio-button label="水平" value="horizontal" />
       </el-radio-group>
@@ -117,7 +166,7 @@ defineExpose({
     <div class="flex-box">
       <span class="label">
         折叠
-        <el-tooltip effect="dark" content="布局为垂直时生效" placement="top">
+        <el-tooltip effect="dark" content="布局为垂直时菜单栏是否折叠" placement="top">
           <el-icon color="#ffae1f"><QuestionFilled /></el-icon>
         </el-tooltip>
       </span>
@@ -127,7 +176,7 @@ defineExpose({
         :inactive-value="false"
         active-text="是"
         inactive-text="否"
-        inline-prompt
+        @change="(val) => onChange('appSetting.menu.collapse', val)"
       />
     </div>
     <div class="flex-box">
@@ -143,7 +192,7 @@ defineExpose({
         :inactive-value="false"
         active-text="是"
         inactive-text="否"
-        inline-prompt
+        @change="(val) => onChange('appSetting.menu.uniqueOpened', val)"
       />
     </div>
     <el-divider direction="horizontal" content-position="center">主体</el-divider>
@@ -154,7 +203,10 @@ defineExpose({
           <el-icon color="#ffae1f"><QuestionFilled /></el-icon>
         </el-tooltip>
       </span>
-      <el-radio-group v-model="appSetting.main.width" size="small">
+      <el-radio-group
+        v-model="appSetting.main.width"
+        @change="(val) => onChange('appSetting.main.width', val)"
+      >
         <el-radio-button label="盒子" value="boxed" />
         <el-radio-button label="撑满" value="full" />
       </el-radio-group>
@@ -167,7 +219,7 @@ defineExpose({
         :inactive-value="false"
         active-text="显示"
         inactive-text="隐藏"
-        inline-prompt
+        @change="(val) => onChange('appSetting.main.navRecord', val)"
       />
     </div>
     <div class="flex-box">
@@ -178,12 +230,12 @@ defineExpose({
         :inactive-value="false"
         active-text="显示"
         inactive-text="隐藏"
-        inline-prompt
+        @change="(val) => onChange('appSetting.main.breadcrumb', val)"
       />
     </div>
     <template #footer>
-      <el-button @click="onReset">重置设置</el-button>
-      <el-button type="primary" @click="onSave">保存设置</el-button>
+      <el-button size="large" @click="onReset">重置设置</el-button>
+      <el-button size="large" type="primary" @click="onSave">保存设置</el-button>
     </template>
   </el-drawer>
 </template>
@@ -191,7 +243,7 @@ defineExpose({
 <style lang="scss">
 .app-setting-modal {
   div[class*='-divider'] {
-    margin: 30px 0;
+    margin: 40px 0;
   }
   div[class*='-drawer__body'] {
     div[class*='-divider']:first-child {
@@ -220,7 +272,7 @@ defineExpose({
     }
   }
   & + .flex-box {
-    margin-top: 16px;
+    margin-top: 25px;
   }
   :deep(div[class*='-switch']) {
     height: 16px;

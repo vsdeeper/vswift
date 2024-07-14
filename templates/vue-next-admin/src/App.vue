@@ -1,4 +1,22 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import localforage from 'localforage'
+import { APP_SETTING_STORAGE_KEY } from './utils/constants'
+import { useAppSettingDataStore, type AppSetting } from './stores/global'
+
+onMounted(async () => {
+  // 存储应用设置
+  const storeAppSetting: AppSetting | null = await localforage.getItem(APP_SETTING_STORAGE_KEY)
+  const { setAppSettingData } = useAppSettingDataStore()
+  if (storeAppSetting) {
+    setAppSettingData(storeAppSetting)
+    // 暗黑模式切换
+    if (storeAppSetting.theme.mode === 'dark') {
+      const el = document.documentElement
+      el.classList.add('dark')
+    }
+  }
+})
+</script>
 
 <template>
   <el-config-provider namespace="vs">
