@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 
 export interface AppSetting {
   theme: {
-    color?: string
     mode?: 'light' | 'dark'
   }
   menu: {

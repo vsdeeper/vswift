@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { useAppSettingDataStore, type AppSetting } from '@/stores/global'
 import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
-import { Check } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import localforage from 'localforage'
 import { storeToRefs } from 'pinia'
 
 const show = ref(false)
-const themeColorData = ['#1e4db7', '#00cec3', '#ff5c8e', '#7352ff']
 const appSettingConst: AppSetting = {
   theme: {
-    color: '#1e4db7',
     mode: 'light'
   },
   menu: {
@@ -42,19 +39,6 @@ onMounted(async () => {
 function onChange(key: string, val: any) {
   const { appSettingData } = storeToRefs(useAppSettingDataStore())
   switch (key) {
-    case 'appSetting.theme.color': {
-      if (appSetting.value.theme.color !== val) {
-        appSetting.value.theme.color = val
-        const el = document.documentElement
-        el.style.setProperty('--vs-color-primary', val)
-      }
-      if (appSettingData.value) {
-        appSetting.value.theme.color = val
-      } else {
-        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
-      }
-      break
-    }
     case 'appSetting.theme.mode': {
       const el = document.documentElement
       if (val === 'dark') {
@@ -137,21 +121,6 @@ defineExpose({
     size="320px"
   >
     <el-divider direction="horizontal" content-position="center">主题</el-divider>
-    <div class="flex-box">
-      <span class="label">颜色</span>
-      <div class="cont">
-        <el-button
-          v-for="color in themeColorData"
-          class="theme-button"
-          :key="color"
-          type="primary"
-          circle
-          :icon="appSetting.theme.color === color ? Check : undefined"
-          :color
-          @click="onChange('appSetting.theme.color', color)"
-        />
-      </div>
-    </div>
     <div class="flex-box">
       <span class="label">模式</span>
       <el-radio-group

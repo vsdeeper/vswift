@@ -11,7 +11,6 @@ export const genAesKey = (bit?: number) => {
 
   // 将密钥转换为字符串形式
   const keyString = CryptoJS.enc.Hex.stringify(key)
-  console.log(11, keyString)
 
   return keyString
 }

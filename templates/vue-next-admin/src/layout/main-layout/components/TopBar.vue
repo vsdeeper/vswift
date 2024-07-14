@@ -358,11 +358,6 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
         padding: 10px;
         background-color: var(--vs-color-primary-light-9);
       }
-      &:not(.is-disabled):focus {
-        span[class*='-avatar'] {
-          background-color: rgba($color: #fff, $alpha: 0.35);
-        }
-      }
     }
   }
 }
