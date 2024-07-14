@@ -45,6 +45,13 @@ function onChange(key: string, val: any) {
     case 'appSetting.theme.color': {
       if (appSetting.value.theme.color !== val) {
         appSetting.value.theme.color = val
+        const el = document.documentElement
+        el.style.setProperty('--vs-color-primary', val)
+      }
+      if (appSettingData.value) {
+        appSetting.value.theme.color = val
+      } else {
+        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
       }
       break
     }
