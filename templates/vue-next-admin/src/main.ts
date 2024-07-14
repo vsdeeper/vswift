@@ -1,8 +1,8 @@
 import 'element-plus/theme-chalk/src/message.scss'
 import 'element-plus/theme-chalk/src/message-box.scss'
-import 'element-plus/theme-chalk/display.css'
+import 'element-plus/theme-chalk/src/display.scss'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import './assets/main.css'
+import './styles/main.scss'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

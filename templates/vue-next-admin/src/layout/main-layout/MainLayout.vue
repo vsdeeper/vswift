@@ -148,7 +148,7 @@ function onSetting() {
     height: 100%;
     box-shadow: 1px 0 20px #00000014;
     transition-duration: 0.2s;
-    background-color: #fff;
+    background-color: var(--vs-bg-color-overlay);
     &.collapse {
       :deep(.logo .name) {
         display: none;

@@ -46,6 +46,15 @@ function onToggleThemeColor(color: string) {
   }
 }
 
+function onToggleDark(mode: unknown) {
+  const el = document.documentElement
+  if (mode === 'dark') {
+    el.classList.add('dark')
+  } else {
+    el.classList.remove('dark')
+  }
+}
+
 function onReset() {
   appSetting.value = JSON.parse(JSON.stringify(appSettingConst))
 }
@@ -92,7 +101,7 @@ defineExpose({
     </div>
     <div class="flex-box">
       <span class="label">模式</span>
-      <el-radio-group v-model="appSetting.theme.mode" size="small">
+      <el-radio-group v-model="appSetting.theme.mode" size="small" @change="onToggleDark">
         <el-radio-button label="明亮" value="light" />
         <el-radio-button label="暗黑" value="dark" />
       </el-radio-group>

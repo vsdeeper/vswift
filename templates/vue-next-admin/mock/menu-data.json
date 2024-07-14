@@ -3,7 +3,7 @@
   "data": [
     {
       "menuID": 1,
-      "menuName": "仪表盘",
+      "menuName": "仪表板",
       "menuType": 1,
       "permKey": "dashboard",
       "path": "/dashboard",

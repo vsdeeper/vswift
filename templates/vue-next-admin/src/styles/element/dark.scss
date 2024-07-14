@@ -1,0 +1,23 @@
+// 修改element-plus的暗黑样式变量
+@forward 'element-plus/theme-chalk/src/dark/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #1e4db7
+    ),
+    'success': (
+      'base': #05b187
+    ),
+    'warning': (
+      'base': #ffae1f
+    ),
+    'danger': (
+      'base': #fa896b
+    ),
+    'error': (
+      'base': #fa896b
+    ),
+    'info': (
+      'base': #909399
+    )
+  )
+);

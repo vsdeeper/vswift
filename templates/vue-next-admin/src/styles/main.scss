@@ -1,0 +1,20 @@
+@import './base.scss';
+
+/* 基础样式 */
+body {
+  min-height: 100vh;
+  margin: 0;
+  /* 字体和element-plus保持一致 */
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    '微软雅黑', Arial, sans-serif;
+  font-size: 14px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--vs-bg-color-page);
+}
+
+#app {
+  height: 100vh;
+  font-weight: normal;
+}
