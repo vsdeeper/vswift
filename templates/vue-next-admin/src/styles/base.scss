@@ -12,14 +12,3 @@
   --color-background: var(--vs-c-white);
   --color-text: var(--vs-c-black);
 }
-
-/**
- * 暗色主题的颜色变量设置
- * 将检测用户是否有将系统的主题色设置为暗色
- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vs-c-black);
-    --color-text: var(--vs-c-white);
-  }
-}

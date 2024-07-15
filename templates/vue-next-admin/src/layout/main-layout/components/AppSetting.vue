@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useAppSettingDataStore, type AppSetting } from '@/stores/global'
+import { useAppSettingDataStore, type AppSetting, type ThemeMode } from '@/stores/global'
+import { getColorPrefers } from '@/utils'
 import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
 import { ElMessage } from 'element-plus'
 import localforage from 'localforage'
@@ -8,7 +9,7 @@ import { storeToRefs } from 'pinia'
 const show = ref(false)
 const appSettingConst: AppSetting = {
   theme: {
-    mode: 'light'
+    mode: 'no-preference'
   },
   menu: {
     layout: 'vertical',
@@ -31,6 +32,12 @@ const { getAppSettingData, setAppSettingData } = useAppSettingDataStore()
 onMounted(async () => {
   if (getAppSettingData()) {
     appSetting.value = getAppSettingData()!
+    const el = document.documentElement
+    if (getThemeMode(appSetting.value.theme.mode) === 'dark') {
+      el.classList.add('dark')
+    } else {
+      el.classList.remove('dark')
+    }
   } else {
     appSetting.value = JSON.parse(JSON.stringify(appSettingConst))
   }
@@ -41,7 +48,7 @@ function onChange(key: string, val: any) {
   switch (key) {
     case 'appSetting.theme.mode': {
       const el = document.documentElement
-      if (val === 'dark') {
+      if (getThemeMode(val) === 'dark') {
         el.classList.add('dark')
       } else {
         el.classList.remove('dark')
@@ -103,6 +110,16 @@ function onSave() {
   show.value = false
 }
 
+function getThemeMode(mode?: ThemeMode) {
+  if (mode === 'dark') {
+    return 'dark'
+  } else if (mode === 'light') {
+    return 'light'
+  } else {
+    return getColorPrefers()
+  }
+}
+
 function open() {
   show.value = true
 }
@@ -122,13 +139,14 @@ defineExpose({
   >
     <el-divider direction="horizontal" content-position="center">主题</el-divider>
     <div class="flex-box">
-      <span class="label">模式</span>
+      <span class="label">外观</span>
       <el-radio-group
         v-model="appSetting.theme.mode"
         @change="(val) => onChange('appSetting.theme.mode', val)"
       >
-        <el-radio-button label="明亮" value="light" />
-        <el-radio-button label="暗黑" value="dark" />
+        <el-radio-button label="浅色" value="light" />
+        <el-radio-button label="深色" value="dark" />
+        <el-radio-button label="自动" value="no-preference" />
       </el-radio-group>
     </div>
     <el-divider direction="horizontal" content-position="center">菜单</el-divider>

@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 
+export type ThemeMode = 'light' | 'dark' | 'no-preference'
+
 export interface AppSetting {
   theme: {
-    mode?: 'light' | 'dark'
+    mode?: ThemeMode
   }
   menu: {
     layout?: 'vertical' | 'horizontal'
