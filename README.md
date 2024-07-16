@@ -38,5 +38,6 @@ vswift create
 
 ## Todo
 
+- Read json file from hard disk path, e.g. `fs.readFileSync('/Users/como/Downloads/test.json', 'utf-8')`.
 - Develop `unplugin-vswift/vite` and import plugins on demand.
 - Develop dynamically generated program of `visual-development`.
