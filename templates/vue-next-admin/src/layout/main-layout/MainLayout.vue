@@ -4,7 +4,6 @@ import { AsideMenu, TopBar, NavRecordBar, type NavRecordDataItem, AppSetting } f
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import type { BreadcrumbDataItem } from '@/components'
-import { Setting } from '@element-plus/icons-vue'
 import { storeToRefs } from 'pinia'
 
 const { appSettingData } = storeToRefs(useAppSettingDataStore())
@@ -145,7 +144,7 @@ function onSetting() {
   </el-container>
   <el-button class="setting-button" type="primary" size="large" circle @click="onSetting">
     <el-icon class="is-loading">
-      <Setting />
+      <IconSetting />
     </el-icon>
   </el-button>
   <AppSetting ref="AppSettingRef" />
@@ -238,6 +237,5 @@ function onSetting() {
   right: 30px;
   bottom: 30px;
   font-size: 18px;
-  pointer-events: all;
 }
 </style>

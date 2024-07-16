@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { NavigationRecordDataItem } from '.'
+import type { NavRecordDataItem } from '.'
 
-const model = defineModel<NavigationRecordDataItem[]>({ default: () => [] })
+const model = defineModel<NavRecordDataItem[]>({ default: () => [] })
 const activePath = defineModel<string>('activePath')
 const router = useRouter()
 
