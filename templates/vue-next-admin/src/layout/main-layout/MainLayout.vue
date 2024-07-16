@@ -11,7 +11,7 @@ const collapse = ref()
 const router = useRouter()
 const activePath = ref<string>()
 const breadcrumbData = ref<BreadcrumbDataItem[]>([])
-const navigationRecordData = ref<NavRecordDataItem[]>([])
+const navRecordData = ref<NavRecordDataItem[]>([])
 const AppSettingRef = ref<InstanceType<typeof AppSetting>>()
 
 provide('breadcrumbData', breadcrumbData)
@@ -58,7 +58,7 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
 }
 
 async function handleNavRecord(path: string) {
-  if (navigationRecordData.value.some((v) => v.path === path)) {
+  if (navRecordData.value.some((v) => v.path === path)) {
     return
   }
   const menuData = await useMenuDataStore().getMenuData()
@@ -68,7 +68,7 @@ async function handleNavRecord(path: string) {
     { id: 'path' }
   )
   if (findMenuItem && findMenuItem.visible === 1) {
-    navigationRecordData.value.push({
+    navRecordData.value.push({
       path,
       name: findMenuItem.menuName
     })
@@ -121,8 +121,8 @@ function onSetting() {
         <el-container class="router-view-wrapper">
           <section class="router-view" :class="[appSettingData?.main.width ?? 'boxed']">
             <NavRecordBar
-              v-if="appSettingData?.main.navRecord"
-              v-model="navigationRecordData"
+              v-if="appSettingData?.main.navRecord ?? true"
+              v-model="navRecordData"
               v-model:active-path="activePath"
             />
             <router-view />

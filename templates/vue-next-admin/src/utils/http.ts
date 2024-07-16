@@ -4,7 +4,7 @@ import { ElMessage, ElMessageBox, type Action } from 'element-plus'
 import Cookies from 'js-cookie'
 import { TOKEN_STORAGE_KEY } from './constants'
 
-const MODE = import.meta.env.MODE
+const MODE = import.meta.env.VITE_MODE
 const BASE_URL = import.meta.env.BASE_URL
 
 const config: Record<string, any> = {
@@ -12,9 +12,9 @@ const config: Record<string, any> = {
     // 接口域名默认与页面域名一致，根据需要添加域名
     // baseURL 环境属性名称与 import.meta.env.MODE 一致
     baseURL: {
-      dev: '/api',
-      test: '/api',
-      prod: '/api'
+      dev: '/',
+      test: '/',
+      prod: '/'
     }
   }
   // 根据需要添加配置第三方接口...
