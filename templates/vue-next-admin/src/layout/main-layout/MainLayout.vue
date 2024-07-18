@@ -9,11 +9,31 @@ import { Setting } from '@element-plus/icons-vue'
 
 const { appSettingData } = storeToRefs(useAppSettingDataStore())
 const collapse = ref()
+const showAside = ref(false)
+const showXsAside = ref(false)
 const router = useRouter()
 const activePath = ref<string>()
 const breadcrumbData = ref<BreadcrumbDataItem[]>([])
 const navRecordData = ref<NavRecordDataItem[]>([])
 const AppSettingRef = ref<InstanceType<typeof AppSetting>>()
+const TopBarRef = ref<InstanceType<typeof TopBar>>()
+const myHeaderWidth = computed(() => {
+  return showAside.value && !showXsAside.value
+    ? collapse.value
+      ? 'calc(100% - 68px)'
+      : 'calc(100% - 250px)'
+    : '100%'
+})
+const myMainPaddingLeft = computed(() => {
+  return showAside.value && !showXsAside.value
+    ? collapse.value
+      ? 'calc(68px + var(--vs-main-padding))'
+      : 'calc(250px + var(--vs-main-padding))'
+    : 'var(--vs-main-padding)'
+})
+const myFooterMarginLeft = computed(() => {
+  return showAside.value && !showXsAside.value ? (collapse.value ? '68px' : '250px') : 'unset'
+})
 
 provide('breadcrumbData', breadcrumbData)
 
@@ -28,12 +48,64 @@ watch(
 )
 
 watch(
-  () => appSettingData.value?.menu.collapse,
-  (val) => {
-    collapse.value = val
+  [() => appSettingData.value?.menu.collapse, () => appSettingData.value?.menu.layout],
+  (res) => {
+    const [collapse, layout] = res
+    if (layout === 'vertical') {
+      showAside.value = true
+      TopBarRef.value?.setShowLogo(false)
+      TopBarRef.value?.setShowTogglebutton(true)
+    } else {
+      const el = document.documentElement
+      const ww = el.clientWidth
+      console.log(444, ww)
+      if (ww <= 768) {
+        showXsAside.value = !!collapse
+      }
+
+      showAside.value = false
+      TopBarRef.value?.setShowLogo(true)
+      TopBarRef.value?.setShowTogglebutton(false)
+    }
   },
   { immediate: true }
 )
+
+// watch(
+//   () => appSettingData.value?.menu.layout,
+//   (val) => {
+//     if (val === 'vertical') {
+//       showAside.value = true
+//       TopBarRef.value?.setShowLogo(false)
+//       TopBarRef.value?.setShowTogglebutton(true)
+//     } else {
+//       showAside.value = false
+//       TopBarRef.value?.setShowLogo(true)
+//       TopBarRef.value?.setShowTogglebutton(false)
+//     }
+//   },
+//   { immediate: true }
+// )
+
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    const el = document.documentElement
+    const ww = el.clientWidth
+    if (appSettingData.value?.menu.layout === 'vertical') {
+      collapse.value = ww < 992
+    } else {
+      if (ww <= 768) {
+        // showXsAside.value = true
+        TopBarRef.value?.setShowLogo(false)
+        TopBarRef.value?.setShowTogglebutton(true)
+      } else {
+        // showXsAside.value = false
+        TopBarRef.value?.setShowLogo(true)
+        TopBarRef.value?.setShowTogglebutton(false)
+      }
+    }
+  })
+})
 
 function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
   if (route.matched.length) {
@@ -110,15 +182,34 @@ function onSetting() {
 
 <template>
   <el-container class="main-layout">
-    <el-aside class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
+    <el-aside v-if="showAside" class="my-aside" :width="collapse ? '68px' : '250px'">
       <Logo />
       <AsideMenu :collapse :default-active="activePath" />
     </el-aside>
+    <el-drawer v-model="showXsAside" direction="ltr" size="250px">
+      <el-aside class="my-aside" :class="{ collapse, 'show-xs-aside': showXsAside }" width="250px">
+        <Logo />
+        <AsideMenu :default-active="activePath" />
+      </el-aside>
+    </el-drawer>
     <el-container>
-      <el-header class="my-header" :class="{ collapse }">
-        <TopBar v-model="collapse" />
+      <el-header
+        class="my-header"
+        :class="{ collapse }"
+        :style="{
+          '--my-header-width': myHeaderWidth
+        }"
+      >
+        <TopBar ref="TopBarRef" v-model="collapse" />
       </el-header>
-      <el-main class="my-main" :class="{ collapse }">
+      <el-main
+        class="my-main"
+        :class="{ collapse }"
+        :style="{
+          '--my-main-padding-left': myMainPaddingLeft
+        }"
+      >
+        {{ showXsAside }}
         <el-container class="router-view-wrapper">
           <section class="router-view" :class="[appSettingData?.main.width ?? 'boxed']">
             <NavRecordBar
@@ -126,11 +217,21 @@ function onSetting() {
               v-model="navRecordData"
               v-model:active-path="activePath"
             />
-            <router-view />
+            <router-view v-slot="{ Component }">
+              <transition name="slide-fade">
+                <component :is="Component" />
+              </transition>
+            </router-view>
           </section>
         </el-container>
       </el-main>
-      <el-footer class="my-footer" :class="{ collapse }">
+      <el-footer
+        class="my-footer"
+        :class="{ collapse }"
+        :style="{
+          '--my-footer-margin-left': myFooterMarginLeft
+        }"
+      >
         Made by
         <el-link
           type="primary"
@@ -184,22 +285,22 @@ function onSetting() {
     right: 0;
     top: 0;
     z-index: 1;
-    width: calc(100% - 250px);
+    width: var(--my-header-width);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
     &.collapse {
-      width: calc(100% - 68px);
+      width: var(--my-header-width);
     }
   }
   .my-main {
     display: flex;
     flex-direction: column;
-    padding-left: calc(250px + var(--vs-main-padding));
+    padding-left: var(--my-main-padding-left);
     padding-top: 60px;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: unset;
     &.collapse {
-      padding-left: calc(68px + var(--vs-main-padding));
+      padding-left: var(--my-main-padding-left);
     }
     .router-view-wrapper {
       display: flex;
@@ -217,15 +318,13 @@ function onSetting() {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: calc(100% - 250px);
-    margin-left: 250px;
+    margin-left: var(--my-footer-margin-left);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
     font-size: 12px;
     color: var(--vs-text-color-secondary);
     &.collapse {
-      width: calc(100% - 68px);
-      margin-left: 68px;
+      margin-left: var(--my-footer-margin-left);
     }
     a[class*='-link'] {
       font-size: inherit;
@@ -237,5 +336,18 @@ function onSetting() {
   position: fixed;
   right: 30px;
   bottom: 30px;
+}
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out 0.3s;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }
 </style>

@@ -8,9 +8,10 @@ import profileIcon from '@/assets/profile-icon.svg'
 import inboxIcon from '@/assets/inbox-icon.svg'
 import tasksIcon from '@/assets/tasks-icon.svg'
 import Cookies from 'js-cookie'
-import { useMenuDataStore } from '@/stores/global'
+import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import { throttle } from 'radash'
 import type { InputInstance } from 'element-plus'
+import { storeToRefs } from 'pinia'
 
 export interface FastLinkDataItem {
   name?: string
@@ -25,6 +26,9 @@ const fastLinkData = ref<FastLinkDataItem[]>(
   genFastLinkData(useMenuDataStore().menuData as VsMenuDataItem[])
 )
 const storeFastLinkData = ref<FastLinkDataItem[]>(JSON.parse(JSON.stringify(fastLinkData.value)))
+const showLogo = ref(false)
+const showTogglebutton = ref(true)
+const { appSettingData } = storeToRefs(useAppSettingDataStore())
 const messageData = ref<Record<string, any>[]>([
   { id: 1, title: '收到新消息', desc: '影子给你发了新消息', avatar: userIcon1, read: false },
   { id: 2, title: '收到新消息', desc: '影子完成了审批', avatar: userIcon2, read: false },
@@ -39,6 +43,20 @@ const personalCenterData = ref<Record<string, any>[]>([
   { title: '收件箱', desc: '消息和电子邮件', icon: inboxIcon },
   { title: '任务', desc: '待办事项和日常任务', icon: tasksIcon }
 ])
+
+// watch(
+//   () => appSettingData.value?.menu.layout,
+//   (val) => {
+//     if (val === 'horizontal') {
+//       showLogo.value = true
+//       showTogglebutton.value = false
+//     } else {
+//       showLogo.value = false
+//       showTogglebutton.value = true
+//     }
+//   },
+//   { immediate: true }
+// )
 
 function onCollapse() {
   collapse.value = !collapse.value
@@ -79,12 +97,28 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
     ]
   }, [])
 }
+
+// 以下 defineExpose
+function setShowLogo(val: boolean) {
+  showLogo.value = val
+}
+
+function setShowTogglebutton(val: boolean) {
+  showTogglebutton.value = val
+}
+
+defineExpose({
+  setShowLogo,
+  setShowTogglebutton
+})
 </script>
 
 <template>
   <div class="top-bar">
     <div class="left-side">
+      <Logo v-if="showLogo" />
       <el-button
+        v-if="showTogglebutton"
         class="left-side-button"
         :icon="collapse ? Expand : Fold"
         size="large"
@@ -369,6 +403,9 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
   align-items: center;
   justify-content: space-between;
   .left-side {
+    display: inline-flex;
+    align-items: center;
+    flex-basis: min-content;
     .left-side-button {
       border: 0 none;
       font-size: 22px;
@@ -380,6 +417,16 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
       }
       & + .left-side-button {
         margin-left: 0;
+      }
+    }
+    :deep(.logo) {
+      padding: 0;
+      min-width: 130px;
+      & + button[class*='-button'] {
+        margin-left: 12px;
+      }
+      & + div[class*='-dropdown'] {
+        margin-left: 12px;
       }
     }
   }

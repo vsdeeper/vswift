@@ -11,12 +11,14 @@ import logo from '@/assets/logo.svg'
 
 <style lang="scss" scoped>
 .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   height: 60px;
+  width: 100%;
   padding: 0 20px;
   .my-image {
     flex: 0 0 30px;
+    max-width: 30px;
   }
   .name {
     display: inline-flex;
