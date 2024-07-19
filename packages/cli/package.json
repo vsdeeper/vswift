@@ -31,6 +31,7 @@
     "inquirer": "^9.2.20",
     "nanospinner": "^1.1.0",
     "prettier": "^3.2.5",
+    "readline": "^1.3.0",
     "typescript": "~5.4.0",
     "vite": "^5.2.8"
   }

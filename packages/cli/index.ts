@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { parsePackage } from './utils/index.js'
-import { buildTask, release, create } from './scripts/index.js'
+import { buildTask, release, create, search } from './scripts/index.js'
 
 const program = new Command()
 
@@ -35,6 +35,13 @@ program
   .description('create a project as needed')
   .action(() => {
     return create()
+  })
+
+program
+  .command('search')
+  .description('enter search readline')
+  .action(() => {
+    return search()
   })
 
 program.parse(process.argv)
