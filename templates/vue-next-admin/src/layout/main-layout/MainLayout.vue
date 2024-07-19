@@ -8,8 +8,7 @@ import { storeToRefs } from 'pinia'
 import { Setting } from '@element-plus/icons-vue'
 
 const { appSettingData } = storeToRefs(useAppSettingDataStore())
-const collapse = ref()
-const showAside = ref(false)
+const collapse = ref(false)
 const showXsAside = ref(false)
 const router = useRouter()
 const activePath = ref<string>()
@@ -18,21 +17,17 @@ const navRecordData = ref<NavRecordDataItem[]>([])
 const AppSettingRef = ref<InstanceType<typeof AppSetting>>()
 const TopBarRef = ref<InstanceType<typeof TopBar>>()
 const myHeaderWidth = computed(() => {
-  return showAside.value && !showXsAside.value
-    ? collapse.value
-      ? 'calc(100% - 68px)'
-      : 'calc(100% - 250px)'
-    : '100%'
+  return !showXsAside.value ? (collapse.value ? 'calc(100% - 68px)' : 'calc(100% - 250px)') : '100%'
 })
 const myMainPaddingLeft = computed(() => {
-  return showAside.value && !showXsAside.value
+  return !showXsAside.value
     ? collapse.value
       ? 'calc(68px + var(--vs-main-padding))'
       : 'calc(250px + var(--vs-main-padding))'
     : 'var(--vs-main-padding)'
 })
 const myFooterMarginLeft = computed(() => {
-  return showAside.value && !showXsAside.value ? (collapse.value ? '68px' : '250px') : 'unset'
+  return !showXsAside.value ? (collapse.value ? '68px' : '250px') : 'unset'
 })
 
 provide('breadcrumbData', breadcrumbData)
@@ -40,6 +35,11 @@ provide('breadcrumbData', breadcrumbData)
 watch(
   () => router.currentRoute.value,
   (route) => {
+    const el = document.documentElement
+    const ww = el.clientWidth
+    if (ww <= 768 && !collapse.value) {
+      collapse.value = true
+    }
     activePath.value = route.path
     handleBreadcrumb(route)
     handleNavRecord(route.path)
@@ -48,22 +48,12 @@ watch(
 )
 
 watch(
-  [() => appSettingData.value?.menu.collapse, () => appSettingData.value?.menu.layout],
-  (res) => {
-    const [collapse, layout] = res
-    if (layout === 'vertical') {
-      showAside.value = true
+  () => appSettingData.value?.menu.layout,
+  (val) => {
+    if (val === 'vertical') {
       TopBarRef.value?.setShowLogo(false)
       TopBarRef.value?.setShowTogglebutton(true)
     } else {
-      const el = document.documentElement
-      const ww = el.clientWidth
-      console.log(444, ww)
-      if (ww <= 768) {
-        showXsAside.value = !!collapse
-      }
-
-      showAside.value = false
       TopBarRef.value?.setShowLogo(true)
       TopBarRef.value?.setShowTogglebutton(false)
     }
@@ -71,41 +61,26 @@ watch(
   { immediate: true }
 )
 
-// watch(
-//   () => appSettingData.value?.menu.layout,
-//   (val) => {
-//     if (val === 'vertical') {
-//       showAside.value = true
-//       TopBarRef.value?.setShowLogo(false)
-//       TopBarRef.value?.setShowTogglebutton(true)
-//     } else {
-//       showAside.value = false
-//       TopBarRef.value?.setShowLogo(true)
-//       TopBarRef.value?.setShowTogglebutton(false)
-//     }
-//   },
-//   { immediate: true }
-// )
-
 onMounted(() => {
-  window.addEventListener('resize', () => {
-    const el = document.documentElement
-    const ww = el.clientWidth
-    if (appSettingData.value?.menu.layout === 'vertical') {
-      collapse.value = ww < 992
-    } else {
-      if (ww <= 768) {
-        // showXsAside.value = true
-        TopBarRef.value?.setShowLogo(false)
-        TopBarRef.value?.setShowTogglebutton(true)
-      } else {
-        // showXsAside.value = false
-        TopBarRef.value?.setShowLogo(true)
-        TopBarRef.value?.setShowTogglebutton(false)
-      }
-    }
-  })
+  handleWindowResize()
+  window.addEventListener('resize', handleWindowResize)
 })
+
+function handleWindowResize() {
+  const el = document.documentElement
+  const ww = el.clientWidth
+  if (ww <= 768) {
+    showXsAside.value = true
+    collapse.value = true
+    TopBarRef.value?.setShowLogo(false)
+    TopBarRef.value?.setShowTogglebutton(true)
+  } else {
+    showXsAside.value = false
+    collapse.value = false
+    TopBarRef.value?.setShowLogo(false)
+    TopBarRef.value?.setShowTogglebutton(true)
+  }
+}
 
 function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
   if (route.matched.length) {
@@ -182,16 +157,22 @@ function onSetting() {
 
 <template>
   <el-container class="main-layout">
-    <el-aside v-if="showAside" class="my-aside" :width="collapse ? '68px' : '250px'">
+    <el-drawer
+      v-if="showXsAside"
+      :model-value="!collapse"
+      direction="ltr"
+      size="250px"
+      @close="collapse = true"
+    >
+      <el-aside class="my-aside" :class="{ collapse }" width="250px">
+        <Logo />
+        <AsideMenu :collapse :default-active="activePath" />
+      </el-aside>
+    </el-drawer>
+    <el-aside v-else class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
       <Logo />
       <AsideMenu :collapse :default-active="activePath" />
     </el-aside>
-    <el-drawer v-model="showXsAside" direction="ltr" size="250px">
-      <el-aside class="my-aside" :class="{ collapse, 'show-xs-aside': showXsAside }" width="250px">
-        <Logo />
-        <AsideMenu :default-active="activePath" />
-      </el-aside>
-    </el-drawer>
     <el-container>
       <el-header
         class="my-header"
@@ -209,7 +190,6 @@ function onSetting() {
           '--my-main-padding-left': myMainPaddingLeft
         }"
       >
-        {{ showXsAside }}
         <el-container class="router-view-wrapper">
           <section class="router-view" :class="[appSettingData?.main.width ?? 'boxed']">
             <NavRecordBar

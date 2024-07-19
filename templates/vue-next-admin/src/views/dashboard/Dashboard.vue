@@ -2,7 +2,10 @@
 const reposData = ref<Record<string, any>[]>([])
 
 onMounted(async () => {
-  const res = await fetch('https://api.github.com/users/vsdeeper/repos')
+  const res = await fetch('https://api.github.com/users/vsdeeper/repos', {
+    method: 'get',
+    headers: { Authorization: 'Bearer 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' }
+  })
   const data: Record<string, any>[] = await res.json()
   reposData.value = data.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
   // .filter((e) =>

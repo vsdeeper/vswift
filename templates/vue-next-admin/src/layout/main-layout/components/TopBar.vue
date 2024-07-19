@@ -8,10 +8,9 @@ import profileIcon from '@/assets/profile-icon.svg'
 import inboxIcon from '@/assets/inbox-icon.svg'
 import tasksIcon from '@/assets/tasks-icon.svg'
 import Cookies from 'js-cookie'
-import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
+import { useMenuDataStore } from '@/stores/global'
 import { throttle } from 'radash'
 import type { InputInstance } from 'element-plus'
-import { storeToRefs } from 'pinia'
 
 export interface FastLinkDataItem {
   name?: string
@@ -28,7 +27,6 @@ const fastLinkData = ref<FastLinkDataItem[]>(
 const storeFastLinkData = ref<FastLinkDataItem[]>(JSON.parse(JSON.stringify(fastLinkData.value)))
 const showLogo = ref(false)
 const showTogglebutton = ref(true)
-const { appSettingData } = storeToRefs(useAppSettingDataStore())
 const messageData = ref<Record<string, any>[]>([
   { id: 1, title: '收到新消息', desc: '影子给你发了新消息', avatar: userIcon1, read: false },
   { id: 2, title: '收到新消息', desc: '影子完成了审批', avatar: userIcon2, read: false },
@@ -43,20 +41,6 @@ const personalCenterData = ref<Record<string, any>[]>([
   { title: '收件箱', desc: '消息和电子邮件', icon: inboxIcon },
   { title: '任务', desc: '待办事项和日常任务', icon: tasksIcon }
 ])
-
-// watch(
-//   () => appSettingData.value?.menu.layout,
-//   (val) => {
-//     if (val === 'horizontal') {
-//       showLogo.value = true
-//       showTogglebutton.value = false
-//     } else {
-//       showLogo.value = false
-//       showTogglebutton.value = true
-//     }
-//   },
-//   { immediate: true }
-// )
 
 function onCollapse() {
   collapse.value = !collapse.value
@@ -116,7 +100,6 @@ defineExpose({
 <template>
   <div class="top-bar">
     <div class="left-side">
-      <Logo v-if="showLogo" />
       <el-button
         v-if="showTogglebutton"
         class="left-side-button"
@@ -415,14 +398,14 @@ defineExpose({
           background-color: var(--vs-fill-color-darker);
         }
       }
-      & + .left-side-button {
-        margin-left: 0;
-      }
+    }
+    & > .left-side-button {
+      margin-left: -12px;
     }
     :deep(.logo) {
       padding: 0;
       min-width: 130px;
-      & + button[class*='-button'] {
+      & + .left-side-button {
         margin-left: 12px;
       }
       & + div[class*='-dropdown'] {
