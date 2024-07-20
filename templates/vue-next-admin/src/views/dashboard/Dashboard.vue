@@ -1,24 +1,13 @@
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
+import { queryRepos } from '@/api/global'
 
 const loading = ref(false)
 const reposData = ref<Record<string, any>[]>([])
 
 onMounted(async () => {
   loading.value = true
-  try {
-    const res = await fetch('https://api.github.com/users/vsdeeper/repos', {
-      method: 'get',
-      headers: {
-        Authorization:
-          'Bearer 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'
-      }
-    })
-    const data: Record<string, any>[] = await res.json()
-    reposData.value = data.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
-  } catch (error) {
-    ElMessage.error('仓库数据获取失败')
-  }
+  const data = await queryRepos()
+  reposData.value = data.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
   loading.value = false
 })
 </script>
