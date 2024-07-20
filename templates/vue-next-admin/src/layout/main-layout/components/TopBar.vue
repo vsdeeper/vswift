@@ -37,9 +37,9 @@ const messageData = ref<Record<string, any>[]>([
   { id: 7, title: '收到新消息', desc: '有个流程需要您审批', read: true }
 ])
 const personalCenterData = ref<Record<string, any>[]>([
-  { title: '资料', desc: '账户设置', icon: profileIcon },
-  { title: '收件箱', desc: '消息和电子邮件', icon: inboxIcon },
-  { title: '任务', desc: '待办事项和日常任务', icon: tasksIcon }
+  { key: 'profile', title: '资料', desc: '账户设置', icon: profileIcon },
+  { key: 'inbox', title: '收件箱', desc: '消息和电子邮件', icon: inboxIcon },
+  { key: 'tasks', title: '任务', desc: '待办事项和日常任务', icon: tasksIcon }
 ])
 
 function onCollapse() {
@@ -65,10 +65,46 @@ function onSignOut() {
   })
 }
 
-function onGoto(path: string) {
-  router.push({
-    path
-  })
+function onGoto(key: string, val?: any) {
+  switch (key) {
+    case 'fastlink': {
+      router.push({
+        path: val
+      })
+      break
+    }
+    case 'messageDetail': {
+      router.push({
+        path: '/messageDetail',
+        query: { id: val }
+      })
+      break
+    }
+    case 'messageAll': {
+      router.push({
+        path: '/message'
+      })
+      break
+    }
+    case 'profile': {
+      router.push({
+        path: '/profile'
+      })
+      break
+    }
+    case 'inbox': {
+      router.push({
+        path: '/inbox'
+      })
+      break
+    }
+    case 'tasks': {
+      router.push({
+        path: '/tasks'
+      })
+      break
+    }
+  }
 }
 
 function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
@@ -134,7 +170,7 @@ defineExpose({
                   <el-dropdown-item
                     v-for="item in fastLinkData"
                     :key="item.path"
-                    @click="onGoto(item.path!)"
+                    @click="onGoto('fastlink', item.path!)"
                   >
                     <h4>{{ item.name }}</h4>
                     <div>{{ item.path }}</div>
@@ -158,7 +194,11 @@ defineExpose({
             <el-tag type="danger" effect="dark" size="small" round> 5 </el-tag>
           </header>
           <el-dropdown-menu>
-            <el-dropdown-item v-for="item in messageData" :key="item.id">
+            <el-dropdown-item
+              v-for="item in messageData"
+              :key="item.id"
+              @click="onGoto('messageDetail', item.id)"
+            >
               <el-badge :is-dot="!item.read" :offset="[0, 10]">
                 <el-avatar
                   :icon="Avatar"
@@ -174,7 +214,9 @@ defineExpose({
             </el-dropdown-item>
           </el-dropdown-menu>
           <footer>
-            <el-button class="footer-button" type="primary" plain>查看所有通知</el-button>
+            <el-button class="footer-button" type="primary" plain @click="onGoto('messageAll')">
+              查看所有通知
+            </el-button>
           </footer>
         </template>
       </el-dropdown>
@@ -207,8 +249,9 @@ defineExpose({
             <el-divider />
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(item, index) in personalCenterData"
-                :key="`personalcenter${index}`"
+                v-for="item in personalCenterData"
+                :key="item.key"
+                @click="onGoto(item.key)"
               >
                 <el-avatar shape="square" fit="contain" :src="item.icon"></el-avatar>
                 <div class="info-box">
