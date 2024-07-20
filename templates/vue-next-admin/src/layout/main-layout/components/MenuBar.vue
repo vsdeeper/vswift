@@ -4,6 +4,7 @@ import MenuItem from './MenuItem.vue'
 import { storeToRefs } from 'pinia'
 
 defineProps<{
+  mode?: 'horizontal' | 'vertical'
   collapse?: boolean
   defaultActive?: string
 }>()
@@ -17,6 +18,7 @@ const uniqueOpened = computed(() => appSettingData.value?.menu.uniqueOpened)
   <el-menu
     class="my-menu"
     router
+    :mode
     :collapse
     :default-active
     :collapse-transition="false"
@@ -38,10 +40,40 @@ const uniqueOpened = computed(() => appSettingData.value?.menu.uniqueOpened)
 }
 </style>
 <style lang="scss" scoped>
-.my-menu {
-  height: calc(100% - 60px);
-  border-right-width: 0;
-  padding: 0 15px;
+ul[class*='-menu--vertical'] {
+  &.my-menu {
+    height: calc(100% - 60px);
+    border-right-width: 0;
+    padding: 0 15px;
+    :deep(li[class*='-menu-item']) {
+      line-height: 1;
+      margin-bottom: 4px;
+      border-radius: 7px;
+      &:hover {
+        color: var(--vs-color-primary);
+      }
+      &.is-active {
+        color: #fff !important;
+        background-color: var(--vs-color-primary) !important;
+      }
+    }
+    :deep(div[class*='-sub-menu__title']) {
+      line-height: 1;
+      margin-bottom: 4px;
+      border-radius: 7px;
+      &:hover {
+        color: var(--vs-color-primary);
+      }
+    }
+  }
+}
+ul[class*='-menu--horizontal'] {
+  &.my-menu {
+    width: 100%;
+    :deep(li[class*='-menu-item'].is-active) {
+      border-bottom: 0 none;
+    }
+  }
 }
 ul[class*='-menu--collapse'] {
   width: 100%;

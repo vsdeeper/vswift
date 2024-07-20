@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Logo } from '@/components'
-import { AsideMenu, TopBar, NavRecordBar, type NavRecordDataItem, AppSetting } from './components'
+import { MenuBar, TopBar, NavRecordBar, type NavRecordDataItem, AppSetting } from './components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import type { BreadcrumbDataItem } from '@/components'
@@ -17,27 +17,51 @@ const navRecordData = ref<NavRecordDataItem[]>([])
 const AppSettingRef = ref<InstanceType<typeof AppSetting>>()
 const TopBarRef = ref<InstanceType<typeof TopBar>>()
 const myHeaderWidth = computed(() => {
-  return !showXsAside.value ? (collapse.value ? 'calc(100% - 68px)' : 'calc(100% - 250px)') : '100%'
+  if (appSettingData.value?.menu.layout === 'vertical') {
+    return !showXsAside.value
+      ? collapse.value
+        ? 'calc(100% - 68px)'
+        : 'calc(100% - 250px)'
+      : '100%'
+  }
+  return '100%'
 })
 const myMainPaddingLeft = computed(() => {
-  return !showXsAside.value
-    ? collapse.value
-      ? 'calc(68px + var(--vs-main-padding))'
-      : 'calc(250px + var(--vs-main-padding))'
-    : 'var(--vs-main-padding)'
+  if (appSettingData.value?.menu.layout === 'vertical') {
+    return !showXsAside.value
+      ? collapse.value
+        ? 'calc(68px + var(--vs-main-padding))'
+        : 'calc(250px + var(--vs-main-padding))'
+      : 'var(--vs-main-padding)'
+  }
+  return 'var(--vs-main-padding)'
+})
+const myMainPaddingTop = computed(() => {
+  if (appSettingData.value?.menu.layout === 'horizontal') {
+    return ww.value > 768 ? undefined : '60px'
+  }
+  return '60px'
 })
 const myFooterMarginLeft = computed(() => {
-  return !showXsAside.value ? (collapse.value ? '68px' : '250px') : 'unset'
+  if (appSettingData.value?.menu.layout === 'vertical') {
+    return !showXsAside.value ? (collapse.value ? '68px' : '250px') : 'unset'
+  }
+  return 'unset'
 })
+const menuBaseLevelPadding = computed(() => {
+  if (appSettingData.value?.menu.layout === 'horizontal') {
+    return ww.value > 768 ? '12px' : '7px'
+  }
+  return '7px'
+})
+const ww = ref(0)
 
 provide('breadcrumbData', breadcrumbData)
 
 watch(
   () => router.currentRoute.value,
   (route) => {
-    const el = document.documentElement
-    const ww = el.clientWidth
-    if (ww <= 768 && !collapse.value) {
+    if (ww.value <= 768 && !collapse.value) {
       collapse.value = true
     }
     activePath.value = route.path
@@ -54,8 +78,8 @@ watch(
       TopBarRef.value?.setShowLogo(false)
       TopBarRef.value?.setShowTogglebutton(true)
     } else {
-      TopBarRef.value?.setShowLogo(true)
-      TopBarRef.value?.setShowTogglebutton(false)
+      TopBarRef.value?.setShowLogo(ww.value > 768)
+      TopBarRef.value?.setShowTogglebutton(ww.value <= 768)
     }
   },
   { immediate: true }
@@ -68,8 +92,8 @@ onMounted(() => {
 
 function handleWindowResize() {
   const el = document.documentElement
-  const ww = el.clientWidth
-  if (ww <= 768) {
+  ww.value = el.clientWidth
+  if (ww.value <= 768) {
     showXsAside.value = true
     collapse.value = true
     TopBarRef.value?.setShowLogo(false)
@@ -77,8 +101,13 @@ function handleWindowResize() {
   } else {
     showXsAside.value = false
     collapse.value = false
-    TopBarRef.value?.setShowLogo(false)
-    TopBarRef.value?.setShowTogglebutton(true)
+    if (appSettingData.value?.menu.layout === 'vertical') {
+      TopBarRef.value?.setShowLogo(false)
+      TopBarRef.value?.setShowTogglebutton(true)
+    } else {
+      TopBarRef.value?.setShowLogo(true)
+      TopBarRef.value?.setShowTogglebutton(false)
+    }
   }
 }
 
@@ -156,7 +185,10 @@ function onSetting() {
 </script>
 
 <template>
-  <el-container class="main-layout">
+  <el-container
+    class="main-layout"
+    :style="{ '--vs-menu-base-level-padding': menuBaseLevelPadding }"
+  >
     <el-drawer
       v-if="showXsAside"
       :model-value="!collapse"
@@ -166,28 +198,54 @@ function onSetting() {
     >
       <el-aside class="my-aside" :class="{ collapse }" width="250px">
         <Logo />
-        <AsideMenu :collapse :default-active="activePath" />
+        <MenuBar :collapse :default-active="activePath" />
       </el-aside>
     </el-drawer>
-    <el-aside v-else class="my-aside" :class="{ collapse }" :width="collapse ? '68px' : '250px'">
+    <el-aside
+      v-else-if="!showXsAside && appSettingData?.menu.layout === 'vertical'"
+      class="my-aside"
+      :class="{ collapse }"
+      :width="collapse ? '68px' : '250px'"
+    >
       <Logo />
-      <AsideMenu :collapse :default-active="activePath" />
+      <MenuBar :collapse :default-active="activePath" />
     </el-aside>
     <el-container>
       <el-header
         class="my-header"
-        :class="{ collapse }"
         :style="{
           '--my-header-width': myHeaderWidth
         }"
       >
-        <TopBar ref="TopBarRef" v-model="collapse" />
+        <TopBar
+          ref="TopBarRef"
+          :class="[
+            appSettingData?.main.width === 'boxed' && appSettingData.menu.layout === 'horizontal'
+              ? 'boxed'
+              : undefined
+          ]"
+          v-model="collapse"
+        />
+      </el-header>
+      <el-header
+        v-if="appSettingData?.menu.layout === 'horizontal' && ww > 768"
+        class="my-menu-bar"
+      >
+        <MenuBar
+          :class="[
+            appSettingData?.main.width === 'boxed' && appSettingData.menu.layout === 'horizontal'
+              ? 'boxed'
+              : undefined
+          ]"
+          mode="horizontal"
+          :default-active="activePath"
+        />
       </el-header>
       <el-main
         class="my-main"
-        :class="{ collapse }"
         :style="{
-          '--my-main-padding-left': myMainPaddingLeft
+          '--my-main-padding-left': myMainPaddingLeft,
+          '--my-main-padding-top': myMainPaddingTop
         }"
       >
         <el-container class="router-view-wrapper">
@@ -207,7 +265,6 @@ function onSetting() {
       </el-main>
       <el-footer
         class="my-footer"
-        :class="{ collapse }"
         :style="{
           '--my-footer-margin-left': myFooterMarginLeft
         }"
@@ -225,7 +282,7 @@ function onSetting() {
     </el-container>
   </el-container>
   <el-button class="setting-button" type="primary" size="large" circle @click="onSetting">
-    <el-icon class="is-loading">
+    <el-icon class="is-loading" size="16px">
       <Setting />
     </el-icon>
   </el-button>
@@ -261,6 +318,8 @@ function onSetting() {
     }
   }
   .my-header {
+    display: flex;
+    justify-content: center;
     position: fixed;
     right: 0;
     top: 0;
@@ -268,20 +327,27 @@ function onSetting() {
     width: var(--my-header-width);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
-    &.collapse {
-      width: var(--my-header-width);
+  }
+  .my-menu-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+    margin: 60px 0 10px;
+    background-color: var(--vs-bg-color-overlay);
+    ul[class*='-menu--horizontal'].my-menu {
+      border-bottom: 0 none;
+      &.boxed {
+        max-width: 1200px;
+      }
     }
   }
   .my-main {
     display: flex;
     flex-direction: column;
     padding-left: var(--my-main-padding-left);
-    padding-top: 60px;
+    padding-top: var(--my-main-padding-top);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: unset;
-    &.collapse {
-      padding-left: var(--my-main-padding-left);
-    }
     .router-view-wrapper {
       display: flex;
       justify-content: center;
@@ -303,9 +369,6 @@ function onSetting() {
     background-color: var(--vs-bg-color-page);
     font-size: 12px;
     color: var(--vs-text-color-secondary);
-    &.collapse {
-      margin-left: var(--my-footer-margin-left);
-    }
     a[class*='-link'] {
       font-size: inherit;
       margin-left: 5px;

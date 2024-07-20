@@ -8,7 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppSetting: typeof import('./../src/layout/main-layout/components/AppSetting.vue')['default']
-    AsideMenu: typeof import('./../src/layout/main-layout/components/AsideMenu.vue')['default']
+    AsideMenu: (typeof import('../src/layout/main-layout/components/MenuBar.vue'))['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -51,18 +51,22 @@ declare module 'vue' {
     IconCommunity: typeof import('./../src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./../src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./../src/components/icons/IconEcosystem.vue')['default']
-    IconSetting: typeof import('./../src/components/icons/IconSetting.vue')['default']
+    IconSetting: (typeof import('./../src/components/icons/IconSetting.vue'))['default']
     IconSupport: typeof import('./../src/components/icons/IconSupport.vue')['default']
     IconTablerCircleDot: typeof import('./../src/components/icons/IconTablerCircleDot.vue')['default']
     IconTooling: typeof import('./../src/components/icons/IconTooling.vue')['default']
     LoginBox: typeof import('./../src/components/login-box/LoginBox.vue')['default']
     Logo: typeof import('./../src/components/logo/Logo.vue')['default']
     MainLayout: typeof import('./../src/layout/main-layout/MainLayout.vue')['default']
+    MenuBar: typeof import('./../src/layout/main-layout/components/MenuBar.vue')['default']
     MenuItem: typeof import('./../src/layout/main-layout/components/MenuItem.vue')['default']
     NavRecordBar: typeof import('./../src/layout/main-layout/components/NavRecordBar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TopBar: typeof import('./../src/layout/main-layout/components/TopBar.vue')['default']
     ViewWrapper: typeof import('./../src/components/view-wrapper/ViewWrapper.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

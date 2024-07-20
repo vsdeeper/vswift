@@ -86,7 +86,6 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
 function setShowLogo(val: boolean) {
   showLogo.value = val
 }
-
 function setShowTogglebutton(val: boolean) {
   showTogglebutton.value = val
 }
@@ -100,6 +99,7 @@ defineExpose({
 <template>
   <div class="top-bar">
     <div class="left-side">
+      <Logo v-if="showLogo" />
       <el-button
         v-if="showTogglebutton"
         class="left-side-button"
@@ -382,9 +382,12 @@ defineExpose({
 <style lang="scss" scoped>
 .top-bar {
   display: flex;
-  height: 100%;
+  flex: 1;
   align-items: center;
   justify-content: space-between;
+  &.boxed {
+    max-width: 1200px;
+  }
   .left-side {
     display: inline-flex;
     align-items: center;
@@ -398,9 +401,6 @@ defineExpose({
           background-color: var(--vs-fill-color-darker);
         }
       }
-    }
-    & > .left-side-button {
-      margin-left: -12px;
     }
     :deep(.logo) {
       padding: 0;

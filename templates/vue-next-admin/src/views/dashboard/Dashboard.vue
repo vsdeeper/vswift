@@ -1,16 +1,25 @@
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
+
+const loading = ref(false)
 const reposData = ref<Record<string, any>[]>([])
 
 onMounted(async () => {
-  const res = await fetch('https://api.github.com/users/vsdeeper/repos', {
-    method: 'get',
-    headers: {
-      Authorization:
-        'Bearer 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'
-    }
-  })
-  const data: Record<string, any>[] = await res.json()
-  reposData.value = data.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
+  loading.value = true
+  try {
+    const res = await fetch('https://api.github.com/users/vsdeeper/repos', {
+      method: 'get',
+      headers: {
+        Authorization:
+          'Bearer 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'
+      }
+    })
+    const data: Record<string, any>[] = await res.json()
+    reposData.value = data.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
+  } catch (error) {
+    ElMessage.error('仓库数据获取失败')
+  }
+  loading.value = false
 })
 </script>
 
@@ -75,7 +84,7 @@ onMounted(async () => {
       </el-card>
     </el-col>
     <el-col :span="24">
-      <el-card class="my-repositories">
+      <el-card v-loading="loading" class="my-repositories">
         <template #header> 我的仓库 </template>
         <el-row :gutter="20">
           <el-col v-for="item in reposData" :key="item.id" :span="24" :md="12">
