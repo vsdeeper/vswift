@@ -8,13 +8,6 @@ onMounted(async () => {
   })
   const data: Record<string, any>[] = await res.json()
   reposData.value = data.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
-  // .filter((e) =>
-  //   [
-  //     'vswift',
-  //     'vswift-components',
-  //     'visual-development',
-  //   ].includes(e.name)
-  // )
 })
 </script>
 
