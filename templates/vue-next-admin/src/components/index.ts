@@ -1,3 +1,6 @@
 export * from './logo'
 export * from './login-box'
 export * from './view-wrapper'
+export * from './vs-search'
+export * from './vs-table'
+export * from './vs-tree-select'

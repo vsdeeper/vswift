@@ -1,5 +1,8 @@
 <script setup lang="ts"></script>
 
 <template>
-  <ViewWrapper> fdsf </ViewWrapper>
+  <ViewWrapper>
+    <VsSearch></VsSearch>
+    <VsTable></VsTable>
+  </ViewWrapper>
 </template>

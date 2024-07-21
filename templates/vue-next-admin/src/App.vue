@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import localforage from 'localforage'
 import { APP_SETTING_STORAGE_KEY } from './utils/constants'
 import { useAppSettingDataStore, type AppSetting } from './stores/global'
@@ -19,7 +20,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <el-config-provider namespace="vs">
+  <el-config-provider namespace="vs" :locale="zhCn">
     <RouterView />
   </el-config-provider>
 </template>
