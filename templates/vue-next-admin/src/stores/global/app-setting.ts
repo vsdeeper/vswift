@@ -19,18 +19,34 @@ export interface AppSetting {
 }
 
 const useAppSettingDataStore = defineStore('global/app-setting', () => {
-  const appSettingData = ref<AppSetting>()
+  const appSettingConst: AppSetting = {
+    theme: {
+      mode: 'no-preference'
+    },
+    menu: {
+      layout: 'vertical',
+      collapse: false,
+      uniqueOpened: false
+    },
+    main: {
+      width: 'boxed',
+      navRecord: true,
+      breadcrumb: true
+    }
+  }
+  const appSettingData = ref<AppSetting>(JSON.parse(JSON.stringify(appSettingConst)))
 
-  function getAppSettingData() {
-    return appSettingData.value
+  function getAppSettingData(): AppSetting {
+    return JSON.parse(JSON.stringify(appSettingData.value))
   }
 
-  function setAppSettingData(data?: AppSetting) {
-    appSettingData.value = data
+  function setAppSettingData(data: AppSetting) {
+    appSettingData.value = JSON.parse(JSON.stringify(data))
   }
 
   return {
     appSettingData,
+    appSettingConst,
     getAppSettingData,
     setAppSettingData
   }

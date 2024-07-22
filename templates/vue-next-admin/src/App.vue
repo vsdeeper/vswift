@@ -1,22 +1,34 @@
 <script setup lang="ts">
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import localforage from 'localforage'
+import { getColorPrefers } from '@/utils'
 import { APP_SETTING_STORAGE_KEY } from './utils/constants'
 import { useAppSettingDataStore, type AppSetting } from './stores/global'
+import { storeToRefs } from 'pinia'
+
+const { appSettingData } = storeToRefs(useAppSettingDataStore())
 
 onMounted(async () => {
-  // 存储应用设置
+  // 获取本地存储应用设置
   const storeAppSetting: AppSetting | null = await localforage.getItem(APP_SETTING_STORAGE_KEY)
-  const { setAppSettingData } = useAppSettingDataStore()
-  if (storeAppSetting) {
-    setAppSettingData(storeAppSetting)
-    // 暗黑模式切换
-    if (storeAppSetting.theme.mode === 'dark') {
-      const el = document.documentElement
-      el.classList.add('dark')
-    }
-  }
+  const { setAppSettingData, appSettingConst } = useAppSettingDataStore()
+  storeAppSetting ? setAppSettingData(storeAppSetting) : setAppSettingData(appSettingConst)
 })
+
+watch(
+  () => appSettingData.value?.theme.mode,
+  (val) => {
+    // 主体外观设置
+    const el = document.documentElement
+    if (val === 'no-preference') {
+      const prefers = getColorPrefers()
+      prefers === 'dark' ? el.classList.add('dark') : el.classList.remove('dark')
+    } else {
+      val === 'dark' ? el.classList.add('dark') : el.classList.remove('dark')
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

@@ -1,98 +1,47 @@
 <script setup lang="ts">
-import { useAppSettingDataStore, type AppSetting, type ThemeMode } from '@/stores/global'
-import { getColorPrefers } from '@/utils'
+import { useAppSettingDataStore, type AppSetting } from '@/stores/global'
 import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
 import { ElMessage } from 'element-plus'
 import localforage from 'localforage'
 import { storeToRefs } from 'pinia'
 
 const show = ref(false)
-const appSettingConst: AppSetting = {
-  theme: {
-    mode: 'no-preference'
-  },
-  menu: {
-    layout: 'vertical',
-    collapse: false,
-    uniqueOpened: false
-  },
-  main: {
-    width: 'boxed',
-    navRecord: true,
-    breadcrumb: true
-  }
-}
 const appSetting = ref<AppSetting>({
   theme: {},
   menu: {},
   main: {}
 })
-const { getAppSettingData, setAppSettingData } = useAppSettingDataStore()
+const { appSettingData } = storeToRefs(useAppSettingDataStore())
+const { getAppSettingData, appSettingConst, setAppSettingData } = useAppSettingDataStore()
 
 onMounted(async () => {
-  if (getAppSettingData()) {
-    appSetting.value = getAppSettingData()!
-    const el = document.documentElement
-    if (getThemeMode(appSetting.value.theme.mode) === 'dark') {
-      el.classList.add('dark')
-    } else {
-      el.classList.remove('dark')
-    }
-  } else {
-    appSetting.value = JSON.parse(JSON.stringify(appSettingConst))
-  }
+  appSetting.value = getAppSettingData()
 })
 
 function onChange(key: string, val: any) {
-  const { appSettingData } = storeToRefs(useAppSettingDataStore())
   switch (key) {
     case 'appSetting.theme.mode': {
-      const el = document.documentElement
-      if (getThemeMode(val) === 'dark') {
-        el.classList.add('dark')
-      } else {
-        el.classList.remove('dark')
-      }
+      appSettingData.value!.theme.mode = val
       break
     }
     case 'appSetting.menu.collapse': {
-      if (appSettingData.value) {
-        appSetting.value.menu.collapse = val
-      } else {
-        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
-      }
+      appSettingData.value!.menu.collapse = val
       break
     }
     case 'appSetting.menu.uniqueOpened': {
-      if (appSettingData.value) {
-        appSetting.value.menu.uniqueOpened = val
-      } else {
-        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
-      }
+      appSettingData.value!.menu.uniqueOpened = val
       break
     }
     case 'appSetting.main.width': {
-      if (appSettingData.value) {
-        appSetting.value.main.width = val
-      } else {
-        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
-      }
+      appSettingData.value!.main.width = val
       break
     }
     case 'appSetting.main.navRecord': {
-      if (appSettingData.value) {
-        appSetting.value.main.navRecord = val
-      } else {
-        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
-      }
+      appSettingData.value!.main.navRecord = val
       break
     }
     case 'appSetting.main.breadcrumb': {
-      if (appSettingData.value) {
-        appSetting.value.main.breadcrumb = val
-      } else {
-        setAppSettingData(JSON.parse(JSON.stringify(appSetting.value)))
-      }
+      appSettingData.value!.main.breadcrumb = val
       break
     }
   }
@@ -100,24 +49,14 @@ function onChange(key: string, val: any) {
 
 function onReset() {
   appSetting.value = JSON.parse(JSON.stringify(appSettingConst))
+  setAppSettingData(appSettingConst)
 }
 
 function onSave() {
-  const data = JSON.parse(JSON.stringify(appSetting.value))
-  setAppSettingData(data)
-  localforage.setItem(APP_SETTING_STORAGE_KEY, data)
+  setAppSettingData(appSetting.value)
+  localforage.setItem(APP_SETTING_STORAGE_KEY, JSON.parse(JSON.stringify(appSetting.value)))
   ElMessage.success('保存设置成功')
   show.value = false
-}
-
-function getThemeMode(mode?: ThemeMode) {
-  if (mode === 'dark') {
-    return 'dark'
-  } else if (mode === 'light') {
-    return 'light'
-  } else {
-    return getColorPrefers()
-  }
 }
 
 function open() {
