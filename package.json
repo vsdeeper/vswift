@@ -25,12 +25,6 @@
     "format": "prettier --write packages/",
     "prepare": "husky"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
   "lint-staged": {
     "*.{js,ts,tsx,vue}": [
       "eslint",
