@@ -18,7 +18,7 @@
     "preinstall": "only-allow pnpm",
     "dev:cli": "tsc --watch --project tsconfig.cli.json",
     "dev:upg": "tsc --watch --project tsconfig.unplugin.json",
-    "dev:vue-next-admin": "pnpm --dir templates/vue-next-admin dev",
+    "dev:vue-admin": "pnpm --dir templates/vue-admin dev",
     "build": "vswift build",
     "release": "vswift release",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
