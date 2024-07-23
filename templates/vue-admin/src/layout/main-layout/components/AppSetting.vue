@@ -24,6 +24,10 @@ function onChange(key: string, val: any) {
       appSettingData.value!.theme.mode = val
       break
     }
+    case 'appSetting.menu.layout': {
+      appSettingData.value!.menu.layout = val
+      break
+    }
     case 'appSetting.menu.collapse': {
       appSettingData.value!.menu.collapse = val
       break
@@ -91,7 +95,10 @@ defineExpose({
     <el-divider direction="horizontal" content-position="center">菜单</el-divider>
     <div class="flex-box">
       <span class="label">布局</span>
-      <el-radio-group v-model="appSetting.menu.layout">
+      <el-radio-group
+        v-model="appSetting.menu.layout"
+        @change="(val) => onChange('appSetting.menu.layout', val)"
+      >
         <el-radio-button label="垂直" value="vertical" />
         <el-radio-button label="水平" value="horizontal" />
       </el-radio-group>

@@ -70,7 +70,10 @@ ul[class*='-menu--vertical'] {
 ul[class*='-menu--horizontal'] {
   &.my-menu {
     width: 100%;
-    :deep(li[class*='-menu-item'].is-active) {
+    :deep(li[class*='-menu-item']) {
+      border-bottom: 0 none;
+    }
+    & > :deep(li[class*='-sub-menu'] div[class*='-sub-menu__title']) {
       border-bottom: 0 none;
     }
   }
