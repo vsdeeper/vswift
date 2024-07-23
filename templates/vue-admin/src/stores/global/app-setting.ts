@@ -29,7 +29,7 @@ const useAppSettingDataStore = defineStore('global/app-setting', () => {
       uniqueOpened: false
     },
     main: {
-      width: 'boxed',
+      width: 'full',
       navRecord: true,
       breadcrumb: true
     }

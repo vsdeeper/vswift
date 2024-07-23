@@ -57,6 +57,10 @@ const menuBaseLevelPadding = computed(() => {
 const ww = ref(0)
 
 provide('breadcrumbData', breadcrumbData)
+provide(
+  'appSettingMainWidth',
+  computed(() => appSettingData.value.main.width)
+)
 
 watch(
   () => router.currentRoute.value,

@@ -17,6 +17,26 @@ const emit = defineEmits<{
 const form = ref<Record<string, any>>({})
 const loading = ref(false)
 const showMore = ref(false)
+const hiddenColLen = ref(0)
+const appSettingMainWidth = inject<Ref<'boxed' | 'full'>>('appSettingMainWidth', ref('full'))
+
+onMounted(() => {
+  handleWindowResize()
+  window.addEventListener('resize', handleWindowResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleWindowResize)
+})
+
+function handleWindowResize() {
+  const colELs = document.querySelectorAll('div.my-search-col[class*="hidden-"]')
+  for (const el of colELs) {
+    if (getComputedStyle(el).display === 'none') {
+      hiddenColLen.value++
+    }
+  }
+}
 
 function onInquire() {
   emit('inquire', form.value)
@@ -38,16 +58,17 @@ defineExpose({
       <el-row>
         <el-col
           v-for="(item, index) in options"
+          class="my-search-col"
           :key="item.id"
-          :lg="6"
-          :md="8"
+          :span="24"
+          :lg="appSettingMainWidth === 'full' ? 6 : 8"
+          :md="12"
           :sm="12"
-          :xs="24"
           :class="{
             'hidden-sm-and-down': !showMore && index > 0,
-            'hidden-md-and-down': !showMore && index > 1,
-            'hidden-lg-and-down': !showMore && index > 2,
-            'hidden-lg-and-up': !showMore && index > 2
+            'hidden-md-and-down': !showMore && index > 0,
+            'hidden-lg-and-down': !showMore && index > 1,
+            'hidden-lg-and-up': !showMore && index > (appSettingMainWidth === 'full' ? 2 : 1)
           }"
         >
           <el-form-item :label="item.label" :prop="item.id">
@@ -56,14 +77,22 @@ defineExpose({
                 v-if="item.type"
                 :is="SComponent[pascal(item.type) as SComponentKey]"
                 v-model="form[item.id]"
+                :placeholder="item.label"
                 :props="item.props"
               />
             </slot>
           </el-form-item>
         </el-col>
-        <el-col :lg="6" :md="8" :sm="12" :xs="24">
+        <el-col :span="24" :lg="appSettingMainWidth === 'full' ? 6 : 8" :md="12" :sm="12">
           <div class="function-btns">
-            <el-button class="more" type="primary" size="small" link @click="showMore = !showMore">
+            <el-button
+              v-if="hiddenColLen !== 0"
+              class="more"
+              type="primary"
+              size="small"
+              link
+              @click="showMore = !showMore"
+            >
               更多筛选条件
               <el-icon class="el-icon--right">
                 <component :is="showMore ? ArrowUp : ArrowDown" />
@@ -82,6 +111,8 @@ defineExpose({
 <style lang="scss" scoped>
 .vs-search {
   .function-btns {
+    display: flex;
+    flex-direction: row;
     margin-left: 10px;
     .more {
       font-weight: normal;
