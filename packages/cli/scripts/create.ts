@@ -20,7 +20,7 @@ export async function create() {
         type: 'list',
         name: 'templateName',
         message: 'Choose a template',
-        choices: ['vue-next-admin', 'vue-uniapp']
+        choices: ['vue-admin', 'vue-uniapp']
       }
     ])
     .then(async ({ projectName, templateName }) => {
@@ -29,7 +29,7 @@ export async function create() {
         return
       }
       const dest = path.resolve(process.cwd(), `${projectName}`)
-      if (templateName === 'vue-next-admin') {
+      if (templateName === 'vue-admin') {
         const source = await getSource(templateName)
         spinner = createSpinner('downloading...', { color: 'green' }).start()
         await copy(source, dest, {
