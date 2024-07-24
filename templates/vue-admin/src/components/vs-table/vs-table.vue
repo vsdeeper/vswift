@@ -15,9 +15,11 @@ const props = withDefaults(
     showRowOperate?: boolean
     paginationAlign?: 'left' | 'right'
     tableOperateAlign?: 'left' | 'right'
-    columns?: VsTableColumnItem[]
-    rowOperateItems?: VsTableOperateItem[]
-    tableOperateItems?: VsTableOperateItem[]
+    total?: number
+    tableData?: Record<string, any>[]
+    tableColumns?: VsTableColumnItem[]
+    rowOperateOptions?: VsTableOperateItem[]
+    tableOperateOptions?: VsTableOperateItem[]
     currentPage?: number
     pageSize?: number
 
@@ -38,7 +40,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   // 以下自定义 emit 事件
   (e: 'operate', key: string, row?: Record<string, any>): void
-  (e: 'pagination-change', val: { currentPage: number; pageSize: number }): void
+  (e: 'paging-change', val: { pageIndex: number; pageSize: number }): void
   (e: 'update:currentPage', val: number): void
   (e: 'update:pageSize', val: number): void
   // 以下 ElTable emit 事件
@@ -129,11 +131,11 @@ function onOperate(key: string, val?: any) {
 }
 
 function handleSizeChange(val: number) {
-  emit('pagination-change', { currentPage: 1, pageSize: val })
+  emit('paging-change', { pageIndex: 1, pageSize: val })
 }
 
 function handleCurrentChange(val: number) {
-  emit('pagination-change', { currentPage: val, pageSize: _pageSize.value! })
+  emit('paging-change', { pageIndex: val, pageSize: _pageSize.value! })
 }
 
 // 以下 ElTable Expose
@@ -207,10 +209,10 @@ defineExpose({
 </script>
 
 <template>
-  <div v-loading="loading" class="vs-table">
-    <div v-if="tableOperateItems?.length" :class="['table-operate', tableOperateAlign]">
+  <div class="vs-table">
+    <div v-if="tableOperateOptions?.length" :class="['table-operate', tableOperateAlign]">
       <template
-        v-for="(item, index) in tableOperateItems"
+        v-for="(item, index) in tableOperateOptions"
         :key="`tableOperateItem${item.value}${index}`"
       >
         <el-popconfirm
@@ -235,7 +237,13 @@ defineExpose({
         </template>
       </template>
     </div>
-    <el-table v-if="columns?.length" ref="tableRef" v-bind="tableProps">
+    <el-table
+      v-if="tableColumns?.length"
+      v-loading="loading"
+      ref="tableRef"
+      :data="tableData"
+      v-bind="tableProps"
+    >
       <template #append="scope">
         <slot name="append" v-bind="scope"></slot>
       </template>
@@ -244,11 +252,15 @@ defineExpose({
       </template>
       <el-table-column v-if="showSelection" type="selection" fixed="left" width="55" />
       <el-table-column v-if="showIndex" type="index" width="50" :index="(index) => index + 1" />
-      <TableColumn v-for="(col, index) in columns" :key="`${col.label}${col.prop}${index}`" :col>
-        <template v-for="slot in getSlots(columns)" #[slot]="scope">
+      <TableColumn
+        v-for="(col, index) in tableColumns"
+        :key="`${col.label}${col.prop}${index}`"
+        :col
+      >
+        <template v-for="slot in getSlots(tableColumns)" #[slot]="scope">
           <slot :name="slot" v-bind="scope" />
         </template>
-        <template v-for="slot in getSlots(columns).map((e) => `${e}-header`)" #[slot]="scope">
+        <template v-for="slot in getSlots(tableColumns).map((e) => `${e}-header`)" #[slot]="scope">
           <slot :name="slot" v-bind="scope" />
         </template>
       </TableColumn>
@@ -259,7 +271,7 @@ defineExpose({
       >
         <template #default="{ row }">
           <template
-            v-for="(item, index) in rowOperateItems"
+            v-for="(item, index) in rowOperateOptions"
             :key="`rowOperateItem${item.value}${index}`"
           >
             <el-popconfirm
@@ -301,6 +313,7 @@ defineExpose({
       <el-pagination
         v-model:current-page="_currentPage"
         v-model:page-size="_pageSize"
+        :total
         v-bind="{
           pageSizes: [10, 20, 30, 40, 50],
           layout: paginationLayout,

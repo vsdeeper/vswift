@@ -16,6 +16,9 @@ export interface AppSetting {
     navRecord?: boolean
     breadcrumb?: boolean
   }
+  dataTable: {
+    pageSize?: number
+  }
 }
 
 const useAppSettingDataStore = defineStore('global/app-setting', () => {
@@ -32,6 +35,9 @@ const useAppSettingDataStore = defineStore('global/app-setting', () => {
       width: 'full',
       navRecord: true,
       breadcrumb: true
+    },
+    dataTable: {
+      pageSize: 10
     }
   }
   const appSettingData = ref<AppSetting>(JSON.parse(JSON.stringify(appSettingConst)))
@@ -44,11 +50,16 @@ const useAppSettingDataStore = defineStore('global/app-setting', () => {
     appSettingData.value = JSON.parse(JSON.stringify(data))
   }
 
+  function getPageSize() {
+    return appSettingData.value.dataTable.pageSize
+  }
+
   return {
     appSettingData,
     appSettingConst,
     getAppSettingData,
-    setAppSettingData
+    setAppSettingData,
+    getPageSize
   }
 })
 

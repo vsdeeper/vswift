@@ -1,0 +1,16 @@
+{
+  "code": 0,
+  "data": {
+    "list": [
+      {
+        "id": 1,
+        "name": "张三",
+        "code": "v0001"
+      }
+    ],
+    "pageIndex": 1,
+    "pageSize": 20,
+    "total": 100
+  },
+  "msg": "success"
+}

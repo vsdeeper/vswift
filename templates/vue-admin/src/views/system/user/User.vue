@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import type { VsSearchOptionItem } from '@/components'
+import type { VsSearchOptionItem, VsTableColumnItem, VsTableOperateItem } from '@/components'
 import type { SSelectProps } from '@/components/vs-search/components'
+import { queryUserList } from '@/api/system/user'
+import { useAppSettingDataStore } from '@/stores/global'
 
+const { getPageSize } = useAppSettingDataStore()
+const permissionCodes = ref(['add', 'edit'])
 const searchOptions = ref<VsSearchOptionItem[]>([
   {
     id: 'searchStr',
@@ -26,11 +30,46 @@ const searchOptions = ref<VsSearchOptionItem[]>([
     label: '手机号'
   }
 ])
+const params = ref<PagingParams>({
+  pageIndex: 1,
+  pageSize: getPageSize()
+})
+const loading = ref(false)
+const total = ref(0)
+const tableData = ref<Record<string, any>[]>([])
+const tableOperateOptions = ref<VsTableOperateItem[]>([
+  { label: '新增', value: 'add', code: 'add', show: (code) => permissionCodes.value.includes(code) }
+])
+const tableColumns = ref<VsTableColumnItem[]>([
+  { label: '员工姓名', prop: 'name' },
+  { label: '员工工号', prop: 'code' }
+])
+
+onMounted(() => {
+  getTableList(params.value)
+})
+
+async function getTableList(params: PagingParams) {
+  loading.value = true
+  const res = await queryUserList(params)
+  loading.value = false
+  total.value = res?.total ?? 0
+  tableData.value = res?.list ?? []
+}
 </script>
 
 <template>
   <ViewWrapper>
     <VsSearch label-width="110px" :options="searchOptions"></VsSearch>
-    <VsTable></VsTable>
+    <VsTable
+      v-model:page-size="params.pageSize"
+      v-model:current-page="params.pageIndex"
+      :table-columns
+      :table-operate-options
+      :table-data
+      :total
+      :loading
+    >
+    </VsTable>
   </ViewWrapper>
 </template>

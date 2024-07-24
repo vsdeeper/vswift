@@ -9,7 +9,8 @@ const show = ref(false)
 const appSetting = ref<AppSetting>({
   theme: {},
   menu: {},
-  main: {}
+  main: {},
+  dataTable: {}
 })
 const { appSettingData } = storeToRefs(useAppSettingDataStore())
 const { getAppSettingData, appSettingConst, setAppSettingData } = useAppSettingDataStore()
@@ -46,6 +47,10 @@ function onChange(key: string, val: any) {
     }
     case 'appSetting.main.breadcrumb': {
       appSettingData.value!.main.breadcrumb = val
+      break
+    }
+    case 'appSetting.dataTable.pageSize': {
+      appSettingData.value!.dataTable.pageSize = val
       break
     }
   }
@@ -172,6 +177,24 @@ defineExpose({
         inactive-text="隐藏"
         @change="(val) => onChange('appSetting.main.breadcrumb', val)"
       />
+    </div>
+    <el-divider direction="horizontal" content-position="center">数据表</el-divider>
+    <div class="flex-box">
+      <span class="label">
+        每页显示条目个数
+        <el-tooltip effect="dark" content="保存设置刷新页面后生效" placement="top">
+          <el-icon color="#ffae1f"><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </span>
+      <el-select
+        v-model="appSetting.dataTable.pageSize"
+        style="width: 120px"
+        @change="(val) => onChange('appSetting.dataTable.pageSize', val)"
+      >
+        <el-option label="10条/页" :value="10" />
+        <el-option label="20条/页" :value="20" />
+        <el-option label="30条/页" :value="30" />
+      </el-select>
     </div>
     <template #footer>
       <el-button size="large" @click="onReset">重置设置</el-button>
