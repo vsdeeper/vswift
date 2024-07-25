@@ -6,7 +6,7 @@ import type { CommandOptions } from './index.js'
 export async function typeCheck(options: CommandOptions) {
   const { pkg } = options
   if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: cli')
+    consola.error('Requires -p or --pkg parameter, optional value: cli')
     return
   }
   const spinner = createSpinner('type checking...', { color: 'green' }).start()
@@ -18,7 +18,7 @@ export async function typeCheck(options: CommandOptions) {
         break
       }
       default: {
-        throw new Error('Uknown pkg parameter')
+        throw new Error('Uknown parameter')
       }
     }
     const end = Date.now()

@@ -6,7 +6,7 @@ import type { CommandOptions } from './index.js'
 export async function typeEmit(options: CommandOptions) {
   const { pkg } = options
   if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: utils')
+    consola.error('Requires -p or --pkg parameter, optional value: utils')
     return
   }
   const spinner = createSpinner('type emitting...', { color: 'green' }).start()
@@ -18,7 +18,7 @@ export async function typeEmit(options: CommandOptions) {
         break
       }
       default: {
-        throw new Error('Uknown pkg parameter')
+        throw new Error('Uknown parameter')
       }
     }
     const end = Date.now()

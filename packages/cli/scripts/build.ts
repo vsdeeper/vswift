@@ -12,7 +12,7 @@ import { globSync } from 'glob'
 export async function buildTask(options: CommandOptions) {
   const { pkg } = options
   if (!pkg) {
-    consola.error('Requires pkg parameter, optional value: cli | utils')
+    consola.error('Requires -p or --pkg parameter, optional value: cli | utils')
     return
   }
   let spinner: Spinner | undefined
@@ -47,7 +47,7 @@ export async function buildTask(options: CommandOptions) {
         break
       }
       default: {
-        throw new Error('Unknown pkg parameter')
+        throw new Error('Unknown parameter')
       }
     }
   } catch (error) {

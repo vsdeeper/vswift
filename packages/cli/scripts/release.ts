@@ -11,7 +11,8 @@ import { dirname } from '../utils/index.js'
 
 export async function release(options: CommandOptions) {
   const { pkg } = options
-  if (!pkg) throw new Error('Requires pkg parameter, optional value: cli | utils | unplugin')
+  if (!pkg)
+    throw new Error('Requires -p or --pkg parameter, optional value: cli | utils | unplugin')
 
   let releasePackageJson: Record<string, any> | undefined
   try {
