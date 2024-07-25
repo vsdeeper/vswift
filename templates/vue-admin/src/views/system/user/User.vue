@@ -5,7 +5,7 @@ import { queryUserList } from '@/api/system/user'
 import { useAppSettingDataStore } from '@/stores/global'
 
 const { getPageSize } = useAppSettingDataStore()
-const permissionCodes = ref(['add', 'edit'])
+const permissionCodes = ref(['add', 'check', 'edit', 'delete'])
 const searchOptions = ref<VsSearchOptionItem[]>([
   {
     id: 'searchStr',
@@ -34,17 +34,37 @@ const params = ref<PagingParams>({
   pageIndex: 1,
   pageSize: getPageSize()
 })
+const tableColumns = ref<VsTableColumnItem[]>([
+  { label: '员工姓名', prop: 'name' },
+  { label: '员工工号', prop: 'code' }
+])
 const loading = ref(false)
 const total = ref(0)
 const tableData = ref<Record<string, any>[]>([])
 const tableOperateOptions = ref<VsTableOperateItem[]>([
   { label: '新增', value: 'add', code: 'add', show: (code) => permissionCodes.value.includes(code) }
 ])
-const tableColumns = ref<VsTableColumnItem[]>([
-  { label: '员工姓名', prop: 'name' },
-  { label: '员工工号', prop: 'code' }
+const rowOperateOptions = ref<VsTableOperateItem[]>([
+  {
+    label: '查看',
+    value: 'check',
+    code: 'check',
+    show: (code) => permissionCodes.value.includes(code)
+  },
+  {
+    label: '编辑',
+    value: 'edit',
+    code: 'edit',
+    show: (code) => permissionCodes.value.includes(code)
+  },
+  {
+    label: '删除',
+    type: 'danger',
+    value: 'delete',
+    code: 'delete',
+    show: (code) => permissionCodes.value.includes(code)
+  }
 ])
-
 onMounted(() => {
   getTableList(params.value)
 })
@@ -66,6 +86,7 @@ async function getTableList(params: PagingParams) {
       v-model:current-page="params.pageIndex"
       :table-columns
       :table-operate-options
+      :row-operate-options
       :table-data
       :total
       :loading

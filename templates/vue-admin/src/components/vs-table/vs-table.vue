@@ -107,6 +107,9 @@ function handleWindowResize() {
   const ww = el.clientWidth
   if (ww < 768) {
     paginationLayout.value = 'total, prev, pager, next'
+    paginationPagerCount.value = 2
+  } else if (ww < 1200) {
+    paginationLayout.value = 'total, sizes, prev, pager, next'
     paginationPagerCount.value = 3
   } else {
     paginationLayout.value = 'total, sizes, prev, pager, next, jumper'
@@ -114,16 +117,16 @@ function handleWindowResize() {
   }
 }
 
-function displayOperateItem(row: Record<string, any>, item: VsTableOperateItem) {
-  const { show, code /** 权限标识符 */ } = item
-  if (!show) return true
-  return show(row, code)
-}
-
 function displayTableOperateItem(item: VsTableOperateItem) {
   const { show, code /** 权限标识符 */ } = item
   if (!show) return true
   return show(code)
+}
+
+function displayRowOperateItem(item: VsTableOperateItem, row: Record<string, any>) {
+  const { show, code /** 权限标识符 */ } = item
+  if (!show) return true
+  return show(code, row)
 }
 
 function onOperate(key: string, val?: any) {
@@ -270,41 +273,43 @@ defineExpose({
         v-bind="{ label: '操作', fixed: 'right', ...operateColumnProps }"
       >
         <template #default="{ row }">
-          <template
-            v-for="(item, index) in rowOperateOptions"
-            :key="`rowOperateItem${item.value}${index}`"
-          >
-            <el-popconfirm
-              v-if="item.showPopconfirm && displayOperateItem(row, item)"
-              v-bind="item.popconfirmProps"
-              @confirm="onOperate(item.value, row)"
+          <div class="operate-btns">
+            <template
+              v-for="(item, index) in rowOperateOptions"
+              :key="`rowOperateItem${item.value}${index}`"
             >
-              <template #reference>
+              <el-popconfirm
+                v-if="item.showPopconfirm && displayRowOperateItem(item, row)"
+                v-bind="item.popconfirmProps"
+                @confirm="onOperate(item.value, row)"
+              >
+                <template #reference>
+                  <el-button
+                    v-bind="{
+                      ...item.buttonProps,
+                      type: item.buttonProps?.type ?? 'primary',
+                      link: true
+                    }"
+                  >
+                    {{ item.label }}
+                  </el-button>
+                </template>
+              </el-popconfirm>
+              <template v-else>
                 <el-button
+                  v-if="displayRowOperateItem(item, row)"
+                  :type="item.type ?? 'primary'"
                   v-bind="{
                     ...item.buttonProps,
-                    type: item.buttonProps?.type ?? 'primary',
                     link: true
                   }"
+                  @click="onOperate(item.value, row)"
                 >
                   {{ item.label }}
                 </el-button>
               </template>
-            </el-popconfirm>
-            <template v-else>
-              <el-button
-                v-if="displayOperateItem(row, item)"
-                v-bind="{
-                  ...item.buttonProps,
-                  type: item.buttonProps?.type ?? 'primary',
-                  link: true
-                }"
-                @click="onOperate(item.value, row)"
-              >
-                {{ item.label }}
-              </el-button>
             </template>
-          </template>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -349,6 +354,9 @@ defineExpose({
         margin-left: -2px;
         button[class*='-button'] + button[class*='-button'] {
           margin: 0;
+        }
+        .operate-btns {
+          margin-left: -2px;
         }
       }
     }
