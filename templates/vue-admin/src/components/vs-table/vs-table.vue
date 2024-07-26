@@ -285,13 +285,7 @@ defineExpose({
                 @confirm="onOperate(item.value, row)"
               >
                 <template #reference>
-                  <el-button
-                    v-bind="{
-                      ...item.buttonProps,
-                      type: item.buttonProps?.type ?? 'primary',
-                      link: true
-                    }"
-                  >
+                  <el-button :type="item.type ?? 'primary'" link v-bind="item.buttonProps">
                     {{ item.label }}
                   </el-button>
                 </template>
