@@ -280,6 +280,7 @@ defineExpose({
             >
               <el-popconfirm
                 v-if="item.showPopconfirm && displayRowOperateItem(item, row)"
+                :title="item.popconfirmTitle"
                 v-bind="item.popconfirmProps"
                 @confirm="onOperate(item.value, row)"
               >

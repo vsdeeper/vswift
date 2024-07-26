@@ -14,6 +14,7 @@ export interface VsTableOperateItem {
   code: string // 权限标识符
   type?: 'primary' | 'success' | 'warning' | 'danger' | 'info'
   showPopconfirm?: boolean
+  popconfirmTitle?: string
   show?: (code: string, row?: Record<string, any>) => boolean
   popconfirmProps?: Partial<PopconfirmProps>
   buttonProps?: Partial<ButtonProps>

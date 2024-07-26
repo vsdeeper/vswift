@@ -63,6 +63,7 @@ const rowOperateOptions = ref<VsTableOperateItem[]>([
     value: 'delete',
     code: 'delete',
     showPopconfirm: true,
+    popconfirmTitle: '确认删除吗？',
     show: (code) => permissionCodes.value.includes(code)
   }
 ])
