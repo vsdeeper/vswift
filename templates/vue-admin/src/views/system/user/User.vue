@@ -62,6 +62,7 @@ const rowOperateOptions = ref<VsTableOperateItem[]>([
     type: 'danger',
     value: 'delete',
     code: 'delete',
+    showPopconfirm: true,
     show: (code) => permissionCodes.value.includes(code)
   }
 ])
