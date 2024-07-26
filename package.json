@@ -23,7 +23,7 @@
     "release": "vswift release",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write packages/",
-    "prepare": "husky init"
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{js,ts,tsx,vue}": [
