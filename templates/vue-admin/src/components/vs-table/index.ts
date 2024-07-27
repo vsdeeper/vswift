@@ -14,10 +14,12 @@ export interface VsTableOperateItem {
   value: string
   code: string // 权限标识符
   type?: 'primary' | 'success' | 'warning' | 'danger' | 'info'
+  show?: (code: string, row?: Record<string, any>) => boolean
+  buttonProps?: Partial<ButtonProps>
+}
+export interface VsRowOperateOptionItem extends VsTableOperateItem {
   showPopconfirm?: boolean
   popconfirmTitle?: string
-  show?: (code: string, row?: Record<string, any>) => boolean
   popconfirmProps?: Partial<PopconfirmProps>
-  buttonProps?: Partial<ButtonProps>
 }
 export { VsTable }

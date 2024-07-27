@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import type { VsSearchOptionItem, VsTableColumnItem, VsTableOperateItem } from '@/components'
+import type {
+  VsRowOperateOptionItem,
+  VsSearchOptionItem,
+  VsTableColumnItem,
+  VsTableInstance,
+  VsTableOperateItem
+} from '@/components'
 import type { SSelectProps } from '@/components/vs-search/components'
-import { queryUserList } from '@/api/system/user'
+import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
 import { useAppSettingDataStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
 import { getLabelByValue } from '@vswift/utils'
 import { format } from 'date-fns'
 import type { AddItemInstance, EditItemInstance } from './components'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const AddItem = defineAsyncComponent(() => import('./components/add-item/AddItem.vue'))
 const EditItem = defineAsyncComponent(() => import('./components/edit-item/EditItem.vue'))
@@ -39,10 +46,12 @@ const params = ref<PagingParams>({
   pageIndex: 1,
   pageSize: getPageSize()
 })
+const TableRef = ref<VsTableInstance>()
 const tableColumns = ref<VsTableColumnItem[]>([
   { label: '员工姓名', prop: 'name' },
   { label: '员工工号', prop: 'code' },
   { label: '员工状态', prop: 'status' },
+  { label: '部门', prop: 'department' },
   { label: '职位', prop: 'position' },
   { label: '手机号', prop: 'phone' },
   { label: '邮箱', prop: 'email' },
@@ -53,9 +62,21 @@ const loading = ref(false)
 const total = ref(0)
 const tableData = ref<Record<string, any>[]>([])
 const tableOperateOptions = ref<VsTableOperateItem[]>([
-  { label: '新增', value: 'add', code: 'add', show: (code) => permissionCodes.value.includes(code) }
+  {
+    label: '新增',
+    value: 'add',
+    code: 'add',
+    show: (code) => permissionCodes.value.includes(code)
+  },
+  {
+    label: '批量删除',
+    value: 'batch_delete',
+    code: 'delete',
+    type: 'danger',
+    show: (code) => permissionCodes.value.includes(code)
+  }
 ])
-const rowOperateOptions = ref<VsTableOperateItem[]>([
+const rowOperateOptions = ref<VsRowOperateOptionItem[]>([
   {
     label: '查看',
     value: 'check',
@@ -107,7 +128,7 @@ async function getTableList(params: PagingParams) {
   tableData.value = res?.list ?? []
 }
 
-function onOperate(key: string, val?: any) {
+async function onOperate(key: string, val?: any) {
   switch (key) {
     case 'add': {
       AddItemRef.value?.open()
@@ -120,10 +141,31 @@ function onOperate(key: string, val?: any) {
       break
     }
     case 'copy': {
+      if (await copyItem(val!.id)) {
+        ElMessage.success('复制成功')
+        getTableList(params.value)
+      }
       break
     }
     case 'delete': {
+      if (await deleteItems([val!.id])) {
+        ElMessage.success('删除成功')
+        getTableList(params.value)
+      }
       break
+    }
+    case 'batch_delete': {
+      const selected = TableRef.value?.getSelectionRows()
+      if (!selected?.length) {
+        ElMessage.error('请选择要删除的项')
+        return
+      }
+      await ElMessageBox.confirm('确定删除吗？', '提示', { type: 'warning' })
+      const ids = selected.map((e) => e.id)
+      if (await deleteItems(ids)) {
+        ElMessage.success('删除成功')
+        getTableList(params.value)
+      }
     }
   }
 }
@@ -138,12 +180,14 @@ function onOperate(key: string, val?: any) {
       @reset="onReset"
     ></VsSearch>
     <VsTable
+      ref="TableRef"
       v-model:page-size="params.pageSize"
       v-model:current-page="params.pageIndex"
       :table-columns
       :table-operate-options
       :row-operate-options
       :table-data
+      show-selection
       :total
       :loading
       operate-column-width="180px"

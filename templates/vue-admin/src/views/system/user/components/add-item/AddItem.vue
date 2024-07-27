@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import { FormDetail, type FormDetailInstance } from '..'
 import { toSubmitData } from '../util'
 import { addItem } from '@/api/system/user'
+import { sleep } from 'radash'
 
 const emit = defineEmits<{
   (e: 'add-success'): void
@@ -36,8 +37,9 @@ function initFormData() {
 }
 
 // 以下 defineExpose
-function open() {
+async function open() {
   show.value = true
+  FormDetailRef.value?.clearValidate()
 }
 
 defineExpose({

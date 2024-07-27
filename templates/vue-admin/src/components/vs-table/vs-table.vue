@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VsTableColumnItem, VsTableOperateItem } from '.'
+import type { VsRowOperateOptionItem, VsTableColumnItem, VsTableOperateItem } from '.'
 import TableColumn from './table-column.vue'
 import { getSlots } from './util'
 import type { LoadingBinding } from 'element-plus/es/components/loading/src/directive.mjs'
@@ -19,7 +19,7 @@ const props = withDefaults(
     total?: number
     tableData?: Record<string, any>[]
     tableColumns?: VsTableColumnItem[]
-    rowOperateOptions?: VsTableOperateItem[]
+    rowOperateOptions?: VsRowOperateOptionItem[]
     tableOperateOptions?: VsTableOperateItem[]
     currentPage?: number
     pageSize?: number
@@ -147,7 +147,7 @@ function clearSelection() {
   tableRef.value?.clearSelection()
 }
 
-function getSelectionRows() {
+function getSelectionRows(): Record<string, any>[] {
   return tableRef.value?.getSelectionRows()
 }
 
@@ -219,28 +219,14 @@ defineExpose({
         v-for="(item, index) in tableOperateOptions"
         :key="`tableOperateItem${item.value}${index}`"
       >
-        <el-popconfirm
-          v-if="item.showPopconfirm && displayTableOperateItem(item)"
-          :title="item.popconfirmTitle ?? `确定${item.label}吗？`"
-          v-bind="item.popconfirmProps"
-          @confirm="onOperate(item.value)"
+        <el-button
+          v-if="displayTableOperateItem(item)"
+          :type="item.type ?? 'primary'"
+          v-bind="item.buttonProps"
+          @click="onOperate(item.value)"
         >
-          <template #reference>
-            <el-button :type="item.type ?? 'primary'" v-bind="item.buttonProps">
-              {{ item.label }}
-            </el-button>
-          </template>
-        </el-popconfirm>
-        <template v-else>
-          <el-button
-            v-if="displayTableOperateItem(item)"
-            :type="item.type ?? 'primary'"
-            v-bind="item.buttonProps"
-            @click="onOperate(item.value)"
-          >
-            {{ item.label }}
-          </el-button>
-        </template>
+          {{ item.label }}
+        </el-button>
       </template>
     </div>
     <el-table
@@ -345,9 +331,6 @@ defineExpose({
     }
     &.left {
       justify-content: flex-start;
-    }
-    :deep(button[class*='-button'] + button[class*='-button']) {
-      margin-left: 5px;
     }
   }
   :deep(table[class*='-table__body']) {

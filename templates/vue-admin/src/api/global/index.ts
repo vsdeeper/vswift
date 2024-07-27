@@ -32,7 +32,8 @@ export async function queryRepos() {
     const res = await fetch('https://api.github.com/users/vsdeeper/repos', {
       method: 'get'
     })
-    return (await res.json()) as Record<string, any>[]
+    if (res.status === 403) throw new Error('获取数据异常')
+    else return (await res.json()) as Record<string, any>[]
   } catch (error) {
     return [
       {
