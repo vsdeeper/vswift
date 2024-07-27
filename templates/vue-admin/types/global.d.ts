@@ -50,4 +50,18 @@ declare global {
     pageSize?: number
     [key: string]: any
   }
+
+  /**
+   * 选项数据通用
+   * @interface OptionItem
+   * @property {string | number} OptionItem.id - 唯一标识
+   * @property {string} OptionItem.label - 名称
+   * @property {string | number} OptionItem.label - 也可做唯一标识
+   */
+  interface OptionItem {
+    id?: string | number
+    label?: string
+    value?: string | number
+    [key: string]: any
+  }
 }

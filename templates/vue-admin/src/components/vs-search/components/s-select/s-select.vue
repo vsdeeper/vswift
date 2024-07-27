@@ -19,9 +19,9 @@ const model = defineModel<string | number | boolean | Record<string, any> | any[
   >
     <el-option
       v-for="item in props?.options"
-      :key="item[props?.itemValue ?? 'id']"
+      :key="item[props?.itemValue ?? 'value']"
       :label="item[props?.itemLabel ?? 'label']"
-      :value="item[props?.itemValue ?? 'id']"
+      :value="item[props?.itemValue ?? 'value']"
     >
     </el-option>
   </el-select>

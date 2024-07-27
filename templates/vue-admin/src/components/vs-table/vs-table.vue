@@ -15,6 +15,7 @@ const props = withDefaults(
     showRowOperate?: boolean
     paginationAlign?: 'left' | 'right'
     tableOperateAlign?: 'left' | 'right'
+    operateColumnWidth?: string | number
     total?: number
     tableData?: Record<string, any>[]
     tableColumns?: VsTableColumnItem[]
@@ -212,7 +213,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="vs-table">
+  <div v-loading="loading" class="vs-table">
     <div v-if="tableOperateOptions?.length" :class="['table-operate', tableOperateAlign]">
       <template
         v-for="(item, index) in tableOperateOptions"
@@ -224,7 +225,7 @@ defineExpose({
           @confirm="onOperate(item.value)"
         >
           <template #reference>
-            <el-button v-bind="{ ...item.buttonProps, type: item.buttonProps?.type ?? 'primary' }">
+            <el-button :type="item.buttonProps?.type ?? 'primary'" v-bind="item.buttonProps">
               {{ item.label }}
             </el-button>
           </template>
@@ -242,9 +243,9 @@ defineExpose({
     </div>
     <el-table
       v-if="tableColumns?.length"
-      v-loading="loading"
       ref="tableRef"
       :data="tableData"
+      show-overflow-tooltip
       v-bind="tableProps"
     >
       <template #append="scope">
@@ -270,7 +271,11 @@ defineExpose({
       <el-table-column
         v-if="showRowOperate"
         class-name="column-operate"
-        v-bind="{ label: '操作', fixed: 'right', ...operateColumnProps }"
+        label="操作"
+        fixed="right"
+        :show-overflow-tooltip="false"
+        :width="operateColumnWidth"
+        v-bind="operateColumnProps"
       >
         <template #default="{ row }">
           <div class="operate-btns">
@@ -280,7 +285,7 @@ defineExpose({
             >
               <el-popconfirm
                 v-if="item.showPopconfirm && displayRowOperateItem(item, row)"
-                :title="item.popconfirmTitle"
+                :title="item.popconfirmTitle ?? `确定${item.label}吗？`"
                 v-bind="item.popconfirmProps"
                 @confirm="onOperate(item.value, row)"
               >

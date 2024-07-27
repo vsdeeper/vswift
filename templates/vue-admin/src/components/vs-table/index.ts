@@ -5,6 +5,7 @@ export type VsTableInstance = InstanceType<typeof VsTable>
 export interface VsTableColumnItem {
   label: string
   prop?: string
+  width?: string | number
   columnProps?: Partial<TableColumnCtx<any>>
   children?: VsTableColumnItem[]
 }

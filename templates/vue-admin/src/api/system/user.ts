@@ -14,3 +14,31 @@ export async function queryUserList(params: PagingParams) {
     console.error('queryUserList ->', error)
   }
 }
+
+export async function addItem(data: Record<string, any>) {
+  try {
+    await http({
+      method: 'post',
+      url: '/mock/operate.json?t=' + +new Date(),
+      data
+    })
+    await sleep(1000)
+    return true
+  } catch (error) {
+    console.error('addItem ->', error)
+  }
+}
+
+export async function editItem(data: Record<string, any>) {
+  try {
+    await http({
+      method: 'post',
+      url: '/mock/operate.json?t=' + +new Date(),
+      data
+    })
+    await sleep(1000)
+    return true
+  } catch (error) {
+    console.error('editItem ->', error)
+  }
+}

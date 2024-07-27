@@ -18,3 +18,9 @@ body {
   height: 100vh;
   font-weight: normal;
 }
+
+// 自适应弹框
+.adaptive-dialog {
+  --vs-dialog-width: calc(100% - 2 * var(--vs-main-padding)) !important;
+  max-width: 900px;
+}

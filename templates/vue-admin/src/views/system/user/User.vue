@@ -3,9 +3,18 @@ import type { VsSearchOptionItem, VsTableColumnItem, VsTableOperateItem } from '
 import type { SSelectProps } from '@/components/vs-search/components'
 import { queryUserList } from '@/api/system/user'
 import { useAppSettingDataStore } from '@/stores/global'
+import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
+import { getLabelByValue } from '@vswift/utils'
+import { format } from 'date-fns'
+import type { AddItemInstance, EditItemInstance } from './components'
+
+const AddItem = defineAsyncComponent(() => import('./components/add-item/AddItem.vue'))
+const EditItem = defineAsyncComponent(() => import('./components/edit-item/EditItem.vue'))
+const AddItemRef = ref<AddItemInstance>()
+const EditItemRef = ref<EditItemInstance>()
 
 const { getPageSize } = useAppSettingDataStore()
-const permissionCodes = ref(['add', 'check', 'edit', 'delete'])
+const permissionCodes = ref(['add', 'check', 'edit', 'copy', 'delete'])
 const searchOptions = ref<VsSearchOptionItem[]>([
   {
     id: 'searchStr',
@@ -17,11 +26,7 @@ const searchOptions = ref<VsSearchOptionItem[]>([
     type: 'select',
     label: '员工状态',
     props: {
-      options: [
-        { id: 1, label: '在职' },
-        { id: 2, label: '离职' },
-        { id: 3, label: '停职' }
-      ]
+      options: EMPLOYEE_STATUS_OPTIONS
     } as SSelectProps
   },
   {
@@ -36,7 +41,13 @@ const params = ref<PagingParams>({
 })
 const tableColumns = ref<VsTableColumnItem[]>([
   { label: '员工姓名', prop: 'name' },
-  { label: '员工工号', prop: 'code' }
+  { label: '员工工号', prop: 'code' },
+  { label: '员工状态', prop: 'status' },
+  { label: '职位', prop: 'position' },
+  { label: '手机号', prop: 'phone' },
+  { label: '邮箱', prop: 'email' },
+  { label: '更新信息', prop: 'updatedInfo' },
+  { label: '创建信息', prop: 'createdInfo' }
 ])
 const loading = ref(false)
 const total = ref(0)
@@ -58,18 +69,35 @@ const rowOperateOptions = ref<VsTableOperateItem[]>([
     show: (code) => permissionCodes.value.includes(code)
   },
   {
+    label: '复制',
+    value: 'copy',
+    code: 'copy',
+    showPopconfirm: true,
+    show: (code) => permissionCodes.value.includes(code)
+  },
+  {
     label: '删除',
     type: 'danger',
     value: 'delete',
     code: 'delete',
     showPopconfirm: true,
-    popconfirmTitle: '确认删除吗？',
     show: (code) => permissionCodes.value.includes(code)
   }
 ])
+
 onMounted(() => {
   getTableList(params.value)
 })
+
+function onInquire(val: Record<string, any>) {
+  params.value.pageIndex = 1
+  getTableList({ ...params.value, ...val })
+}
+
+function onReset() {
+  params.value.pageIndex = 1
+  getTableList(params.value)
+}
 
 async function getTableList(params: PagingParams) {
   loading.value = true
@@ -78,11 +106,38 @@ async function getTableList(params: PagingParams) {
   total.value = res?.total ?? 0
   tableData.value = res?.list ?? []
 }
+
+function onOperate(key: string, val?: any) {
+  switch (key) {
+    case 'add': {
+      console.log(1111)
+      AddItemRef.value?.open()
+      break
+    }
+    case 'check': {
+      break
+    }
+    case 'edit': {
+      break
+    }
+    case 'copy': {
+      break
+    }
+    case 'delete': {
+      break
+    }
+  }
+}
 </script>
 
 <template>
   <ViewWrapper>
-    <VsSearch label-width="110px" :options="searchOptions"></VsSearch>
+    <VsSearch
+      label-width="110px"
+      :options="searchOptions"
+      @inquire="onInquire"
+      @reset="onReset"
+    ></VsSearch>
     <VsTable
       v-model:page-size="params.pageSize"
       v-model:current-page="params.pageIndex"
@@ -92,7 +147,22 @@ async function getTableList(params: PagingParams) {
       :table-data
       :total
       :loading
+      operate-column-width="180px"
+      @operate="onOperate"
     >
+      <template #status="{ row }">
+        {{ getLabelByValue(row.status, EMPLOYEE_STATUS_OPTIONS) }}
+      </template>
+      <template #updatedInfo="{ row }">
+        {{ row.updatedBy }}<br />
+        {{ format(row.updatedAt, 'yyyy-MM-dd HH:mm:ss') }}
+      </template>
+      <template #createdInfo="{ row }">
+        {{ row.createdBy }}<br />
+        {{ format(row.createdAt, 'yyyy-MM-dd HH:mm:ss') }}
+      </template>
     </VsTable>
   </ViewWrapper>
+  <AddItem ref="AddItemRef" />
+  <EditItem ref="EditItemRef" />
 </template>

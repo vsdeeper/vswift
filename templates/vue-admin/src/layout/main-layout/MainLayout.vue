@@ -383,6 +383,7 @@ function onSetting() {
   position: fixed;
   right: 30px;
   bottom: 30px;
+  z-index: 3000;
 }
 .slide-fade-enter-active {
   transition: all 0.3s ease-out 0.3s;
