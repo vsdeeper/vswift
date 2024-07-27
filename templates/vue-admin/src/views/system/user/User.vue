@@ -10,10 +10,11 @@ import type { SSelectProps } from '@/components/vs-search/components'
 import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
 import { useAppSettingDataStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
-import { getLabelByValue } from '@vswift/utils'
+import { findArraryValueFromTreeData, getLabelByValue } from '@vswift/utils'
 import { format } from 'date-fns'
 import type { AddItemInstance, EditItemInstance } from './components'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/stores/system/user'
 
 const AddItem = defineAsyncComponent(() => import('./components/add-item/AddItem.vue'))
 const EditItem = defineAsyncComponent(() => import('./components/edit-item/EditItem.vue'))
@@ -51,8 +52,8 @@ const tableColumns = ref<VsTableColumnItem[]>([
   { label: '员工姓名', prop: 'name' },
   { label: '员工工号', prop: 'code' },
   { label: '员工状态', prop: 'status' },
-  { label: '部门', prop: 'department' },
-  { label: '职位', prop: 'position' },
+  { label: '部门', prop: 'departmentId' },
+  { label: '职位', prop: 'positionName' },
   { label: '手机号', prop: 'phone' },
   { label: '邮箱', prop: 'email' },
   { label: '更新信息', prop: 'updatedInfo' },
@@ -105,8 +106,11 @@ const rowOperateOptions = ref<VsRowOperateOptionItem[]>([
     show: (code) => permissionCodes.value.includes(code)
   }
 ])
+const departmentOptions = ref<Record<string, any>[]>([])
+const { getdDepartmentData } = useUserStore()
 
 onMounted(() => {
+  getdDepartmentData().then((res) => (departmentOptions.value = res ?? []))
   getTableList(params.value)
 })
 
@@ -138,6 +142,7 @@ async function onOperate(key: string, val?: any) {
       break
     }
     case 'edit': {
+      EditItemRef.value?.open(val)
       break
     }
     case 'copy': {
@@ -169,6 +174,52 @@ async function onOperate(key: string, val?: any) {
     }
   }
 }
+
+const findArraryValuesFromTreeData = (
+  targetId: string | number,
+  tree: Record<string, any>[],
+  options?: {
+    id?: string
+    label?: string
+    children?: string
+    returnType?: 'ids' | 'names'
+  }
+) => {
+  const { id = 'id', label = 'label', children = 'children', returnType = 'ids' } = options || {}
+  const toFlatArr = (tree: Record<string, any>[], parentId?: string | number) => {
+    return tree.reduce(
+      (pre: Record<string, any>[], cur: Record<string, any>): Record<string, any>[] => {
+        return [
+          ...pre,
+          typeof parentId === 'undefined' ? cur : { ...cur, parentId },
+          ...(cur[children] && cur[children].length ? toFlatArr(cur[children], cur[id]) : [])
+        ]
+      },
+      []
+    )
+  }
+  const getIds = (flatArr: Record<string, any>[]) => {
+    let ids = [targetId]
+    let child = flatArr.find((e) => e[id] === targetId)
+    while (child && typeof child.parentId !== 'undefined') {
+      ids = [child.parentId, ...ids]
+      child = flatArr.find((e) => e[id] === child!.parentId)
+    }
+    return ids
+  }
+  const getNames = (flatArr: Record<string, any>[]) => {
+    let child = flatArr.find((e) => e[id] === targetId)
+    let names = (child && [child[label]]) || []
+    while (child && typeof child.parentId !== 'undefined') {
+      const find = flatArr.find((e) => e[id] === child!.parentId)
+      names = [find![label], ...names]
+      child = flatArr.find((e) => e[id] === child!.parentId)
+    }
+    return names
+  }
+  if (returnType === 'names') return getNames(toFlatArr(tree))
+  else return getIds(toFlatArr(tree))
+}
 </script>
 
 <template>
@@ -195,6 +246,13 @@ async function onOperate(key: string, val?: any) {
     >
       <template #status="{ row }">
         {{ getLabelByValue(row.status, EMPLOYEE_STATUS_OPTIONS) }}
+      </template>
+      <template #departmentId="{ row }">
+        {{
+          findArraryValueFromTreeData(row.departmentId, departmentOptions, {
+            returnType: 'labels'
+          })?.join('/')
+        }}
       </template>
       <template #updatedInfo="{ row }">
         {{ row.updatedBy }}<br />

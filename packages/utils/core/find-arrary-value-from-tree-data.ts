@@ -47,7 +47,7 @@ export function toFlatten(
       return [
         ...pre,
         typeof parentId === 'undefined' ? cur : { ...cur, parentId },
-        ...(cur[children]?.length ? toFlatten(cur[children], cur[id]) : [])
+        ...(cur[children]?.length ? toFlatten(cur[children], { parentId: cur[id] }) : [])
       ]
     }, [])
   } catch (error) {

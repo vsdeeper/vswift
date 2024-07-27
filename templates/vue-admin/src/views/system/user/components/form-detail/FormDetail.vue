@@ -1,23 +1,35 @@
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
 import { useUserStore } from '@/stores/system/user'
+import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
 
 const formRef = ref<FormInstance>()
 const form = defineModel<Record<string, any>>({ default: () => ({}) })
 const departmentOptions = ref<Record<string, any>[]>([])
 const positionOptions = ref<Record<string, any>[]>([])
+const { getPositionData } = useUserStore()
 
 onMounted(() => {
   const { getdDepartmentData } = useUserStore()
   getdDepartmentData().then((res) => (departmentOptions.value = res ?? []))
 })
 
+watch(
+  () => form.value.departmentId,
+  async (val) => {
+    if (val) {
+      const res = await getPositionData(val)
+      positionOptions.value = res ?? []
+    }
+  },
+  { once: true, immediate: true }
+)
+
 async function onChange(key: string, val?: any) {
   switch (key) {
     case 'departmentId': {
       form.value.positionId = undefined
       positionOptions.value = []
-      const { getPositionData } = useUserStore()
       const res = await getPositionData(val)
       positionOptions.value = res ?? []
       break
@@ -41,7 +53,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-form ref="formRef" :model="form" label-width="100px" :inline="false">
+  <el-form ref="formRef" :model="form" label-width="90px" :inline="false">
     <el-form-item label="员工姓名" prop="name" :rules="[{ required: true, message: '必填项' }]">
       <el-input v-model="form.name" placeholder="请输入"></el-input>
     </el-form-item>
@@ -74,15 +86,14 @@ defineExpose({
       <el-input v-model="form.phone" placeholder="请输入"></el-input>
     </el-form-item>
     <el-form-item label="状态" prop="status">
-      <el-switch
-        v-model="form.status"
-        :active-value="1"
-        :inactive-value="2"
-        active-text="启用"
-        inactive-text="禁用"
-        inline-prompt
-      >
-      </el-switch>
+      <el-radio-group v-model="form.status">
+        <el-radio-button
+          v-for="item in EMPLOYEE_STATUS_OPTIONS"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-radio-group>
     </el-form-item>
     <el-form-item label="备注" prop="remark">
       <el-input v-model="form.remark" type="textarea" placeholder="请输入" autosize> </el-input>

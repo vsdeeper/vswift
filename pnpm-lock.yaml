@@ -117,8 +117,8 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1(vue@3.4.27(typescript@5.4.5))
       '@vswift/utils':
-        specifier: ^1.1.2
-        version: 1.1.2
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@vueuse/core':
         specifier: ^10.11.0
         version: 10.11.0(vue@3.4.27(typescript@5.4.5))
@@ -1046,9 +1046,6 @@ packages:
 
   '@volar/typescript@2.2.1':
     resolution: {integrity: sha512-Z/tqluR7Hz5/5dCqQp7wo9C/6tSv/IYl+tTzgzUt2NjTq95bKSsuO4E+V06D0c+3aP9x5S9jggLqw451hpnc6Q==}
-
-  '@vswift/utils@1.1.2':
-    resolution: {integrity: sha512-1jVLUDoNvuW32OluPnqFarC9N07pm4k/G7aE5Hrk+TWa5uBsStROh5gmPv216aCfvAPSEuMeFtEU2wCPZutpCQ==}
 
   '@vue/babel-helper-vue-transform-on@1.2.2':
     resolution: {integrity: sha512-nOttamHUR3YzdEqdM/XXDyCSdxMA9VizUKoroLX6yTyRtggzQMHXcmwh8a7ZErcJttIBIc9s68a1B8GZ+Dmvsw==}
@@ -4351,10 +4348,6 @@ snapshots:
     dependencies:
       '@volar/language-core': 2.2.1
       path-browserify: 1.0.1
-
-  '@vswift/utils@1.1.2':
-    dependencies:
-      xlsx-js-style: 1.2.0
 
   '@vue/babel-helper-vue-transform-on@1.2.2': {}
 
