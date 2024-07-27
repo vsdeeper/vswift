@@ -8,7 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppSetting: (typeof import('./../src/layout/main-layout/components/AppSetting.vue'))['default']
-    AsideMenu: (typeof import('../src/layout/main-layout/components/MenuBar.vue'))['default']
     ElAlert: (typeof import('element-plus/es'))['ElAlert']
     ElAside: (typeof import('element-plus/es'))['ElAside']
     ElAvatar: (typeof import('element-plus/es'))['ElAvatar']
@@ -64,7 +63,6 @@ declare module 'vue' {
     IconCommunity: (typeof import('./../src/components/icons/IconCommunity.vue'))['default']
     IconDocumentation: (typeof import('./../src/components/icons/IconDocumentation.vue'))['default']
     IconEcosystem: (typeof import('./../src/components/icons/IconEcosystem.vue'))['default']
-    IconSetting: (typeof import('./../src/components/icons/IconSetting.vue'))['default']
     IconSupport: (typeof import('./../src/components/icons/IconSupport.vue'))['default']
     IconTablerCircleDot: (typeof import('./../src/components/icons/IconTablerCircleDot.vue'))['default']
     IconTooling: (typeof import('./../src/components/icons/IconTooling.vue'))['default']

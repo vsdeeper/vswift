@@ -300,7 +300,7 @@ function onSetting() {
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 2;
+    z-index: 4;
     height: 100%;
     box-shadow: var(--vs-box-shadow);
     transition-duration: 0.2s;
@@ -327,7 +327,7 @@ function onSetting() {
     position: fixed;
     right: 0;
     top: 0;
-    z-index: 1;
+    z-index: 3;
     width: var(--my-header-width);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
@@ -383,7 +383,7 @@ function onSetting() {
   position: fixed;
   right: 30px;
   bottom: 30px;
-  z-index: 3000;
+  z-index: 2000;
 }
 .slide-fade-enter-active {
   transition: all 0.3s ease-out 0.3s;

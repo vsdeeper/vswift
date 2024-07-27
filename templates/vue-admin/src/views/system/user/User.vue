@@ -110,7 +110,6 @@ async function getTableList(params: PagingParams) {
 function onOperate(key: string, val?: any) {
   switch (key) {
     case 'add': {
-      console.log(1111)
       AddItemRef.value?.open()
       break
     }

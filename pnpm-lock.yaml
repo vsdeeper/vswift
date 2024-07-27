@@ -159,6 +159,12 @@ importers:
         specifier: ^4.3.0
         version: 4.3.2(vue@3.4.27(typescript@5.4.5))
     devDependencies:
+      '@commitlint/cli':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/node@20.12.7)(typescript@5.4.5)
+      '@commitlint/config-conventional':
+        specifier: ^19.2.2
+        version: 19.2.2
       '@iconify-json/ep':
         specifier: ^1.1.15
         version: 1.1.15
@@ -207,6 +213,12 @@ importers:
       glob:
         specifier: ^10.3.12
         version: 10.3.12
+      husky:
+        specifier: ^9.1.1
+        version: 9.1.1
+      lint-staged:
+        specifier: ^15.2.7
+        version: 15.2.7
       npm-run-all2:
         specifier: ^6.1.2
         version: 6.1.2
