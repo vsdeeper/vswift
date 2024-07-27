@@ -221,11 +221,12 @@ defineExpose({
       >
         <el-popconfirm
           v-if="item.showPopconfirm && displayTableOperateItem(item)"
+          :title="item.popconfirmTitle ?? `确定${item.label}吗？`"
           v-bind="item.popconfirmProps"
           @confirm="onOperate(item.value)"
         >
           <template #reference>
-            <el-button :type="item.buttonProps?.type ?? 'primary'" v-bind="item.buttonProps">
+            <el-button :type="item.type ?? 'primary'" v-bind="item.buttonProps">
               {{ item.label }}
             </el-button>
           </template>
@@ -233,7 +234,8 @@ defineExpose({
         <template v-else>
           <el-button
             v-if="displayTableOperateItem(item)"
-            v-bind="{ ...item.buttonProps, type: item.buttonProps?.type ?? 'primary' }"
+            :type="item.type ?? 'primary'"
+            v-bind="item.buttonProps"
             @click="onOperate(item.value)"
           >
             {{ item.label }}
