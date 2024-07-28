@@ -4,7 +4,9 @@ import { SComponent, type SComponentKey } from './components'
 import { pascal } from 'radash'
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 
-defineProps<VsSearchProps>()
+withDefaults(defineProps<VsSearchProps>(), {
+  showDividerLine: true
+})
 
 const emit = defineEmits<{
   (e: 'inquire', val: Record<string, any>): void
@@ -102,7 +104,7 @@ defineExpose({
           </el-col>
         </el-row>
       </el-form>
-      <el-divider direction="horizontal" />
+      <el-divider v-if="showDividerLine" direction="horizontal" />
     </template>
     <el-text v-else class="no-data" type="info" tag="i">未配置搜索选项</el-text>
   </div>
