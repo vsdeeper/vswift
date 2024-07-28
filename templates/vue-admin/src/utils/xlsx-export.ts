@@ -1,4 +1,4 @@
-// import * as XLSX from 'xlsx-js-style'
+import * as XLSX from 'xlsx-js-style'
 import type { XLSX$Utils, WorkSheet } from 'xlsx-js-style'
 
 /**
@@ -11,11 +11,9 @@ import type { XLSX$Utils, WorkSheet } from 'xlsx-js-style'
 export async function xlsxExport(
   exportData: Record<string, any>[],
   name?: string,
-  // eslint-disable-next-line no-unused-vars
   addStyleExc?: (XLSX: { utils: XLSX$Utils }, worksheet: WorkSheet) => void
 ) {
   try {
-    const XLSX = await import('xlsx-js-style')
     // 创建工作簿和工作表
     const workbook = XLSX.utils.book_new()
     const worksheet = XLSX.utils.json_to_sheet(exportData, { cellStyles: true, cellDates: true })

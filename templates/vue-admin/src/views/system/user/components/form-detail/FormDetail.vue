@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
 import { useUserStore } from '@/stores/system/user'
-import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
+import { EMPLOYEE_STATUS_OPTIONS } from '@/utils/constants'
 
 defineProps<{
   disabled?: boolean

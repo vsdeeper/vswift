@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import type { VsSearchOptions } from '.'
+import type { VsSearchProps } from '.'
 import { SComponent, type SComponentKey } from './components'
 import { pascal } from 'radash'
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 
-defineProps<{
-  options?: VsSearchOptions
-  labelWidth?: string | number
-}>()
+defineProps<VsSearchProps>()
 
 const emit = defineEmits<{
   (e: 'inquire', val: Record<string, any>): void

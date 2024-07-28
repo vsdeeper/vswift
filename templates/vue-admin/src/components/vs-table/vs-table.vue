@@ -1,42 +1,16 @@
 <script setup lang="ts">
-import type { VsRowOperateOptionItem, VsTableColumnItem, VsTableOperateItem } from '.'
+import type { VsTableOperateItem, VsTableProps } from '.'
 import TableColumn from './table-column.vue'
 import { getSlots } from './util'
-import type { LoadingBinding } from 'element-plus/es/components/loading/src/directive.mjs'
-import type { PaginationProps, TableColumnCtx, TableInstance, TableProps } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 
-const props = withDefaults(
-  defineProps<{
-    // 自定义属性
-    loading?: LoadingBinding
-    showIndex?: boolean
-    showSelection?: boolean
-    showPagination?: boolean
-    showRowOperate?: boolean
-    paginationAlign?: 'left' | 'right'
-    tableOperateAlign?: 'left' | 'right'
-    operateColumnWidth?: string | number
-    total?: number
-    tableData?: Record<string, any>[]
-    tableColumns?: VsTableColumnItem[]
-    rowOperateOptions?: VsRowOperateOptionItem[]
-    tableOperateOptions?: VsTableOperateItem[]
-    currentPage?: number
-    pageSize?: number
-
-    // 源属性
-    tableProps?: Partial<TableProps<Record<string, any>>>
-    operateColumnProps?: Partial<TableColumnCtx<any>>
-    paginationProps?: Partial<PaginationProps>
-  }>(),
-  {
-    loading: false,
-    showRowOperate: true,
-    showPagination: true,
-    paginationAlign: 'left',
-    tableOperateAlign: 'left'
-  }
-)
+const props = withDefaults(defineProps<VsTableProps>(), {
+  loading: false,
+  showRowOperate: true,
+  showPagination: true,
+  paginationAlign: 'left',
+  tableOperateAlign: 'left'
+})
 
 const emit = defineEmits<{
   // 以下自定义 emit 事件
@@ -214,9 +188,9 @@ defineExpose({
 
 <template>
   <div v-loading="loading" class="vs-table">
-    <div v-if="tableOperateOptions?.length" :class="['table-operate', tableOperateAlign]">
+    <div v-if="operateOptions?.length" :class="['table-operate', tableOperateAlign]">
       <template
-        v-for="(item, index) in tableOperateOptions"
+        v-for="(item, index) in operateOptions"
         :key="`tableOperateItem${item.value}${index}`"
       >
         <el-button
@@ -229,13 +203,7 @@ defineExpose({
         </el-button>
       </template>
     </div>
-    <el-table
-      v-if="tableColumns?.length"
-      ref="tableRef"
-      :data="tableData"
-      show-overflow-tooltip
-      v-bind="tableProps"
-    >
+    <el-table v-if="columns?.length" ref="tableRef" :data show-overflow-tooltip v-bind="tableProps">
       <template #append="scope">
         <slot name="append" v-bind="scope"></slot>
       </template>
@@ -244,15 +212,11 @@ defineExpose({
       </template>
       <el-table-column v-if="showSelection" type="selection" fixed="left" width="55" />
       <el-table-column v-if="showIndex" type="index" width="50" :index="(index) => index + 1" />
-      <TableColumn
-        v-for="(col, index) in tableColumns"
-        :key="`${col.label}${col.prop}${index}`"
-        :col
-      >
-        <template v-for="slot in getSlots(tableColumns)" #[slot]="scope">
+      <TableColumn v-for="(col, index) in columns" :key="`${col.label}${col.prop}${index}`" :col>
+        <template v-for="slot in getSlots(columns)" #[slot]="scope">
           <slot :name="slot" v-bind="scope" />
         </template>
-        <template v-for="slot in getSlots(tableColumns).map((e) => `${e}-header`)" #[slot]="scope">
+        <template v-for="slot in getSlots(columns).map((e) => `${e}-header`)" #[slot]="scope">
           <slot :name="slot" v-bind="scope" />
         </template>
       </TableColumn>

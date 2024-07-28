@@ -5,7 +5,8 @@ const { defineConfig } = require('eslint-define-config')
 module.exports = defineConfig({
   root: true,
   env: {
-    node: true
+    node: true,
+    browser: true
   },
   extends: ['eslint:recommended', 'plugin:prettier/recommended'],
   parser: 'vue-eslint-parser',

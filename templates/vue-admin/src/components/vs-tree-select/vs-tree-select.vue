@@ -4,7 +4,7 @@ import { Close } from '@element-plus/icons-vue'
 import type { TreeKey, TreeNodeData } from 'element-plus/es/components/tree-v2/src/types'
 import { type InputInstance, ElTree as MyTree, ElTreeV2 as MyTreeV2 } from 'element-plus'
 import type { VsTreeSelectProps, VsTreeSelectValue, VsTreeSelectValueItem } from '.'
-import { findArraryValueFromTreeData, isArraryObject } from '@vswift/utils'
+import { findArraryValueFromTreeData, isArraryObject } from './util'
 
 const props = withDefaults(defineProps<VsTreeSelectProps>(), {
   modelValue: undefined,
