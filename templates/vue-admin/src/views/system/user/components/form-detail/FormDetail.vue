@@ -3,6 +3,10 @@ import type { FormInstance } from 'element-plus'
 import { useUserStore } from '@/stores/system/user'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
 
+defineProps<{
+  disabled?: boolean
+}>()
+
 const formRef = ref<FormInstance>()
 const form = defineModel<Record<string, any>>({ default: () => ({}) })
 const departmentOptions = ref<Record<string, any>[]>([])
@@ -53,7 +57,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-form ref="formRef" :model="form" label-width="90px" :inline="false">
+  <el-form ref="formRef" :model="form" label-width="90px" :inline="false" :disabled>
     <el-form-item label="员工姓名" prop="name" :rules="[{ required: true, message: '必填项' }]">
       <el-input v-model="form.name" placeholder="请输入"></el-input>
     </el-form-item>

@@ -12,14 +12,16 @@ import { useAppSettingDataStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils'
 import { findArraryValueFromTreeData, getLabelByValue } from '@vswift/utils'
 import { format } from 'date-fns'
-import type { AddItemInstance, EditItemInstance } from './components'
+import type { AddItemInstance, CheckItemInstance, EditItemInstance } from './components'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/system/user'
 
 const AddItem = defineAsyncComponent(() => import('./components/add-item/AddItem.vue'))
 const EditItem = defineAsyncComponent(() => import('./components/edit-item/EditItem.vue'))
+const CheckItem = defineAsyncComponent(() => import('./components/check-item/CheckItem.vue'))
 const AddItemRef = ref<AddItemInstance>()
 const EditItemRef = ref<EditItemInstance>()
+const CheckItemRef = ref<CheckItemInstance>()
 
 const { getPageSize } = useAppSettingDataStore()
 const permissionCodes = ref(['add', 'check', 'edit', 'copy', 'delete'])
@@ -139,6 +141,7 @@ async function onOperate(key: string, val?: any) {
       break
     }
     case 'check': {
+      CheckItemRef.value?.open(val)
       break
     }
     case 'edit': {
@@ -266,4 +269,5 @@ const findArraryValuesFromTreeData = (
   </ViewWrapper>
   <AddItem ref="AddItemRef" />
   <EditItem ref="EditItemRef" />
+  <CheckItem ref="CheckItemRef" />
 </template>
