@@ -41,7 +41,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="show" title="编辑" @closed="onClosed">
+  <el-dialog class="adaptive-dialog" v-model="show" title="编辑" @closed="onClosed">
     <FormDetail ref="FormDetailRef" v-model="form" />
     <template #footer>
       <el-button @click="show = false">取消</el-button>

@@ -16,6 +16,7 @@ import logo from '@/assets/logo.svg'
   height: 60px;
   width: 100%;
   padding: 0 20px;
+  box-sizing: border-box;
   .my-image {
     flex: 0 0 30px;
     max-width: 30px;

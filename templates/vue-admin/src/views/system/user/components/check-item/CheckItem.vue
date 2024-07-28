@@ -17,7 +17,10 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="show" title="查看">
+  <el-dialog class="adaptive-dialog" v-model="show" title="查看">
     <FormDetail v-model="form" disabled />
+    <template #footer>
+      <el-button @click="show = false">关闭</el-button>
+    </template>
   </el-dialog>
 </template>

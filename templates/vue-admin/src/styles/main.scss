@@ -22,6 +22,6 @@ body {
 // 自适应弹框
 .adaptive-dialog {
   --vs-dialog-width: calc(100% - 2 * var(--vs-main-padding)) !important;
-  --vs-dialog-max-width: 900px;
+  --vs-dialog-max-width: 850px;
   max-width: var(--vs-dialog-max-width);
 }

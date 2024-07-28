@@ -2,6 +2,9 @@
 import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import MenuItem from './MenuItem.vue'
 import { storeToRefs } from 'pinia'
+import { Promotion } from '@element-plus/icons-vue'
+
+const isDev = import.meta.env.DEV
 
 defineProps<{
   mode?: 'horizontal' | 'vertical'
@@ -12,21 +15,37 @@ defineProps<{
 const { appSettingData } = storeToRefs(useAppSettingDataStore())
 const menuData = computed(() => useMenuDataStore().menuData)
 const uniqueOpened = computed(() => appSettingData.value?.menu.uniqueOpened)
+
+function onVisualDevelopment() {
+  window.open('https://vsdeeper.github.io/', '_blank')
+}
 </script>
 
 <template>
-  <el-menu
-    class="my-menu"
-    router
-    :mode
-    :collapse
-    :default-active
-    :collapse-transition="false"
-    :unique-opened
-    popper-class="my-menu-popper"
-  >
-    <MenuItem :menu-data />
-  </el-menu>
+  <div class="my-menu" :class="[{ 'is-dev': isDev }, mode]">
+    <el-menu
+      router
+      :mode
+      :collapse
+      :default-active
+      :collapse-transition="false"
+      :unique-opened
+      popper-class="my-menu-popper"
+    >
+      <MenuItem :menu-data />
+    </el-menu>
+    <el-button
+      v-if="isDev"
+      class="vd-btn"
+      type="info"
+      size="small"
+      link
+      @click="onVisualDevelopment"
+    >
+      可视化开发
+      <el-icon><TopRight /></el-icon>
+    </el-button>
+  </div>
 </template>
 
 <style lang="scss">
@@ -40,11 +59,39 @@ const uniqueOpened = computed(() => appSettingData.value?.menu.uniqueOpened)
 }
 </style>
 <style lang="scss" scoped>
-ul[class*='-menu--vertical'] {
-  &.my-menu {
-    height: calc(100% - 60px);
+.my-menu {
+  position: relative;
+  flex: 1;
+  height: calc(100% - 60px);
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+  &.is-dev {
+    padding-bottom: 50px;
+    .vd-btn {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+  &.horizontal {
+    height: unset;
+    padding: 0;
+    &.is-dev {
+      padding: 0 105px 0 0;
+      .vd-btn {
+        position: absolute;
+        right: 12px;
+        left: unset;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+  }
+  ul[class*='-menu--vertical'] {
     border-right-width: 0;
-    padding: 0 15px;
+    height: 100%;
+    overflow: auto;
     :deep(li[class*='-menu-item']) {
       line-height: 1;
       margin-bottom: 4px;
@@ -66,10 +113,9 @@ ul[class*='-menu--vertical'] {
       }
     }
   }
-}
-ul[class*='-menu--horizontal'] {
-  &.my-menu {
+  ul[class*='-menu--horizontal'] {
     width: 100%;
+    border-bottom: 0 none;
     :deep(li[class*='-menu-item']) {
       border-bottom: 0 none;
     }

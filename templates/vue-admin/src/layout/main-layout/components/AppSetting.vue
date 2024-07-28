@@ -235,7 +235,7 @@ defineExpose({
     }
   }
   & + .flex-box {
-    margin-top: 25px;
+    margin-top: 20px;
   }
   :deep(div[class*='-switch']) {
     height: 16px;
