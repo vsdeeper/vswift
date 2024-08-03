@@ -253,7 +253,7 @@ defineExpose({
                 :key="item.key"
                 @click="onGoto(item.key)"
               >
-                <el-avatar shape="square" fit="contain" :src="item.icon"></el-avatar>
+                <el-avatar shape="square" fit="contain" size="large" :src="item.icon"></el-avatar>
                 <div class="info-box">
                   <h4>{{ item.title }}</h4>
                   <div>{{ item.desc }}</div>
@@ -322,7 +322,7 @@ defineExpose({
 .notification-dropdown-poper,
 .profile-dropdown-poper {
   div[class*='-dropdown__list'] {
-    width: 300px;
+    width: 320px;
     overflow: hidden;
     header {
       display: flex;
@@ -391,7 +391,7 @@ defineExpose({
         padding: 5px 0;
         margin-left: 15px;
         h3 {
-          font-size: 14px;
+          font-size: 16px;
           margin: 0;
         }
         div {
@@ -415,7 +415,7 @@ defineExpose({
 
     li[class*='-dropdown-menu__item'] {
       span[class*='-avatar'] {
-        padding: 10px;
+        padding: 12px;
         background-color: var(--vs-color-primary-light-9);
       }
     }

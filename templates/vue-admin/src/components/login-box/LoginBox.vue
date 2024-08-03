@@ -87,7 +87,7 @@ function onCloseAlert() {
   <div class="login-box">
     <header>
       <h2>欢迎来到 Vsdeeper</h2>
-      <p>您的管理平台</p>
+      <p>您的快捷管理平台</p>
     </header>
     <section class="sign-in-with">
       <div class="button-box">
@@ -142,10 +142,11 @@ function onCloseAlert() {
   header {
     h2 {
       font-size: 20px;
+      letter-spacing: 1px;
       margin: 0 0 5px 0;
     }
     p {
-      letter-spacing: 2px;
+      letter-spacing: 1px;
       margin: 0 0 30px 0;
     }
   }
