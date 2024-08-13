@@ -12,9 +12,9 @@ export function recursiveTreeData(
   options?: { children?: string }
 ) {
   const { children = 'children' } = options ?? {}
-  treeData.forEach((node) => {
-    callback(node)
-    node[children]?.length && recursiveTreeData(node[children], callback, options)
+  treeData.forEach((item) => {
+    callback(item)
+    item[children]?.length && recursiveTreeData(item[children], callback, options)
   })
   return treeData
 }
