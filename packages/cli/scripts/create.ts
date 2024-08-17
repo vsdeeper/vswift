@@ -5,6 +5,7 @@ import path from 'path'
 import { dirname } from '../utils/index.js'
 import ora from 'ora'
 import chalk from 'chalk'
+import os from 'os'
 
 export async function create() {
   const spinner = ora({ spinner: 'line' })
@@ -35,7 +36,7 @@ export async function create() {
           consola.error('Project template not found')
           return
         }
-        spinner.start('downloading...')
+        spinner.start('downloading...' + os.EOL)
         await copy(source, dest, {
           filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
         })

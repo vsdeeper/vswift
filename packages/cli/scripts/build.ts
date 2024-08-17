@@ -10,6 +10,7 @@ import { globSync } from 'glob'
 import ora from 'ora'
 import { dirname } from '../utils/index.js'
 import { build } from 'vite'
+import os from 'os'
 
 export async function buildTask(options: CommandOptions) {
   const { pkg } = options
@@ -22,11 +23,11 @@ export async function buildTask(options: CommandOptions) {
     case 'cli': {
       spinner.start('Type checking...')
       await typeCheck(options)
-      spinner.succeed('Type check')
+      spinner.succeed('Type check done')
 
-      spinner.start('Clear the old compilation directory...')
+      spinner.start('Clear old compilation directory...')
       await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
-      spinner.succeed('The old compilation directory has been cleared')
+      spinner.succeed('Clear old compilation directory done')
 
       spinner.start('Start Compiling...')
       await $({
@@ -43,28 +44,28 @@ export async function buildTask(options: CommandOptions) {
         const formatted = await prettier.format(text, formatOptions!)
         writeFileSync(filePath, formatted)
       }
-      spinner.succeed('Compiled files format')
+      spinner.succeed('Compiled files format done')
 
-      spinner.start('Copy templates to the build directory...')
+      spinner.start('Copy templates to build directory...')
       const dest = path.resolve(process.cwd(), 'packages/cli/dist/templates')
       const source = path.resolve(dirname(), `../../../../templates`)
       await copy(source, dest, {
         filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
       })
-      spinner.succeed('Copy templates to the build directory')
+      spinner.succeed('Copy templates to build directory done')
       spinner.succeed('Build success!!!')
       break
     }
     case 'utils': {
-      spinner.start('Clear old compilation directory...')
+      spinner.start('Clear old compilation directory...' + os.EOL /**换行符 */)
       await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
-      spinner.succeed('Old compilation directory has been cleared')
+      spinner.succeed('Copy templates to build directory done')
 
-      spinner.start('Type Outputting...')
+      spinner.start('Type Outputting...' + os.EOL)
       await $({
-        stdio: 'inherit'
+        stdin: 'inherit'
       })`pnpm tsc --project packages/${pkg}/tsconfig.build.json`
-      spinner.succeed('Type Output')
+      spinner.succeed('Type Output done')
 
       await build({
         root: path.resolve(process.cwd(), `packages/${pkg}`),
@@ -73,9 +74,15 @@ export async function buildTask(options: CommandOptions) {
           sourcemap: true,
           lib: {
             entry: 'index.ts',
-            name: 'VswiftUtils',
-            fileName: 'index',
+            fileName: (format) => {
+              return `index.${format === 'es' ? 'js' : 'cjs'}`
+            },
             formats: ['es', 'cjs']
+          },
+
+          rollupOptions: {
+            // 确保外部化处理那些你不想打包进库的依赖
+            external: ['xlsx-js-style']
           }
         }
       })

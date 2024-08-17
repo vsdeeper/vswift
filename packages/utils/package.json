@@ -2,7 +2,6 @@
   "name": "@vswift/utils",
   "version": "1.1.2",
   "description": "Quickly develop public methods",
-  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -16,9 +15,13 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
+  
   "keywords": [
     "utils",
     "es",
     "typescript"
-  ]
+  ],
+  "dependencies": {
+    "xlsx-js-style": "^1.2.0"
+  }
 }

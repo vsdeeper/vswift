@@ -93,6 +93,7 @@ importers:
       ora:
         specifier: ^8.0.1
         version: 8.0.1
+      os: {specifier: ^0.1.2, version: 0.1.2}
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -108,7 +109,11 @@ importers:
 
   packages/unplugin: {}
 
-  packages/utils: {}
+  packages/utils:
+    dependencies:
+      xlsx-js-style:
+        specifier: ^1.2.0
+        version: 1.2.0
 
   templates/vue-admin:
     dependencies:
@@ -2592,6 +2597,9 @@ packages:
   os-tmpdir@1.0.2:
     resolution: {integrity: sha512-D2FR03Vir7FIu45XBY20mTb+/ZSWB00sjU9jdQXt83gDrI4Ztz5Fs7/yy74g2N5SVQY4xY1qDr4rNddwYRVX0g==}
     engines: {node: '>=0.10.0'}
+
+  os@0.1.2:
+    resolution: {integrity: sha512-ZoXJkvAnljwvc56MbvhtKVWmSkzV712k42Is2mA0+0KTSRakq5XXuXpjZjgAt9ctzl51ojhQWakQQpmOvXWfjQ==}
 
   outdent@0.5.0:
     resolution: {integrity: sha512-/jHxFIzoMXdqPzTaCpFzAAWhpkSjZPF4Vsn6jAfNpmbH/ymsmd7Qc6VE9BGn0L6YMj6uwpQLxCECpus4ukKS9Q==}
@@ -6050,6 +6058,8 @@ snapshots:
       strip-ansi: 7.1.0
 
   os-tmpdir@1.0.2: {}
+
+  os@0.1.2: {}
 
   outdent@0.5.0: {}
 
