@@ -1,4 +1,4 @@
-import { type NodeKey } from '.'
+import { type NodeKey } from '..'
 /**
  * 从树形数据中找到目标ID所在的节点对象
  * @param targetId 目标ID

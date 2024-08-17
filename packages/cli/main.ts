@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { parsePackage } from './utils/index.js'
-import { buildTask, release, create, search } from './scripts/index.js'
+import { buildTask, release, create, dev, search } from './scripts/index.js'
 
 const program = new Command()
 
@@ -12,6 +12,15 @@ program
     if (version) {
       console.log(parsePackage('cli').version)
     }
+  })
+
+program
+  .command('dev')
+  .description('run a package or template for development')
+  .option('-p, --pkg <name>', 'package name to perform dev, optional value: cli')
+  .option('-t, --tpl <name>', 'template name to perform dev, optional value: vue-admin')
+  .action((options) => {
+    return dev(options)
   })
 
 program

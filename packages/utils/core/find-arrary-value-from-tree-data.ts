@@ -1,4 +1,4 @@
-import { type NodeKey } from '.'
+import { type NodeKey } from '..'
 /**
  * 根据子ID查询其所有父级元素，包含其本身
  * @param targetId 要查询的目标id

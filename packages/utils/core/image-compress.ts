@@ -8,7 +8,7 @@ export function imageCompress(imgFile: File | Blob, quality?: number) {
     try {
       console.log('imageCompress压缩前文件信息: ', imgFile)
       const fileReader = new FileReader()
-      fileReader.onload = ev => {
+      fileReader.onload = (ev) => {
         const img = new Image()
         img.src = ev.target?.result as string
         img.onload = () => {

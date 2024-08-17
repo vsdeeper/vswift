@@ -7,11 +7,12 @@
  */
 export function recursiveTreeData(
   treeData: Record<string, any>[],
+  // eslint-disable-next-line no-unused-vars
   callback: (node: Record<string, any>) => void,
-  options?: { children?: string },
+  options?: { children?: string }
 ) {
   const { children = 'children' } = options ?? {}
-  treeData.forEach(node => {
+  treeData.forEach((node) => {
     callback(node)
     node[children]?.length && recursiveTreeData(node[children], callback, options)
   })

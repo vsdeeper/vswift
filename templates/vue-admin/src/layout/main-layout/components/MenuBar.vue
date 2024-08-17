@@ -2,7 +2,6 @@
 import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
 import MenuItem from './MenuItem.vue'
 import { storeToRefs } from 'pinia'
-import { Promotion } from '@element-plus/icons-vue'
 
 const isDev = import.meta.env.DEV
 

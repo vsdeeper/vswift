@@ -1,4 +1,4 @@
-import type { NodeKey } from '.'
+import type { NodeKey } from '..'
 
 /**
  * 根据value值获取label名称
@@ -12,11 +12,11 @@ import type { NodeKey } from '.'
 export function getLabelByValue(
   target: NodeKey,
   data: Record<string, any>[],
-  options?: { label?: string; value?: string; emptyText?: string },
+  options?: { label?: string; value?: string; emptyText?: string }
 ) {
   try {
     const { label = 'label', value = 'value', emptyText = '--' } = options ?? {}
-    const find = data.find(e => e[value] === target)
+    const find = data.find((e) => e[value] === target)
     return (find && find[label]) ?? emptyText
   } catch (error) {
     console.error('getLabelByValue: ', error)

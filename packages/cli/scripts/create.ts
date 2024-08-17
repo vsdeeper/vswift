@@ -1,13 +1,13 @@
 import consola from 'consola'
 import { copy, pathExists } from 'fs-extra/esm'
 import inquirer from 'inquirer'
-import { createSpinner, type Spinner } from 'nanospinner'
 import path from 'path'
 import { dirname } from '../utils/index.js'
-
-let spinner: Spinner | undefined
+import ora from 'ora'
+import chalk from 'chalk'
 
 export async function create() {
+  const spinner = ora({ spinner: 'line' })
   inquirer
     .prompt([
       {
@@ -30,26 +30,19 @@ export async function create() {
       }
       const dest = path.resolve(process.cwd(), `${projectName}`)
       if (templateName === 'vue-admin') {
-        const source = await getSource(templateName)
-        spinner = createSpinner('downloading...', { color: 'green' }).start()
+        const source = path.resolve(dirname(), `../templates/${templateName}/`)
+        if (!(await pathExists(source)) /** source不存在 */) {
+          consola.error('Project template not found')
+          return
+        }
+        spinner.start('downloading...')
         await copy(source, dest, {
           filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
         })
-        spinner.success({ text: `Your project template has been created, see: ${dest}` })
+        spinner.succeed(`Your project template has been created, see:  ${chalk.green(dest)}`)
       }
     })
     .catch((error) => {
-      spinner?.error({ text: 'create failed' })
       consola.error(error)
     })
-}
-
-async function getSource(templateName: string) {
-  // 从dist目录中查找
-  const source = path.resolve(dirname(), `../templates/${templateName}/`)
-  if (await pathExists(source) /** source存在 */) return source
-  else {
-    // dist目录中不存在source，说明是开发环境
-    return path.resolve(dirname(), `../../../../templates/${templateName}/`)
-  }
 }

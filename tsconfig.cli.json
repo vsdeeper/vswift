@@ -1,6 +1,6 @@
 {
   "include": ["packages/cli/**/*.ts"],
-  "exclude": ["packages/cli/**/__tests__/*", "packages/cli/dist/**/*"],
+  "exclude": ["**/__tests__/*", "**/dist/**/*"],
   "compilerOptions": {
     "target": "ESNext",
     "module": "NodeNext",

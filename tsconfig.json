@@ -8,10 +8,7 @@
       "path": "./tsconfig.cli.json"
     },
     {
-      "path": "./tsconfig.unplugin.json"
-    },
-    {
-      "path": "./tsconfig.utils.json"
+      "path": "./tsconfig.pkg.json"
     }
   ]
 }

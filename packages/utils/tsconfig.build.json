@@ -1,7 +1,7 @@
 {
   "extends": "@vue/tsconfig/tsconfig.lib.json",
-  "include": ["packages/utils/**/*.ts"],
-  "exclude": ["packages/utils/**/__tests__/*", "packages/utils/dist/**/*"],
+  "include": ["core/**/*.ts", "index.ts"],
+  "exclude": ["__tests__/**", "dist/**"],
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
@@ -10,7 +10,7 @@
     "verbatimModuleSyntax": true,
     "noImplicitAny": false,
     "strict": true,
-    "outDir": "packages/utils/dist",
-    "declarationDir": "packages/utils/dist/types"
+    "outDir": "dist",
+    "declarationDir": "dist/types"
   }
 }

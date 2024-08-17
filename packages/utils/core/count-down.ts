@@ -4,6 +4,7 @@
  * @param change 每秒变化时的回调
  * @param done 倒计时完成时的回调
  */
+// eslint-disable-next-line no-unused-vars
 export function countDown(seconds: number, change: (seconds: number) => void, done?: () => void) {
   const timer = setInterval(() => {
     if (seconds--) change(seconds)
