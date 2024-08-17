@@ -525,8 +525,8 @@ defineExpose({
           &::after {
             width: 4px;
             height: 4px;
-            border-radius: var(--zonst-components-border-radius-circle);
-            background-color: var(--zonst-components-color-white);
+            border-radius: var(--vs-components-border-radius-circle);
+            background-color: var(--vs-components-color-white);
             content: '';
             position: absolute;
             left: 50%;
