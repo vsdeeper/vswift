@@ -5,25 +5,31 @@ import Cookies from 'js-cookie'
 import { TOKEN_STORAGE_KEY } from './constants'
 
 const MODE = import.meta.env.VITE_MODE
-const BASE_URL = import.meta.env.BASE_URL
+const API_DOMAIN = import.meta.env.VITE_API_DOMAIN
+const API_BASE_PATH = import.meta.env.VITE_API_BASE_PATH
 
-/** config在初始化项目时将被vswift修改 */
-export const config: Record<string, any> = {
-  http: {
-    // 接口域名默认与页面域名一致，根据需要添加域名
-    // baseURL 环境属性名称与 import.meta.env.MODE 一致
-    baseURL: {
+const config = {
+  // 接口域名默认与页面域名一致，根据需要添加域名
+  apiDomain: {
+    dev: API_DOMAIN,
+    test: API_DOMAIN,
+    prod: API_DOMAIN
+  },
+  basePath: API_BASE_PATH,
+  // 根据需要添加配置第三方接口...
+  thirdPartyConfig: {
+    apiDomain: {
       dev: '/',
       test: '/',
       prod: '/'
-    }
+    },
+    basePath: ''
   }
-  // 根据需要添加配置第三方接口...
 }
 
 // 默认 http 实例
 const http: AxiosInstance = axios.create({
-  baseURL: config.http.baseURL[MODE],
+  baseURL: config.apiDomain[MODE] + config.basePath,
   // 请求超时设置，默认10秒
   timeout: 10000
 })
@@ -73,7 +79,7 @@ http.interceptors.response.use(
               router.replace({
                 path: '/login',
                 query: {
-                  redirect_url: getRedirectUrl(BASE_URL)
+                  redirect_url: getRedirectUrl()
                 }
               })
             }
@@ -87,12 +93,12 @@ http.interceptors.response.use(
   }
 )
 
-function getRedirectUrl(separator: string) {
+function getRedirectUrl(base?: string) {
   try {
     const pathname = window.location.pathname
     const search = window.location.search
-    if (separator === '/') return `${pathname}${search}`
-    else return `/${pathname.split(separator)[1]}${search}`
+    if (!base || base === '/') return `${pathname}${search}`
+    else return `/${pathname.split(base)[1]}${search}`
   } catch (error) {
     console.error('getRedirectUrl ->', error)
   }

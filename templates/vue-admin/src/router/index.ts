@@ -8,10 +8,8 @@ import { useMenuDataStore, useUserInfoStore } from '@/stores/global'
 
 NProgress.configure({ showSpinner: true, minimum: 0.1 })
 
-const BASE_URL = import.meta.env.BASE_URL
-
 const router = createRouter({
-  history: createWebHistory(BASE_URL),
+  history: createWebHistory(),
   scrollBehavior(/** to, from, savedPosition */) {
     // 始终滚动到顶部
     return { top: 0 }

@@ -2,15 +2,49 @@ import consola from 'consola'
 import { copy, pathExists, pathExistsSync } from 'fs-extra/esm'
 import inquirer from 'inquirer'
 import path from 'path'
-import { dirname, parseConfig } from '../utils/index.js'
+import { dirname, transformVueAdmin, parseConfig } from '../utils/index.js'
 import ora from 'ora'
 import chalk from 'chalk'
 import os from 'os'
+import { readFileSync } from 'fs'
 
 export async function create() {
   const spinner = ora({ spinner: 'line' })
-  inquirer
-    .prompt([
+  const config = parseConfig()
+  let answer: Record<string, any> | undefined
+  let configFilePath: string | undefined
+  let configData: Record<string, any> | undefined
+  if (config.downloadDir) {
+    configFilePath = `${config.downloadDir}/${config.fileName ? config.fileName + '.json' : 'vswift-project.config.json'}`
+    if (pathExistsSync(configFilePath)) {
+      configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
+      // 询问是否根据配置文件转换生成
+      answer = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'isConfigFile',
+          message: `Whether to create project based on the configuration file: ${configFilePath}`
+        }
+      ])
+    }
+  }
+
+  if (answer?.isConfigFile /** 根据配置文件转换生成 */) {
+    spinner.start('Downloading...' + os.EOL)
+    const source = await getSource('vue-admin' /**暂时只支持vue-admin */)
+    const dest = path.resolve(process.cwd(), `${configData!.options.name || 'vswift-project'}`)
+    await copy(source, dest, {
+      filter: (src) => !(src.endsWith('dist') || src.endsWith('node_modules'))
+    })
+    spinner.succeed('Download done')
+
+    spinner.start('Transforming...' + os.EOL)
+    await transformVueAdmin(dest, configFilePath!)
+    spinner.succeed(
+      `Transform done, your project template has been created, see:  ${chalk.green(dest)}`
+    )
+  } else {
+    const { projectName, templateName } = await inquirer.prompt([
       {
         type: 'input',
         name: 'projectName',
@@ -24,56 +58,22 @@ export async function create() {
         choices: ['vue-admin', 'vue-uniapp']
       }
     ])
-    .then(async ({ projectName, templateName }) => {
-      if (templateName === 'vue-uniapp') {
-        consola.info('vue-uniapp is coming soon...')
-        return
-      }
 
+    if (templateName === 'vue-admin') {
+      spinner.start('Downloading...' + os.EOL)
+      const source = await getSource(templateName)
       const dest = path.resolve(process.cwd(), `${projectName}`)
-      if (templateName === 'vue-admin') {
-        const source = await getSource(templateName)
-        if (!(await pathExists(source)) /** source不存在 */) {
-          consola.error('Project template not found')
-          return
-        }
+      await copy(source, dest, {
+        filter: (src) => !(src.endsWith('dist') || src.endsWith('node_modules'))
+      })
+      spinner.succeed(`Your project template has been created, see:  ${chalk.green(dest)}`)
+    }
 
-        const config = parseConfig()
-        let answer: Record<string, any> | undefined
-        if (config.downloadDir) {
-          const configFilePath = `${config.downloadDir}/${config.configFileName ? config.configFileName + '.json' : 'vswift-project.config.json'}`
-          if (pathExistsSync(configFilePath)) {
-            answer = await inquirer.prompt([
-              {
-                type: 'confirm',
-                name: 'isConfigFile',
-                message: `Whether to create project based on the configuration file: ${configFilePath}`
-              }
-            ])
-          }
-        }
-
-        spinner.start('downloading...' + os.EOL)
-        await copy(source, dest, {
-          filter: (source) => {
-            if (source.endsWith('dist') || source.endsWith('node_modules')) {
-              return false
-            } else {
-              if (answer?.isConfigFile /** 根据配置文件创建项目 */) {
-                // 根据配置修改原始项目...
-                return true
-              } else {
-                return true
-              }
-            }
-          }
-        })
-        spinner.succeed(`Your project template has been created, see:  ${chalk.green(dest)}`)
-      }
-    })
-    .catch((error) => {
-      consola.error(error)
-    })
+    if (templateName === 'vue-uniapp') {
+      consola.info('vue-uniapp is coming soon...')
+      return
+    }
+  }
 }
 
 async function getSource(templateName: string) {

@@ -26,10 +26,10 @@ configCommand
   })
 
 configCommand
-  .command('configFileName <name>')
+  .command('fileName <name>')
   .description('config file name for vswift, it is the export file name of visual development data')
   .action((options) => {
-    return config('configFileName', options)
+    return config('fileName', options)
   })
 
 configCommand
