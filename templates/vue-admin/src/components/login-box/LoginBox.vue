@@ -86,7 +86,7 @@ function onCloseAlert() {
 <template>
   <div class="login-box">
     <header>
-      <h2>欢迎来到 Vsdeeper</h2>
+      <h2>欢迎来到 Vswift</h2>
       <p>您的快捷管理平台</p>
     </header>
     <section class="sign-in-with">

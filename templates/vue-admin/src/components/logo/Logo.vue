@@ -5,7 +5,7 @@ import logo from '@/assets/logo.svg'
 <template>
   <div class="logo">
     <el-image class="my-image" :src="logo" fit="contain"></el-image>
-    <span class="name"> Vsdeeper </span>
+    <span class="name"> Vswift </span>
   </div>
 </template>
 
