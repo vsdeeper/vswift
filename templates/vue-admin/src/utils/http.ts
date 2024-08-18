@@ -7,7 +7,8 @@ import { TOKEN_STORAGE_KEY } from './constants'
 const MODE = import.meta.env.VITE_MODE
 const BASE_URL = import.meta.env.BASE_URL
 
-const config: Record<string, any> = {
+/** config在初始化项目时将被vswift修改 */
+export const config: Record<string, any> = {
   http: {
     // 接口域名默认与页面域名一致，根据需要添加域名
     // baseURL 环境属性名称与 import.meta.env.MODE 一致

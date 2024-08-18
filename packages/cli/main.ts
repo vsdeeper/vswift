@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { parsePackage } from './utils/index.js'
-import { buildTask, release, create, dev, search } from './scripts/index.js'
+import { config, buildTask, release, create, dev, search } from './scripts/index.js'
 
 const program = new Command()
 
@@ -14,6 +14,37 @@ program
     }
   })
 
+const configCommand = program.command('config').description('config vswift')
+configCommand
+  .command('downloadDir <path>')
+  .description(
+    'config download directory for vswift, it is the export directory of visual development data'
+  )
+  .action((options) => {
+    return config('downloadDir', options)
+  })
+
+configCommand
+  .command('get <name>')
+  .description('get the specified configuration')
+  .action((options) => {
+    return config('get', options)
+  })
+
+configCommand
+  .command('clear')
+  .description('clear all configuration')
+  .action(() => {
+    return config('clear')
+  })
+
+configCommand
+  .command('delete <name>')
+  .description('delete the specified configuration')
+  .action((options) => {
+    return config('delete', options)
+  })
+
 program
   .command('dev')
   .description('run a package or template for development')
@@ -25,7 +56,7 @@ program
 
 program
   .command('build')
-  .description('build, frame usage')
+  .description('optional build a package')
   .option('-p, --pkg <name>', 'package name to perform build, optional value: utils | components')
   .action((options) => {
     return buildTask(options)
@@ -33,7 +64,7 @@ program
 
 program
   .command('release')
-  .description('release, frame usage')
+  .description('optional release a package')
   .option('-p, --pkg <name>', 'package name to perform release, optional value: utils | components')
   .action((options) => {
     return release(options)

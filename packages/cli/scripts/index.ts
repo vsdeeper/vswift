@@ -3,6 +3,7 @@ export * from './type-check.js'
 export * from './release.js'
 export * from './create.js'
 export * from './dev.js'
+export * from './config.js'
 export * from './search.js'
 
 export type PkgName = 'cli' | 'utils'
