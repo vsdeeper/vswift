@@ -26,6 +26,13 @@ export async function config(key: string, val?: string) {
       }
       break
     }
+    case 'configFileName': {
+      const newConfigStr = changeConfig(key, val!, configStr)
+      if (newConfigStr !== configStr) {
+        writeFileSync(configPath, newConfigStr)
+      }
+      break
+    }
   }
 }
 

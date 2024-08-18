@@ -15,6 +15,7 @@ program
   })
 
 const configCommand = program.command('config').description('config vswift')
+
 configCommand
   .command('downloadDir <path>')
   .description(
@@ -22,6 +23,13 @@ configCommand
   )
   .action((options) => {
     return config('downloadDir', options)
+  })
+
+configCommand
+  .command('configFileName <name>')
+  .description('config file name for vswift, it is the export file name of visual development data')
+  .action((options) => {
+    return config('configFileName', options)
   })
 
 configCommand

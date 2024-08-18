@@ -29,6 +29,7 @@ export async function create() {
         consola.info('vue-uniapp is coming soon...')
         return
       }
+
       const dest = path.resolve(process.cwd(), `${projectName}`)
       if (templateName === 'vue-admin') {
         const source = await getSource(templateName)
@@ -36,27 +37,29 @@ export async function create() {
           consola.error('Project template not found')
           return
         }
+
         const config = parseConfig()
-        let answerOfConfigFile: boolean | undefined
+        let answer: Record<string, any> | undefined
         if (config.downloadDir) {
-          const configFilePath = `${config.downloadDir}/${config.configFileName ?? 'vswift-project.config.json'}`
+          const configFilePath = `${config.downloadDir}/${config.configFileName ? config.configFileName + '.json' : 'vswift-project.config.json'}`
           if (pathExistsSync(configFilePath)) {
-            answerOfConfigFile = await inquirer.prompt([
+            answer = await inquirer.prompt([
               {
                 type: 'confirm',
-                name: 'configFile',
-                message: `Whether to create a project based on the configuration file: ${config.downloadDir}/${config.configFileName ?? 'vswift-project.config.json'}`
+                name: 'isConfigFile',
+                message: `Whether to create project based on the configuration file: ${configFilePath}`
               }
             ])
           }
         }
+
         spinner.start('downloading...' + os.EOL)
         await copy(source, dest, {
           filter: (source) => {
             if (source.endsWith('dist') || source.endsWith('node_modules')) {
               return false
             } else {
-              if (answerOfConfigFile /** 根据配置文件创建项目 */) {
+              if (answer?.isConfigFile /** 根据配置文件创建项目 */) {
                 // 根据配置修改原始项目...
                 return true
               } else {
