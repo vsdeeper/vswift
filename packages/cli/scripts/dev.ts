@@ -24,7 +24,7 @@ export async function dev(options: CommandOptions) {
   } else if (tpl /** template模板 */) {
     switch (tpl) {
       case 'vue-admin': {
-        await $({ stdio: 'inherit' })`pnpm --dir templates/vue-admin dev`
+        await $({ stdio: 'inherit' })`pnpm --dir templates/${tpl} dev`
         break
       }
       default: {
