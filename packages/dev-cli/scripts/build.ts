@@ -3,12 +3,10 @@ import { consola } from 'consola'
 import { copy, remove } from 'fs-extra/esm'
 import path from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { typeCheck } from './index.js'
 import type { CommandOptions } from './index.js'
 import prettier from 'prettier'
 import { globSync } from 'glob'
 import ora from 'ora'
-import { dirname } from '../utils/index.js'
 import { build } from 'vite'
 import os from 'os'
 
@@ -21,10 +19,6 @@ export async function buildTask(options: CommandOptions) {
   const spinner = ora({ spinner: 'line' })
   switch (pkg) {
     case 'cli': {
-      spinner.start('Type checking...')
-      await typeCheck(options)
-      spinner.succeed('Type check done')
-
       spinner.start('Clear old compilation directory...')
       await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
       spinner.succeed('Clear old compilation directory done')
@@ -32,7 +26,7 @@ export async function buildTask(options: CommandOptions) {
       spinner.start('Start Compiling...')
       await $({
         stdio: 'inherit'
-      })`pnpm tsc --project tsconfig.cli.json`
+      })`pnpm tsc --project tsconfig.${pkg}.json`
       spinner.succeed('Compilation done')
 
       spinner.start('Formatting compiled files...')
@@ -47,13 +41,13 @@ export async function buildTask(options: CommandOptions) {
       spinner.succeed('Compiled files format done')
 
       spinner.start('Copy templates to build directory...')
-      const dest = path.resolve(process.cwd(), 'packages/cli/dist/templates')
-      const source = path.resolve(dirname(), `../../../../templates`)
+      const dest = path.resolve(process.cwd(), `packages/${pkg}/dist/templates`)
+      const source = path.resolve(process.cwd(), `templates`)
       await copy(source, dest, {
         filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
       })
       spinner.succeed('Copy templates to build directory done')
-      spinner.succeed('Build success!!!')
+      spinner.succeed('Build success')
       break
     }
     case 'utils': {
@@ -61,11 +55,11 @@ export async function buildTask(options: CommandOptions) {
       await remove(path.resolve(process.cwd(), `packages/${pkg}/dist`))
       spinner.succeed('Copy templates to build directory done')
 
-      spinner.start('Type Outputting...' + os.EOL)
+      spinner.start('Type outputting...' + os.EOL)
       await $({
         stdin: 'inherit'
       })`pnpm tsc --project packages/${pkg}/tsconfig.build.json`
-      spinner.succeed('Type Output done')
+      spinner.succeed('Type output done\n')
 
       await build({
         root: path.resolve(process.cwd(), `packages/${pkg}`),

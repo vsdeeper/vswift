@@ -1,6 +1,6 @@
-export * from './create.js'
-export * from './config.js'
-export * from './search.js'
+export * from './build.js'
+export * from './release.js'
+export * from './dev.js'
 
 export type PkgName = 'cli' | 'utils'
 export type TplName = 'vue-admin'

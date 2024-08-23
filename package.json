@@ -15,10 +15,10 @@
   ],
   "scripts": {
     "preinstall": "only-allow pnpm",
-    "dev": "vswift dev",
-    "dev:cli": "tsc --watch --project tsconfig.cli.json",
-    "build": "vswift build",
-    "release": "vswift release",
+    "dev": "dev-vswift dev",
+    "dev:cli": "tsc --watch --project tsconfig.dev-cli.json",
+    "build": "dev-vswift build",
+    "release": "dev-vswift release",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier . --write",
     "prepare": "husky"
@@ -36,13 +36,13 @@
     ]
   },
   "devDependencies": {
+    "dev-cli": "workspace:*",
     "@changesets/cli": "^2.27.1",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@rushstack/eslint-patch": "^1.8.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.12.5",
-    "@vswift/cli": "workspace:*",
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.57.0",
     "eslint-define-config": "^2.1.0",

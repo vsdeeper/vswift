@@ -8,6 +8,9 @@
       "path": "./tsconfig.cli.json"
     },
     {
+      "path": "./tsconfig.dev-cli.json"
+    },
+    {
       "path": "./tsconfig.pkg.json"
     }
   ]
