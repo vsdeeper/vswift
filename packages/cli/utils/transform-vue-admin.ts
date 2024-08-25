@@ -37,4 +37,9 @@ export async function transformVueAdmin(dest: string, configFilePath: string) {
   if (newEnvProdConfig !== envProdConfig) {
     writeFileSync(envProdConfigPath, newEnvProdConfig)
   }
+
+  // 添加.npmrc
+  if (options.npmrc) {
+    writeFileSync(path.resolve(dest, '.npmrc'), options.npmrc)
+  }
 }

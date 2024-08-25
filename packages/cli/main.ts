@@ -33,8 +33,15 @@ configCommand
   })
 
 configCommand
+  .command('list')
+  .description('get configuration list')
+  .action((options) => {
+    return config('list', options)
+  })
+
+configCommand
   .command('get <name>')
-  .description('get the specified configuration')
+  .description('get configuration with specified name')
   .action((options) => {
     return config('get', options)
   })
@@ -48,7 +55,7 @@ configCommand
 
 configCommand
   .command('delete <name>')
-  .description('delete the specified configuration')
+  .description('delete configuration with specified name')
   .action((options) => {
     return config('delete', options)
   })

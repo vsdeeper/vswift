@@ -10,7 +10,9 @@ import os from 'os'
 import { readFileSync, writeFileSync } from 'fs'
 
 export async function create() {
-  await checkHusky()
+  if (!(await checkHusky())) {
+    return
+  }
   const spinner = ora({ spinner: 'line' })
   const config = parseConfig()
   let answer: Record<string, any> | undefined
@@ -38,16 +40,16 @@ export async function create() {
       getTemplatePath('vue-admin' /**暂时只支持vue-admin */, import.meta.url),
       dest
     )
-    await solveFilesLossWhenCopy(configData!.options.name || 'vswift-project')
+    await manuallyAddFiles(configData!.options.name || 'vswift-project')
     spinner.succeed('Download done')
 
-    spinner.start('Initialize git...' + os.EOL)
+    spinner.start('Initialize Git...' + os.EOL)
     await gitInit(configData!.options.name || 'vswift-project')
-    spinner.succeed('Initializing git done')
+    spinner.succeed('Initializing Git done')
 
-    spinner.start('Set up git hooks...' + os.EOL)
+    spinner.start('Set up Git Hooks...' + os.EOL)
     await setupGithooks(configData!.options.name || 'vswift-project')
-    spinner.succeed('Set up git hooks done')
+    spinner.succeed('Set up Git Hooks done')
 
     spinner.start('Transforming...' + os.EOL)
     await transformVueAdmin(dest, configFilePath!)
@@ -76,7 +78,7 @@ export async function create() {
       spinner.start('Downloading...' + os.EOL)
       const dest = path.resolve(process.cwd(), `${projectName}`)
       await copyTemplate(getTemplatePath('vue-admin', import.meta.url), dest)
-      await solveFilesLossWhenCopy(projectName)
+      await manuallyAddFiles(projectName)
       spinner.succeed('Download done')
 
       spinner.start('Initialize Git...' + os.EOL)
@@ -102,7 +104,8 @@ async function checkHusky() {
   try {
     const { stdout } = await $({ shell: true })`npm list -g husky`
     const huskyVersion = getPackageVersion('husky', stdout)
-    consola.info(`Detected that your global husky version is ${huskyVersion}`)
+    consola.log(`Detected that your global husky version is ${chalk.cyan(huskyVersion)}`)
+    return true
   } catch (error: any) {
     if (error.stdout?.includes('empty')) {
       consola.error(
@@ -119,18 +122,11 @@ async function copyTemplate(source: string, dest: string) {
   })
 }
 
-async function solveFilesLossWhenCopy(projectName: string) {
-  // 解决.gitignore可能丢失的问题
+async function manuallyAddFiles(projectName: string) {
   const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
   if (!(await pathExists(gitignoreFilePath))) {
-    // 手动写入
+    // 手动写入.gitignore
     createGitignore(gitignoreFilePath)
-  }
-  // 解决.npmrc可能丢失的问题
-  const npmrcFilePath = path.resolve(process.cwd(), `${projectName}/.npmrc`)
-  if (!(await pathExists(npmrcFilePath))) {
-    // 手动写入
-    createNpmrc(npmrcFilePath)
   }
 }
 
@@ -153,30 +149,20 @@ function createGitignore(path: string) {
     'logs',
     '*.log',
     'pnpm-debug.log*',
-    '\n',
+    '',
     'node_modules',
     '.DS_Store',
     'dist',
     'coverage',
     '*.local',
-    '\n',
+    '',
     '/cypress/videos/',
     '/cypress/screenshots/',
     '# Editor directories and files',
     '.vscode/*',
     '!.vscode/extensions.json',
-    '\n',
+    '',
     '*.tsbuildinfo'
-  ]
-  writeFileSync(path, rules.join('\n'))
-}
-
-function createNpmrc(path: string) {
-  const rules = [
-    'registry=https://registry.npmmirror.com/',
-    '@scoped:registry=https://xxx.xxx.com/',
-    'engine-strict=true',
-    'save-exact=true'
   ]
   writeFileSync(path, rules.join('\n'))
 }

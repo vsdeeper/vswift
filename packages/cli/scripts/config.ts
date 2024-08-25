@@ -5,6 +5,11 @@ export async function config(key: string, val?: string) {
   const configPath = getConfigPath(import.meta.url)
   const configStr = readFileSync(configPath).toString('utf-8')
   switch (key) {
+    case 'list': {
+      const configArr = configStr.split('\n').filter((e) => !!e)
+      console.log(configArr.join('\n'))
+      break
+    }
     case 'get': {
       console.log(getConfig(val!, configStr))
       break
