@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import { parsePackage } from './utils/index.js'
+import { parsePackageJson } from './utils/index.js'
 import { config, create, search } from './scripts/index.js'
 
 const program = new Command()
@@ -10,7 +10,7 @@ program
   .action((options) => {
     const { version } = options
     if (version) {
-      console.log(parsePackage('cli').version)
+      console.log(parsePackageJson()?.version)
     }
   })
 

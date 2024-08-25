@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import { getConfigPath, getConfig, deleteConfig, changeConfig } from '../utils/index.js'
 
 export async function config(key: string, val?: string) {
-  const configPath = getConfigPath()
+  const configPath = getConfigPath(import.meta.url)
   const configStr = readFileSync(configPath).toString('utf-8')
   switch (key) {
     case 'get': {

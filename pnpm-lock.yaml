@@ -26,6 +26,9 @@ importers:
       '@types/node':
         specifier: ^20.12.5
         version: 20.12.7
+      '@vswift/cli':
+        specifier: workspace:*
+        version: link:packages/cli
       '@vue/tsconfig':
         specifier: ^0.5.1
         version: 0.5.1
@@ -96,6 +99,9 @@ importers:
       readline:
         specifier: ^1.3.0
         version: 1.3.0
+      semver:
+        specifier: ^7.6.3
+        version: 7.6.3
       typescript:
         specifier: ~5.4.0
         version: 5.4.5
@@ -109,6 +115,9 @@ importers:
       '@types/inquirer':
         specifier: ^9.0.7
         version: 9.0.7
+      '@types/semver':
+        specifier: ^7.5.8
+        version: 7.5.8
 
   packages/dev-cli:
     devDependencies:
@@ -2959,6 +2968,11 @@ packages:
 
   semver@7.6.0:
     resolution: {integrity: sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.6.3:
+    resolution: {integrity: sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -6412,6 +6426,8 @@ snapshots:
   semver@7.6.0:
     dependencies:
       lru-cache: 6.0.0
+
+  semver@7.6.3: {}
 
   set-blocking@2.0.0: {}
 

@@ -4,7 +4,7 @@ import path from 'path'
 import { dirname } from './index.js'
 
 export function parseConfig() {
-  const configStr = readFileSync(getConfigPath()).toString('utf-8')
+  const configStr = readFileSync(getConfigPath(import.meta.url)).toString('utf-8')
   const configArr = configStr.split('\n').filter((e) => !!e)
   return configArr.reduce<Record<string, any>>((pre, cur) => {
     return {
@@ -14,10 +14,10 @@ export function parseConfig() {
   }, {})
 }
 
-export function getConfigPath(basePath?: string) {
-  let config = path.resolve(dirname(), basePath ?? '..', '.config')
+export function getConfigPath(importMetaUrl: string, basePath?: string) {
+  let config = path.resolve(dirname(importMetaUrl), basePath ?? '..', '.config')
   if (!pathExistsSync(config)) {
-    config = path.resolve(dirname(), basePath ?? '..', '../.config')
+    config = path.resolve(dirname(importMetaUrl), basePath ?? '..', '../.config')
   }
   return config
 }

@@ -1,6 +1,6 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-export function dirname() {
-  return path.dirname(fileURLToPath(import.meta.url))
+export function dirname(importMetaUrl: string) {
+  return path.dirname(fileURLToPath(importMetaUrl))
 }
