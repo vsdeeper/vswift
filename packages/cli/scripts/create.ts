@@ -4,7 +4,7 @@ import { copy, pathExists, pathExistsSync } from 'fs-extra/esm'
 import inquirer from 'inquirer'
 import path from 'path'
 import { transformVueAdmin, parseConfig, getTemplatePath } from '../utils/index.js'
-import ora from 'ora'
+import ora, { type Ora } from 'ora'
 import chalk from 'chalk'
 import os from 'os'
 import { readFileSync, writeFileSync } from 'fs'
@@ -34,22 +34,17 @@ export async function create() {
   }
 
   if (answer?.isConfigFile /** 根据配置文件转换生成 */) {
+    const projectName = configData!.options.name || 'vswift-project'
     spinner.start('Downloading...' + os.EOL)
-    const dest = path.resolve(process.cwd(), `${configData!.options.name || 'vswift-project'}`)
+    const dest = path.resolve(process.cwd(), `${projectName}`)
     await copyTemplate(
       getTemplatePath('vue-admin' /**暂时只支持vue-admin */, import.meta.url),
       dest
     )
-    await manuallyAddFiles(configData!.options.name || 'vswift-project')
+    await manuallyAddFiles(projectName)
     spinner.succeed('Download done')
 
-    spinner.start('Initialize Git...' + os.EOL)
-    await gitInit(configData!.options.name || 'vswift-project')
-    spinner.succeed('Initializing Git done')
-
-    spinner.start('Set up Git Hooks...' + os.EOL)
-    await setupGithooks(configData!.options.name || 'vswift-project')
-    spinner.succeed('Set up Git Hooks done')
+    await generalSettings(projectName, spinner)
 
     spinner.start('Transforming...' + os.EOL)
     await transformVueAdmin(dest, configFilePath!)
@@ -57,7 +52,7 @@ export async function create() {
       `Transform done, your project template has been created, see:  ${chalk.green(dest)}`
     )
 
-    finalOutput(configData!.options.name || 'vswift-project')
+    finalOutput(projectName)
   } else {
     const { projectName, templateName } = await inquirer.prompt([
       {
@@ -81,13 +76,7 @@ export async function create() {
       await manuallyAddFiles(projectName)
       spinner.succeed('Download done')
 
-      spinner.start('Initialize Git...' + os.EOL)
-      await gitInit(projectName)
-      spinner.succeed('Initializing Git done')
-
-      spinner.start('Set up Git Hooks...' + os.EOL)
-      await setupGithooks(projectName)
-      spinner.succeed('Set up Git Hooks done')
+      await generalSettings(projectName, spinner)
 
       spinner.succeed(`Your project template has been created, see:  ${chalk.green(dest)}`)
     }
@@ -132,6 +121,10 @@ async function manuallyAddFiles(projectName: string) {
 
 async function gitInit(projectName: string) {
   await $({ shell: true })`cd ${projectName} && git init`
+}
+
+async function gitAddOrigin(projectName: string, url: string) {
+  await $({ shell: true })`cd ${projectName} && git remote add origin ${url}`
 }
 
 async function setupGithooks(projectName: string) {
@@ -179,4 +172,26 @@ function getPackageVersion(pkg: string, source: string) {
     source.indexOf(`${pkg}@`) + `${pkg}@`.length,
     source.indexOf('\n', source.indexOf(`${pkg}@`))
   )
+}
+
+async function generalSettings(
+  projectName: string,
+  spinner: Ora,
+  configData?: Record<string, any>
+) {
+  const { options } = configData ?? { options: {} }
+
+  spinner.start('Initialize Git...' + os.EOL)
+  await gitInit(projectName)
+  spinner.succeed('Initializing Git done')
+
+  if (options.gitUrl) {
+    spinner.start('Git remote add origin...' + os.EOL)
+    await gitAddOrigin(projectName, options.gitUrl)
+    spinner.succeed('Git remote add origin done')
+  }
+
+  spinner.start('Set up Git Hooks...' + os.EOL)
+  await setupGithooks(projectName)
+  spinner.succeed('Set up Git Hooks done')
 }

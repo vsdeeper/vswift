@@ -1,12 +1,13 @@
 {
   "name": "@vswift/cli",
-  "version": "0.0.1-0",
+  "version": "0.0.1-1",
   "type": "module",
   "main": "dist/main.js",
   "files": [
     "dist",
     "bin.js",
-    ".config"
+    ".config",
+    "CHANGELOG.md"
   ],
   "bin": {
     "vswift": "bin.js"
