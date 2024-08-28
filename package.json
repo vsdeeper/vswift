@@ -19,8 +19,8 @@
     "dev:cli": "tsc --watch --project tsconfig.dev-cli.json",
     "build": "dev-vswift build",
     "release": "dev-vswift release",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier . --write",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .eslintignore",
+    "format": "prettier . --write  --ignore-path .prettierignore",
     "prepare": "husky"
   },
   "lint-staged": {

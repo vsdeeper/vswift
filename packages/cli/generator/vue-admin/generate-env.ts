@@ -1,12 +1,8 @@
-import { readFileSync, writeFileSync } from 'fs'
 import path from 'path'
-import { changeConfig } from './index.js'
+import { readFileSync, writeFileSync } from 'fs'
+import { changeConfig } from '../../utils/index.js'
 
-export async function transformVueAdmin(dest: string, configFilePath: string) {
-  const configData: Record<string, any> = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
-  const { options } = configData
-
-  // 转换环境变量
+export async function generateEnv(dest: string, options: Record<string, any>) {
   const envConfigPath = path.resolve(dest, '.env')
   const envTestConfigPath = path.resolve(dest, '.env.test')
   const envProdConfigPath = path.resolve(dest, '.env.prod')
@@ -36,10 +32,5 @@ export async function transformVueAdmin(dest: string, configFilePath: string) {
   }
   if (newEnvProdConfig !== envProdConfig) {
     writeFileSync(envProdConfigPath, newEnvProdConfig)
-  }
-
-  // 添加.npmrc
-  if (options.npmrc) {
-    writeFileSync(path.resolve(dest, '.npmrc'), options.npmrc)
   }
 }

@@ -3,17 +3,17 @@ import { $ } from 'execa'
 import { copy, pathExists, pathExistsSync } from 'fs-extra/esm'
 import inquirer from 'inquirer'
 import path from 'path'
-import { transformVueAdmin, parseConfig, getTemplatePath } from '../utils/index.js'
-import ora, { type Ora } from 'ora'
+import ora from 'ora'
 import chalk from 'chalk'
-import os from 'os'
 import { readFileSync, writeFileSync } from 'fs'
+import os from 'os'
+import { parseConfig, getTemplatePath } from '../utils/index.js'
+import { generateProject } from '../generator/vue-admin/index.js'
 
 export async function create() {
   if (!(await checkHusky())) {
     return
   }
-  const spinner = ora({ spinner: 'line' })
   const config = parseConfig()
   let answer: Record<string, any> | undefined
   let configFilePath: string | undefined
@@ -35,24 +35,8 @@ export async function create() {
 
   if (answer?.isConfigFile /** 根据配置文件转换生成 */) {
     const projectName = configData!.options.name || 'vswift-project'
-    spinner.start('Downloading...' + os.EOL)
     const dest = path.resolve(process.cwd(), `${projectName}`)
-    await copyTemplate(
-      getTemplatePath('vue-admin' /**暂时只支持vue-admin */, import.meta.url),
-      dest
-    )
-    await manuallyAddFiles(projectName)
-    spinner.succeed('Download done')
-
-    await generalSettings(projectName, spinner)
-
-    spinner.start('Transforming...' + os.EOL)
-    await transformVueAdmin(dest, configFilePath!)
-    spinner.succeed(
-      `Transform done, your project template has been created, see:  ${chalk.green(dest)}`
-    )
-
-    finalOutput(projectName)
+    await generateProject(dest, configData!)
   } else {
     const { projectName, templateName } = await inquirer.prompt([
       {
@@ -69,21 +53,30 @@ export async function create() {
       }
     ])
 
-    if (templateName === 'vue-admin') {
-      spinner.start('Downloading...' + os.EOL)
-      const dest = path.resolve(process.cwd(), `${projectName}`)
-      await copyTemplate(getTemplatePath('vue-admin', import.meta.url), dest)
-      await manuallyAddFiles(projectName)
-      spinner.succeed('Download done')
+    const spinner = ora({ spinner: 'line' })
+    spinner.start('Generating...' + os.EOL)
 
-      await generalSettings(projectName, spinner)
+    const dest = path.resolve(process.cwd(), `${projectName}`)
 
-      spinner.succeed(`Your project template has been created, see:  ${chalk.green(dest)}`)
+    // 下载template
+    await copyTemplate(getTemplatePath(templateName, import.meta.url), dest)
+
+    // git init
+    await gitInit(projectName)
+
+    // 设置git hooks
+    await setupGithooks(projectName)
+
+    // 添加.gitignore
+    const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
+    if (!(await pathExists(gitignoreFilePath))) {
+      // 手动写入.gitignore
+      createGitignore(gitignoreFilePath)
     }
 
-    if (templateName === 'vue-uniapp') {
-      consola.info('vue-uniapp is coming soon...')
-    }
+    spinner.succeed(
+      `Generate success, your project template has been created, see:  ${chalk.green(dest)}`
+    )
 
     finalOutput(projectName)
   }
@@ -111,20 +104,8 @@ async function copyTemplate(source: string, dest: string) {
   })
 }
 
-async function manuallyAddFiles(projectName: string) {
-  const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
-  if (!(await pathExists(gitignoreFilePath))) {
-    // 手动写入.gitignore
-    createGitignore(gitignoreFilePath)
-  }
-}
-
 async function gitInit(projectName: string) {
   await $({ shell: true })`cd ${projectName} && git init`
-}
-
-async function gitAddOrigin(projectName: string, url: string) {
-  await $({ shell: true })`cd ${projectName} && git remote add origin ${url}`
 }
 
 async function setupGithooks(projectName: string) {
@@ -160,13 +141,6 @@ function createGitignore(path: string) {
   writeFileSync(path, rules.join('\n'))
 }
 
-function finalOutput(projectName: string) {
-  console.log(
-    `\n  Next, you can start the project like this: \n\n` +
-      chalk.gray(`  ${`$ cd ${projectName}`}\n` + `  ${'$ pnpm install'}\n` + `  ${'$ pnpm dev'}\n`)
-  )
-}
-
 function getPackageVersion(pkg: string, source: string) {
   return source.substring(
     source.indexOf(`${pkg}@`) + `${pkg}@`.length,
@@ -174,24 +148,9 @@ function getPackageVersion(pkg: string, source: string) {
   )
 }
 
-async function generalSettings(
-  projectName: string,
-  spinner: Ora,
-  configData?: Record<string, any>
-) {
-  const { options } = configData ?? { options: {} }
-
-  spinner.start('Initialize Git...' + os.EOL)
-  await gitInit(projectName)
-  spinner.succeed('Initializing Git done')
-
-  if (options.gitUrl) {
-    spinner.start('Git remote add origin...' + os.EOL)
-    await gitAddOrigin(projectName, options.gitUrl)
-    spinner.succeed('Git remote add origin done')
-  }
-
-  spinner.start('Set up Git Hooks...' + os.EOL)
-  await setupGithooks(projectName)
-  spinner.succeed('Set up Git Hooks done')
+function finalOutput(projectName: string) {
+  console.log(
+    `\n  Next, you can start the project like this: \n\n` +
+      chalk.gray(`  ${`$ cd ${projectName}`}\n` + `  ${'$ pnpm install'}\n` + `  ${'$ pnpm dev'}\n`)
+  )
 }

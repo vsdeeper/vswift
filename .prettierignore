@@ -3,3 +3,6 @@ packages/!cli/dist
 build
 coverage
 pnpm-workspace.yaml
+
+# Custom
+templates
