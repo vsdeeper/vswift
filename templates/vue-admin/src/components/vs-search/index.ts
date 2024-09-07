@@ -1,5 +1,7 @@
 import VsSearch from './vs-search.vue'
 
+export * from './components'
+
 export interface VsSearchOptionItem {
   // 唯一标识，与后端交互字段名称
   id: string

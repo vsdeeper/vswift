@@ -27,8 +27,8 @@ export async function create() {
         {
           type: 'confirm',
           name: 'isConfigFile',
-          message: `Whether to create project based on the configuration file: ${configFilePath}`
-        }
+          message: `Whether to create project based on the configuration file: ${configFilePath}`,
+        },
       ])
     }
   }
@@ -43,14 +43,14 @@ export async function create() {
         type: 'input',
         name: 'projectName',
         message: 'Input your project name',
-        default: 'vswift-project'
+        default: 'vswift-project',
       },
       {
         type: 'list',
         name: 'templateName',
         message: 'Choose a template',
-        choices: ['vue-admin', 'vue-uniapp']
-      }
+        choices: ['vue-admin', 'vue-uniapp'],
+      },
     ])
 
     const spinner = ora({ spinner: 'line' })
@@ -75,7 +75,7 @@ export async function create() {
     }
 
     spinner.succeed(
-      `Generate success, your project template has been created, see:  ${chalk.green(dest)}`
+      `Generate success, your project template has been created, see:  ${chalk.green(dest)}`,
     )
 
     finalOutput(projectName)
@@ -91,7 +91,7 @@ async function checkHusky() {
   } catch (error: any) {
     if (error.stdout?.includes('empty')) {
       consola.error(
-        `It is detected that husky is not installed yet. Please run ${chalk.green('npm install -g --verbose husky')} to install the latest version`
+        `It is detected that husky is not installed yet. Please run ${chalk.green('npm install -g --verbose husky')} to install the latest version`,
       )
     }
     return false
@@ -100,7 +100,7 @@ async function checkHusky() {
 
 async function copyTemplate(source: string, dest: string) {
   await copy(source, dest, {
-    filter: (src) => !(src.endsWith('dist') || src.endsWith('node_modules'))
+    filter: src => !(src.endsWith('dist') || src.endsWith('node_modules')),
   })
 }
 
@@ -110,10 +110,10 @@ async function gitInit(projectName: string) {
 
 async function setupGithooks(projectName: string) {
   await $({
-    shell: true
+    shell: true,
   })`cd ${projectName} && pnpm exec husky init`
   await $({
-    shell: true
+    shell: true,
   })`cd ${projectName} && echo "pnpm lint-staged" > .husky/pre-commit && echo "pnpm --no-install commitlint --edit" > .husky/commit-msg`
 }
 
@@ -136,7 +136,7 @@ function createGitignore(path: string) {
     '.vscode/*',
     '!.vscode/extensions.json',
     '',
-    '*.tsbuildinfo'
+    '*.tsbuildinfo',
   ]
   writeFileSync(path, rules.join('\n'))
 }
@@ -144,13 +144,15 @@ function createGitignore(path: string) {
 function getPackageVersion(pkg: string, source: string) {
   return source.substring(
     source.indexOf(`${pkg}@`) + `${pkg}@`.length,
-    source.indexOf('\n', source.indexOf(`${pkg}@`))
+    source.indexOf('\n', source.indexOf(`${pkg}@`)),
   )
 }
 
 function finalOutput(projectName: string) {
   console.log(
     `\n  Next, you can start the project like this: \n\n` +
-      chalk.gray(`  ${`$ cd ${projectName}`}\n` + `  ${'$ pnpm install'}\n` + `  ${'$ pnpm dev'}\n`)
+      chalk.gray(
+        `  ${`$ cd ${projectName}`}\n` + `  ${'$ pnpm install'}\n` + `  ${'$ pnpm dev'}\n`,
+      ),
   )
 }
