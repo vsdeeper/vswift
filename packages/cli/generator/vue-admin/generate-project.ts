@@ -1,19 +1,30 @@
-import { writeFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import path from 'path'
-import { copy, pathExists } from 'fs-extra/esm'
+import { copy, pathExists, pathExistsSync } from 'fs-extra/esm'
 import { $ } from 'execa'
 import ora from 'ora'
 import os from 'os'
 import chalk from 'chalk'
 import { generateEnv } from './index.js'
-import { getTemplatePath } from '../../utils/index.js'
+import { getTemplatePath, parseConfig } from '../../utils/index.js'
 import { finalOutput } from '../util.js'
+import consola from 'consola'
 
-export async function generateProject(dest: string, configData: Record<string, any>) {
+export async function generateProject(fileName: string) {
+  const config = parseConfig()
+  const configFilePath = `${config.downloadDir}/${fileName + '.json'}`
+
+  if (!pathExistsSync(configFilePath)) {
+    consola.error(`Configuration file ${chalk.green(configFilePath)} not found`)
+    return
+  }
+
   const spinner = ora({ spinner: 'line' })
   spinner.start('Generating...' + os.EOL)
+  const configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
   const { options } = configData
   const projectName = configData!.options.name || 'vswift-project'
+  const dest = path.resolve(process.cwd(), `${projectName}`)
 
   // 下载template
   await copyTemplate(getTemplatePath('vue-admin', import.meta.url, '../../'), dest)
@@ -45,7 +56,7 @@ export async function generateProject(dest: string, configData: Record<string, a
   }
 
   spinner.succeed(
-    `Generate success, your project template has been created, see:  ${chalk.green(dest)}`
+    `Generate success, your project template has been created, see:  ${chalk.green(dest)}`,
   )
 
   finalOutput(projectName)
@@ -53,7 +64,7 @@ export async function generateProject(dest: string, configData: Record<string, a
 
 async function copyTemplate(source: string, dest: string) {
   await copy(source, dest, {
-    filter: (src) => !(src.endsWith('dist') || src.endsWith('node_modules'))
+    filter: src => !(src.endsWith('dist') || src.endsWith('node_modules')),
   })
 }
 
@@ -67,10 +78,10 @@ async function gitAddOrigin(projectName: string, url: string) {
 
 async function setupGithooks(projectName: string) {
   await $({
-    shell: true
+    shell: true,
   })`cd ${projectName} && pnpm exec husky init`
   await $({
-    shell: true
+    shell: true,
   })`cd ${projectName} && echo "pnpm lint-staged" > .husky/pre-commit && echo "pnpm --no-install commitlint --edit" > .husky/commit-msg`
 }
 
@@ -93,7 +104,7 @@ function createGitignore(path: string) {
     '.vscode/*',
     '!.vscode/extensions.json',
     '',
-    '*.tsbuildinfo'
+    '*.tsbuildinfo',
   ]
   writeFileSync(path, rules.join('\n'))
 }

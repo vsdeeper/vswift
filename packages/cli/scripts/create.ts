@@ -1,85 +1,60 @@
 import consola from 'consola'
 import { $ } from 'execa'
-import { copy, pathExists, pathExistsSync } from 'fs-extra/esm'
+import { copy, pathExists } from 'fs-extra/esm'
 import inquirer from 'inquirer'
 import path from 'path'
 import ora from 'ora'
 import chalk from 'chalk'
-import { readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import os from 'os'
-import { parseConfig, getTemplatePath } from '../utils/index.js'
-import { generateProject } from '../generator/vue-admin/index.js'
+import { getTemplatePath } from '../utils/index.js'
 
 export async function create() {
   if (!(await checkHusky())) {
     return
   }
-  const config = parseConfig()
-  let answer: Record<string, any> | undefined
-  let configFilePath: string | undefined
-  let configData: Record<string, any> | undefined
-  if (config.downloadDir) {
-    configFilePath = `${config.downloadDir}/${config.fileName ? config.fileName + '.json' : 'vswift-project.config.json'}`
-    if (pathExistsSync(configFilePath)) {
-      configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
-      // 询问是否根据配置文件转换生成
-      answer = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'isConfigFile',
-          message: `Whether to create project based on the configuration file: ${configFilePath}`,
-        },
-      ])
-    }
+
+  const { projectName, templateName } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'projectName',
+      message: 'Input your project name',
+      default: 'vswift-project',
+    },
+    {
+      type: 'list',
+      name: 'templateName',
+      message: 'Choose a template',
+      choices: ['vue-admin', 'vue-uniapp'],
+    },
+  ])
+
+  const spinner = ora({ spinner: 'line' })
+  spinner.start('Generating...' + os.EOL)
+
+  const dest = path.resolve(process.cwd(), `${projectName}`)
+
+  // 下载template
+  await copyTemplate(getTemplatePath(templateName, import.meta.url), dest)
+
+  // git init
+  await gitInit(projectName)
+
+  // 设置git hooks
+  await setupGithooks(projectName)
+
+  // 添加.gitignore
+  const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
+  if (!(await pathExists(gitignoreFilePath))) {
+    // 手动写入.gitignore
+    createGitignore(gitignoreFilePath)
   }
 
-  if (answer?.isConfigFile /** 根据配置文件转换生成 */) {
-    const projectName = configData!.options.name || 'vswift-project'
-    const dest = path.resolve(process.cwd(), `${projectName}`)
-    await generateProject(dest, configData!)
-  } else {
-    const { projectName, templateName } = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'projectName',
-        message: 'Input your project name',
-        default: 'vswift-project',
-      },
-      {
-        type: 'list',
-        name: 'templateName',
-        message: 'Choose a template',
-        choices: ['vue-admin', 'vue-uniapp'],
-      },
-    ])
+  spinner.succeed(
+    `Generate success, your project template has been created, see:  ${chalk.green(dest)}`,
+  )
 
-    const spinner = ora({ spinner: 'line' })
-    spinner.start('Generating...' + os.EOL)
-
-    const dest = path.resolve(process.cwd(), `${projectName}`)
-
-    // 下载template
-    await copyTemplate(getTemplatePath(templateName, import.meta.url), dest)
-
-    // git init
-    await gitInit(projectName)
-
-    // 设置git hooks
-    await setupGithooks(projectName)
-
-    // 添加.gitignore
-    const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
-    if (!(await pathExists(gitignoreFilePath))) {
-      // 手动写入.gitignore
-      createGitignore(gitignoreFilePath)
-    }
-
-    spinner.succeed(
-      `Generate success, your project template has been created, see:  ${chalk.green(dest)}`,
-    )
-
-    finalOutput(projectName)
-  }
+  finalOutput(projectName)
 }
 
 async function checkHusky() {

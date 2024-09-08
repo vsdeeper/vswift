@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { parsePackageJson } from './utils/index.js'
 import { config, create, search } from './scripts/index.js'
-import { generateView } from './generator/vue-admin/index.js'
+import { generateProject, generateView } from './generator/vue-admin/index.js'
 
 const program = new Command()
 
@@ -24,13 +24,6 @@ configCommand
   )
   .action(options => {
     return config('downloadDir', options)
-  })
-
-configCommand
-  .command('fileName <name>')
-  .description('config file name for vswift, it is the export file name of visual development data')
-  .action(options => {
-    return config('fileName', options)
   })
 
 configCommand
@@ -68,11 +61,22 @@ program
     return create()
   })
 
-program
-  .command('generate <name>')
-  .description('generate a code file with the specified name')
+const generateCommand = program
+  .command('generate')
+  .description('generate code based on configuration data')
+
+generateCommand
+  .command('project <name>')
+  .description('generate project with the specified configuration file')
   .action(name => {
-    return generateView(process.cwd(), name)
+    return generateProject(name)
+  })
+
+generateCommand
+  .command('view <name>')
+  .description('generate view with the specified configuration file')
+  .action(name => {
+    return generateView(name)
   })
 
 program

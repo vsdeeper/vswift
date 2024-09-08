@@ -6,7 +6,7 @@ export async function config(key: string, val?: string) {
   const configStr = readFileSync(configPath).toString('utf-8')
   switch (key) {
     case 'list': {
-      const configArr = configStr.split('\n').filter((e) => !!e)
+      const configArr = configStr.split('\n').filter(e => !!e)
       console.log(configArr.join('\n'))
       break
     }
@@ -24,13 +24,6 @@ export async function config(key: string, val?: string) {
       break
     }
     case 'downloadDir': {
-      const newConfigStr = changeConfig(key, val!, configStr)
-      if (newConfigStr !== configStr) {
-        writeFileSync(configPath, newConfigStr)
-      }
-      break
-    }
-    case 'fileName': {
       const newConfigStr = changeConfig(key, val!, configStr)
       if (newConfigStr !== configStr) {
         writeFileSync(configPath, newConfigStr)

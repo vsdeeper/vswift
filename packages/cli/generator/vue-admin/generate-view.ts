@@ -1,5 +1,5 @@
 import { $ } from 'execa'
-import { readFileSync, writeFileSync } from 'fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { pathExistsSync } from 'fs-extra/esm'
 import handlebars from 'handlebars'
 import path from 'path'
@@ -8,7 +8,7 @@ import { parseConfig } from '../../utils/index.js'
 import consola from 'consola'
 import chalk from 'chalk'
 
-export async function generateView(dest: string, fileName: string) {
+export async function generateView(fileName: string) {
   const config = parseConfig()
   const configFilePath = `${config.downloadDir}/${fileName + '.json'}`
   if (!pathExistsSync(configFilePath)) {
@@ -19,9 +19,15 @@ export async function generateView(dest: string, fileName: string) {
   const { options } = configData
   const code = `${generateScript(configData)}`
   const viewName = options.name ?? 'unknown-view'
-  const filePath = path.resolve(dest, `src/views/${viewName}/${pascal(viewName)}.vue`)
-  writeFileSync(filePath, code)
-  await $({ shell: true })`pnpm prettier ${filePath} --write`
+  const fileDir = path.resolve(process.cwd(), `templates/vue-admin/src/views/${viewName}`)
+  const filePath = path.resolve(fileDir, `${pascal(viewName)}.vue`)
+  if (pathExistsSync(fileDir)) {
+    consola.error(`${chalk.green(fileDir)} directory already exists`)
+  } else {
+    mkdirSync(fileDir)
+    writeFileSync(filePath, code)
+    await $({ shell: true })`pnpm prettier ${filePath} --write`
+  }
 }
 
 function generateScript(configData: Record<string, any>) {
