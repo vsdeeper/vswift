@@ -1,6 +1,6 @@
 import router from '@/router'
 import axios, { type AxiosInstance } from 'axios'
-import { ElMessage, ElMessageBox, type Action } from 'element-plus'
+import { type Action } from 'element-plus'
 import Cookies from 'js-cookie'
 import { TOKEN_STORAGE_KEY } from './constants'
 

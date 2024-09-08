@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useAppSettingDataStore, type AppSetting } from '@/stores/global'
 import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
-import { ElMessage } from 'element-plus'
 import localforage from 'localforage'
 import { storeToRefs } from 'pinia'
 

@@ -3,6 +3,7 @@ import { http } from '@/utils/http'
 export async function queryUserInfo() {
   try {
     const { data } = await http({
+      baseURL: '/',
       method: 'get',
       url: '/mock/user-info.json?t=' + +new Date()
     })
@@ -18,6 +19,7 @@ export async function queryUserInfo() {
 export async function queryMenuData() {
   try {
     const { data } = await http({
+      baseURL: '/',
       method: 'get',
       url: '/mock/menu-data.json?t=' + +new Date()
     })

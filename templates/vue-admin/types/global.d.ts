@@ -6,6 +6,11 @@
 export {}
 declare global {
   /**
+   * element-plus手动定义
+   */
+  const ElMessage: (typeof import('element-plus/es'))['ElMessage']
+  const ElMessageBox: (typeof import('element-plus/es'))['ElMessageBox']
+  /**
    * 菜单数据接口
    * @interface VsMenuDataItem
    * @property {number} VsMenuDataItem.menuId - 菜单id

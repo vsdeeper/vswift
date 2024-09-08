@@ -4,6 +4,7 @@ import { sleep } from 'radash'
 export async function queryUserList(params: PagingParams) {
   try {
     const { data } = await http({
+      baseURL: '/',
       method: 'get',
       url: '/mock/user-list.json?t=' + +new Date(),
       params
@@ -18,6 +19,7 @@ export async function queryUserList(params: PagingParams) {
 export async function addItem(data: Record<string, any>) {
   try {
     await http({
+      baseURL: '/',
       method: 'post',
       url: '/mock/operate.json?t=' + +new Date(),
       data
@@ -32,6 +34,7 @@ export async function addItem(data: Record<string, any>) {
 export async function editItem(data: Record<string, any>) {
   try {
     await http({
+      baseURL: '/',
       method: 'post',
       url: '/mock/operate.json?t=' + +new Date(),
       data
@@ -46,6 +49,7 @@ export async function editItem(data: Record<string, any>) {
 export async function copyItem(id: number) {
   try {
     await http({
+      baseURL: '/',
       method: 'post',
       url: '/mock/operate.json?t=' + +new Date(),
       data: { id }
@@ -60,6 +64,7 @@ export async function copyItem(id: number) {
 export async function deleteItems(ids: number[]) {
   try {
     await http({
+      baseURL: '/',
       method: 'post',
       url: '/mock/operate.json?t=' + +new Date(),
       data: { ids }
@@ -74,6 +79,7 @@ export async function deleteItems(ids: number[]) {
 export async function queryDepartmentData() {
   try {
     const { data } = await http({
+      baseURL: '/',
       method: 'post',
       url: '/mock/department-data.json?t=' + +new Date()
     })
@@ -87,6 +93,7 @@ export async function queryDepartmentData() {
 export async function queryPositionList(depId: number) {
   try {
     const { data } = await http({
+      baseURL: '/',
       method: 'post',
       url: '/mock/position-list.json?t=' + +new Date(),
       data: { depId }

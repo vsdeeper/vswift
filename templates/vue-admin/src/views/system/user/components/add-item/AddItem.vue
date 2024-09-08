@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
 import { FormDetail, type FormDetailInstance } from '..'
 import { toSubmitData } from '../util'
 import { addItem } from '@/api/system/user'
