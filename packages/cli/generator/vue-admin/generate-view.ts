@@ -35,6 +35,7 @@ function generateScript(configData: Record<string, any>) {
   return `<script setup lang="ts">
           ${generateImportStoresGlobal(components)}
           ${generateImportVswiftComponents(components)}
+          ${generateImportConstants(components)}
           </script>`
 }
 
@@ -52,6 +53,15 @@ function generateImportStoresGlobal(components: Record<string, any>[]) {
   const code = compile({ components })
   if (code) {
     return `import { ${code} } from '@/stores/global'`
+  }
+  return ''
+}
+
+function generateImportConstants(components: Record<string, any>[]) {
+  const compile = handlebars.compile('{{ImportConstants components}}')
+  const code = compile({ components })
+  if (code) {
+    return `import { ${code} } from './constants'`
   }
   return ''
 }
@@ -93,6 +103,15 @@ handlebars.registerHelper('ImportVswiftComponentsType', (components: Record<stri
 })
 
 handlebars.registerHelper('ImportStoresGlobal', (components: Record<string, any>[]) => {
+  const codeArr: string[] = []
+  const filterTables = components.filter(e => e.type === 'Table')
+  if (filterTables.some(e => e.options.showPagination)) {
+    codeArr.push('useAppSettingDataStore')
+  }
+  return codeArr.join(',')
+})
+
+handlebars.registerHelper('ImportConstants', (components: Record<string, any>[]) => {
   const codeArr: string[] = []
   const filterTables = components.filter(e => e.type === 'Table')
   if (filterTables.some(e => e.options.showPagination)) {
