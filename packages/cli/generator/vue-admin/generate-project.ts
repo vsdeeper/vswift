@@ -12,8 +12,14 @@ import consola from 'consola'
 
 export async function generateProject(fileName: string) {
   const config = parseConfig()
-  const configFilePath = `${config.downloadDir}/${fileName + '.json'}`
+  if (!config.downloadDir) {
+    consola.error(
+      `Please set configuration file download directory, you can run ${chalk.gray('$ vswift config downloadDir <path>')} to set it`,
+    )
+    return
+  }
 
+  const configFilePath = `${config.downloadDir}/${fileName + '.json'}`
   if (!pathExistsSync(configFilePath)) {
     consola.error(`Configuration file ${chalk.green(configFilePath)} not found`)
     return
