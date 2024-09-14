@@ -33,8 +33,9 @@ export async function generateView(fileName: string) {
 function generateScript(configData: Record<string, any>) {
   const { components } = configData
   return `<script setup lang="ts">
-          ${generateImportStoresGlobal(components)}
           ${generateImportVswiftComponents(components)}
+          ${generateImportDateFns(components)}
+          ${generateImportStoresGlobal(components)}
           ${generateImportConstants(components)}
           </script>`
 }
@@ -66,6 +67,16 @@ function generateImportConstants(components: Record<string, any>[]) {
   return ''
 }
 
+function generateImportDateFns(components: Record<string, any>[]) {
+  const compile = handlebars.compile('{{ImportDateFns components}}')
+  const code = compile({ components })
+  if (code) {
+    return `import { ${code} } from 'date-fns'`
+  }
+  return ''
+}
+
+// 以下定义handlebars helper
 handlebars.registerHelper('ImportVswiftComponentsType', (components: Record<string, any>[]) => {
   const codeArr: string[] = []
   if (components.some(e => e.type === 'Search')) {
@@ -113,9 +124,49 @@ handlebars.registerHelper('ImportStoresGlobal', (components: Record<string, any>
 
 handlebars.registerHelper('ImportConstants', (components: Record<string, any>[]) => {
   const codeArr: string[] = []
-  const filterTables = components.filter(e => e.type === 'Table')
-  if (filterTables.some(e => e.options.showPagination)) {
-    codeArr.push('useAppSettingDataStore')
+  const staticDataKeyArrInSearch = components
+    .filter(e => e.type === 'Search')
+    .reduce((pre: string[], cur) => {
+      return [
+        ...pre,
+        ...(cur.options.searchConditionItems
+          ?.filter(
+            (a: Record<string, any>) => a.optionDataType === 'static_data' && !!a.staticDataKey,
+          )
+          ?.map((b: Record<string, any>) => b.staticDataKey) ?? []),
+      ]
+    }, [])
+  const staticDataKeyArrInTable = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: string[], cur) => {
+      return [
+        ...pre,
+        ...(cur.options.tableColumnItems
+          ?.filter(
+            (a: Record<string, any>) =>
+              a.formatterType === 'static_data_transform' && !!a.staticDataKey,
+          )
+          ?.map((b: Record<string, any>) => b.staticDataKey) ?? []),
+      ]
+    }, [])
+
+  codeArr.push(
+    ...Array.from(new Set(staticDataKeyArrInSearch)),
+    ...Array.from(new Set(staticDataKeyArrInTable)),
+  )
+
+  return codeArr.join(',')
+})
+
+handlebars.registerHelper('ImportDateFns', (components: Record<string, any>[]) => {
+  const codeArr: string[] = []
+  const tableColumnItems = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableColumnItems ?? [])]
+    }, [])
+  if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
+    codeArr.push('format')
   }
   return codeArr.join(',')
 })

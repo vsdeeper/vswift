@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useAppSettingDataStore } from '@/stores/global'
 import type { VsSearchProps, VsTableInstance, VsTableProps, SSelectProps } from '@/components'
-import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
+import { useAppSettingDataStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils/constants'
+import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
 import { findArraryValueFromTreeData, getLabelByValue } from '@/utils'
 import { format } from 'date-fns'
 import type { AddItemInstance, CheckItemInstance, EditItemInstance } from './components'
