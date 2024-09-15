@@ -4,10 +4,13 @@ import { pathExistsSync } from 'fs-extra/esm'
 import handlebars from 'handlebars'
 import path from 'path'
 import { pascal } from 'radash'
-import { parseConfig } from '../../utils/index.js'
+import { parseConfig } from '../../../utils/index.js'
 import consola from 'consola'
 import chalk from 'chalk'
 
+/**
+ * 生成SFC格式
+ */
 export async function generateView(fileName: string) {
   const config = parseConfig()
   const configFilePath = `${config.downloadDir}/${fileName + '.json'}`
@@ -37,6 +40,7 @@ function generateScript(configData: Record<string, any>) {
           ${generateImportDateFns(components)}
           ${generateImportStoresGlobal(components)}
           ${generateImportConstants(components)}
+          ${generateImportUtils(components)}
           </script>`
 }
 
@@ -72,6 +76,15 @@ function generateImportDateFns(components: Record<string, any>[]) {
   const code = compile({ components })
   if (code) {
     return `import { ${code} } from 'date-fns'`
+  }
+  return ''
+}
+
+function generateImportUtils(components: Record<string, any>[]) {
+  const compile = handlebars.compile('{{ImportUtils components}}')
+  const code = compile({ components })
+  if (code) {
+    return `import { ${code} } from '@/utils'`
   }
   return ''
 }
@@ -167,6 +180,25 @@ handlebars.registerHelper('ImportDateFns', (components: Record<string, any>[]) =
     }, [])
   if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
     codeArr.push('format')
+  }
+  return codeArr.join(',')
+})
+
+handlebars.registerHelper('ImportUtils', (components: Record<string, any>[]) => {
+  const codeArr: string[] = []
+  const tableColumnItems = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableColumnItems ?? [])]
+    }, [])
+  if (tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && e.isTreeData)) {
+    codeArr.push('findArraryValueFromTreeData')
+  }
+  if (
+    tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && !e.isTreeData) ||
+    tableColumnItems.some(e => e.formatterType === 'static_data_transform' && !!e.staticDataKey)
+  ) {
+    codeArr.push('getLabelByValue')
   }
   return codeArr.join(',')
 })
