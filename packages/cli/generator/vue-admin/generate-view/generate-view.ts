@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { pathExistsSync } from 'fs-extra/esm'
 import handlebars from 'handlebars'
 import path from 'path'
-import { pascal } from 'radash'
+import { last, pascal } from 'radash'
 import { parseConfig } from '../../../utils/index.js'
 import consola from 'consola'
 import chalk from 'chalk'
@@ -41,6 +41,7 @@ function generateScript(configData: Record<string, any>) {
           ${generateImportStoresGlobal(components)}
           ${generateImportConstants(components)}
           ${generateImportUtils(components)}
+          ${generateImportApi(configData)}
           </script>`
 }
 
@@ -85,6 +86,20 @@ function generateImportUtils(components: Record<string, any>[]) {
   const code = compile({ components })
   if (code) {
     return `import { ${code} } from '@/utils'`
+  }
+  return ''
+}
+
+function generateImportApi(configData: Record<string, any>) {
+  const { components } = configData
+  const compile = handlebars.compile('{{ImportApi components}}')
+  const code = compile({ components })
+  if (code) {
+    if (!configData.options.name) {
+      consola.error(`视图名称未配置 -> id=${configData.id}`)
+      return
+    }
+    return `import { ${code} } from '@/api/'${configData.options.name}`
   }
   return ''
 }
@@ -200,5 +215,88 @@ handlebars.registerHelper('ImportUtils', (components: Record<string, any>[]) => 
   ) {
     codeArr.push('getLabelByValue')
   }
+  return codeArr.join(',')
+})
+
+handlebars.registerHelper('ImportApi', (components: Record<string, any>[]) => {
+  const codeArr: string[] = []
+  const searchConditionItemsNeedApi = components
+    .filter(e => e.type === 'Search')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.searchConditionItems ?? [])]
+    }, [])
+    .filter(
+      e =>
+        ['Select', 'Cascader'].includes(e.type) &&
+        e.optionDataType === 'definition' &&
+        e.dataSource === 'api' &&
+        e.apiConfig?.method &&
+        e.apiConfig?.url,
+    )
+
+  const tableOperationsNeedApi = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableOperations ?? [])]
+    }, [])
+    .filter(
+      e =>
+        (e.apiConfig?.method && e.apiConfig?.url) ||
+        (e.echoApiConfig?.method && e.echoApiConfig?.url),
+    )
+  const tableColumnItemsNeedApi = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableColumnItems ?? [])]
+    }, [])
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
+    }, [])
+    .filter(
+      e => e.formatterType === 'dynamic_data_transform' && e.apiConfig?.method && e.apiConfig?.url,
+    )
+
+  const tableColumnOperationsNeedApi = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableColumnOperations ?? [])]
+    }, [])
+    .filter(
+      e =>
+        (e.apiConfig?.method && e.apiConfig?.url) ||
+        (e.echoApiConfig?.method && e.echoApiConfig?.url),
+    )
+
+  if (searchConditionItemsNeedApi.length) {
+    codeArr.push(
+      ...searchConditionItemsNeedApi.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
+    )
+  }
+  if (tableOperationsNeedApi.length) {
+    for (const item of tableOperationsNeedApi) {
+      if (item.apiConfig?.method && item.apiConfig?.url) {
+        codeArr.push(item.apiConfig.name || last(item.apiConfig.url.split('/')))
+      }
+      if (item.echoApiConfig?.method && item.echoApiConfig?.url) {
+        codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
+      }
+    }
+  }
+  if (tableColumnItemsNeedApi.length) {
+    codeArr.push(
+      ...tableColumnItemsNeedApi.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
+    )
+  }
+  if (tableColumnOperationsNeedApi.length) {
+    for (const item of tableColumnOperationsNeedApi) {
+      if (item.apiConfig?.method && item.apiConfig?.url) {
+        codeArr.push(item.apiConfig.name || last(item.apiConfig.url.split('/')))
+      }
+      if (item.echoApiConfig?.method && item.echoApiConfig?.url) {
+        codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
+      }
+    }
+  }
+
   return codeArr.join(',')
 })
