@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { pathExistsSync } from 'fs-extra/esm'
 import handlebars from 'handlebars'
 import path from 'path'
-import { last, pascal } from 'radash'
+import { camel, dash, last, pascal } from 'radash'
 import { parseConfig } from '../../../utils/index.js'
 import consola from 'consola'
 import chalk from 'chalk'
@@ -42,6 +42,10 @@ function generateScript(configData: Record<string, any>) {
           ${generateImportConstants(components)}
           ${generateImportUtils(components)}
           ${generateImportApi(configData)}
+          ${generateImportStores(configData)}
+
+          ${generateAsyncComponentImports(components)}
+          ${generateUseStoreConst(configData)}
           </script>`
 }
 
@@ -91,15 +95,44 @@ function generateImportUtils(components: Record<string, any>[]) {
 }
 
 function generateImportApi(configData: Record<string, any>) {
-  const { components } = configData
+  const { components, options } = configData
   const compile = handlebars.compile('{{ImportApi components}}')
   const code = compile({ components })
   if (code) {
-    if (!configData.options.name) {
+    if (!options.name) {
       consola.error(`视图名称未配置 -> id=${configData.id}`)
       return
     }
-    return `import { ${code} } from '@/api/'${configData.options.name}`
+    return `import { ${code} } from '@/api/'${options.name}`
+  }
+  return ''
+}
+
+function generateImportStores(configData: Record<string, any>) {
+  const { options } = configData
+  if (!options.name) {
+    consola.error(`视图名称未配置 -> id=${configData.id}`)
+    return
+  }
+  return `import { use${pascal(last(options.name.split('/'))!)}Store } from '@/stores/'${options.name}`
+}
+
+function generateAsyncComponentImports(components: Record<string, any>[]) {
+  const compile = handlebars.compile('{{AsyncComponentImports components}}')
+  const code = compile({ components })
+  return code || ''
+}
+
+function generateUseStoreConst(configData: Record<string, any>) {
+  const { components, options } = configData
+  const compile = handlebars.compile('{{UseStoreConst components}}')
+  const code = compile({ components })
+  if (code) {
+    if (!options.name) {
+      consola.error(`视图名称未配置 -> id=${configData.id}`)
+      return
+    }
+    return `const { ${code} } = use${pascal(last(options.name.split('/'))!)}Store()`
   }
   return ''
 }
@@ -220,19 +253,6 @@ handlebars.registerHelper('ImportUtils', (components: Record<string, any>[]) => 
 
 handlebars.registerHelper('ImportApi', (components: Record<string, any>[]) => {
   const codeArr: string[] = []
-  const searchConditionItemsNeedApi = components
-    .filter(e => e.type === 'Search')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.searchConditionItems ?? [])]
-    }, [])
-    .filter(
-      e =>
-        ['Select', 'Cascader'].includes(e.type) &&
-        e.optionDataType === 'definition' &&
-        e.dataSource === 'api' &&
-        e.apiConfig?.method &&
-        e.apiConfig?.url,
-    )
 
   const tableOperationsNeedApi = components
     .filter(e => e.type === 'Table')
@@ -243,17 +263,6 @@ handlebars.registerHelper('ImportApi', (components: Record<string, any>[]) => {
       e =>
         (e.apiConfig?.method && e.apiConfig?.url) ||
         (e.echoApiConfig?.method && e.echoApiConfig?.url),
-    )
-  const tableColumnItemsNeedApi = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnItems ?? [])]
-    }, [])
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
-    }, [])
-    .filter(
-      e => e.formatterType === 'dynamic_data_transform' && e.apiConfig?.method && e.apiConfig?.url,
     )
 
   const tableColumnOperationsNeedApi = components
@@ -266,12 +275,6 @@ handlebars.registerHelper('ImportApi', (components: Record<string, any>[]) => {
         (e.apiConfig?.method && e.apiConfig?.url) ||
         (e.echoApiConfig?.method && e.echoApiConfig?.url),
     )
-
-  if (searchConditionItemsNeedApi.length) {
-    codeArr.push(
-      ...searchConditionItemsNeedApi.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
-    )
-  }
   if (tableOperationsNeedApi.length) {
     for (const item of tableOperationsNeedApi) {
       if (item.apiConfig?.method && item.apiConfig?.url) {
@@ -281,11 +284,6 @@ handlebars.registerHelper('ImportApi', (components: Record<string, any>[]) => {
         codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
       }
     }
-  }
-  if (tableColumnItemsNeedApi.length) {
-    codeArr.push(
-      ...tableColumnItemsNeedApi.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
-    )
   }
   if (tableColumnOperationsNeedApi.length) {
     for (const item of tableColumnOperationsNeedApi) {
@@ -299,4 +297,85 @@ handlebars.registerHelper('ImportApi', (components: Record<string, any>[]) => {
   }
 
   return codeArr.join(',')
+})
+
+handlebars.registerHelper('AsyncComponentImports', (components: Record<string, any>[]) => {
+  const codeArr: string[] = []
+
+  const tableOperationsHasForm = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableOperations ?? [])]
+    }, [])
+    .filter(e => !!e.formConfig)
+
+  const tableColumnItemsHasForm = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableColumnItems ?? [])]
+    }, [])
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
+    }, [])
+    .filter(e => !!e.formConfig)
+
+  if (tableOperationsHasForm.length) {
+    codeArr.push(...tableOperationsHasForm.map(e => `table-${dash(e.value)}`))
+  }
+
+  if (tableColumnItemsHasForm.length) {
+    codeArr.push(...tableColumnItemsHasForm.map(e => `row-${dash(e.value)}`))
+  }
+
+  return [
+    ...codeArr.map(
+      e =>
+        `const ${camel(e)} = defineAsyncComponent(() => import('./components/${e}/${pascal(e)}.vue'))`,
+    ),
+    ...codeArr.map(e => `const ${pascal(e)}Ref = ref<${pascal(e)}Instance>()`),
+  ].join('\n')
+})
+
+handlebars.registerHelper('UseStoreConst', (components: Record<string, any>[]) => {
+  const codeArr: string[] = []
+  const searchConditionItemsNeedStore = components
+    .filter(e => e.type === 'Search')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.searchConditionItems ?? [])]
+    }, [])
+    .filter(
+      e =>
+        ['Select', 'Cascader'].includes(e.type) &&
+        e.optionDataType === 'definition' &&
+        e.dataSource === 'api' &&
+        e.apiConfig?.method &&
+        e.apiConfig?.url,
+    )
+  const tableColumnItemsNeedStore = components
+    .filter(e => e.type === 'Table')
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.options.tableColumnItems ?? [])]
+    }, [])
+    .reduce((pre: Record<string, any>[], cur) => {
+      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
+    }, [])
+    .filter(
+      e => e.formatterType === 'dynamic_data_transform' && e.apiConfig?.method && e.apiConfig?.url,
+    )
+
+  if (searchConditionItemsNeedStore.length) {
+    codeArr.push(
+      ...searchConditionItemsNeedStore.map(
+        e => e.apiConfig.name || last(e.apiConfig.url.split('/')),
+      ),
+    )
+  }
+
+  if (tableColumnItemsNeedStore.length) {
+    codeArr.push(
+      ...tableColumnItemsNeedStore.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
+    )
+  }
+
+  return codeArr.map(e => `get${pascal(e)}`).join(',')
 })
