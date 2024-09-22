@@ -11,6 +11,8 @@ import {
   getAsyncComponentConst,
   getConstantsImports,
   getDateFnsImports,
+  getParams,
+  getSearch,
   getStoresGlobalImports,
   getUseStoreConst,
   getUseUserInfoStoreConst,
@@ -48,6 +50,7 @@ function transCode(configData: Record<string, any>) {
   const scriptCodeArr: string[] = []
   const templateCodeArr: string[] = []
 
+  // script 生成开始
   scriptCodeArr.push('<script setup lang="ts">')
 
   // @vswift/components 类型导入
@@ -124,6 +127,21 @@ function transCode(configData: Record<string, any>) {
       `const { ${useUserInfoStoreConst.join(',')} } = storeToRefs(useUserInfoStore())`,
     )
   }
+
+  // params 定义
+  const params = getParams(components)
+  if (params.length) {
+    scriptCodeArr.push(params.join('\n'))
+  }
+
+  // search 定义
+  const search = getSearch(components)
+  if (search.length) {
+    scriptCodeArr.push(search.join('\n'))
+  }
+
+  // script 生成结束
+  scriptCodeArr.push('</script>')
 
   return [...scriptCodeArr, ...templateCodeArr]
 }

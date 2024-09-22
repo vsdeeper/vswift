@@ -1,4 +1,4 @@
-import { camel, dash, last } from 'radash'
+import { camel, dash, last, pascal } from 'radash'
 
 export function getVswiftComponentsTypeImports(components: Record<string, any>[]) {
   const codeArr: string[] = []
@@ -273,6 +273,35 @@ export function getUseUserInfoStoreConst(components: Record<string, any>[]) {
     .filter(e => !!e.code)
   if (tableOperationsHasPermissionCode.length || tableColumnOperationsHasPermissionCode.length) {
     codeArr.push('permissionCodes')
+  }
+  return codeArr
+}
+
+export function getParams(components: Record<string, any>[]) {
+  const codeArr: string[] = ['const params = ref<PagingParams>({']
+  const filterTables = components.filter(e => e.type === 'Table')
+  if (filterTables.some(e => e.options.showPagination)) {
+    codeArr.push('pageIndex: 1,', 'pageSize: getPageSize()')
+  }
+  codeArr.push('})')
+  return codeArr
+}
+
+export function getSearch(components: Record<string, any>[]) {
+  const codeArr: string[] = ['const search = ref<VsSearchProps>({']
+  const findSearch = components.find(e => e.type === 'Search')
+  if (findSearch) {
+    const { options } = findSearch
+    if (options.labelWidth) {
+      codeArr.push(`labelWidth: '${options.labelWidth}px',`)
+    }
+    codeArr.push('options: [')
+    for (const item of options.searchConditionItems) {
+      codeArr.push(
+        `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: {} as S${pascal(item.type)}Props }`,
+      )
+    }
+    codeArr.push('})')
   }
   return codeArr
 }
