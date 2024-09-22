@@ -27,7 +27,7 @@ export default defineConfig(() => {
       vueJsx(),
       cssInjectedByJsPlugin(),
       AutoImport({
-        imports: ['vue', 'vue-router'],
+        imports: ['vue', 'vue-router', 'pinia'],
         dts: './types/auto-imports.d.ts',
         resolvers: [
           ElementPlusResolver({
