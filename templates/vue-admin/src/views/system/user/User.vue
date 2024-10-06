@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VsSearchProps, VsTableInstance, VsTableProps, SSelectProps } from '@/components'
+import type { VsSearchProps, VsTableInstance, VsTableProps, SSelectProps, SInputProps } from '@/components'
 import { useAppSettingDataStore, useUserInfoStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils/constants'
 import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
@@ -27,7 +27,8 @@ const search = ref<VsSearchProps>({
     {
       id: 'searchStr',
       type: 'input',
-      label: '员工姓名/工号'
+      label: '员工姓名/工号',
+      props: {} as SInputProps
     },
     {
       id: 'status',
@@ -40,7 +41,8 @@ const search = ref<VsSearchProps>({
     {
       id: 'phone',
       type: 'input',
-      label: '手机号'
+      label: '手机号',
+      props: {} as SInputProps
     }
   ]
 })

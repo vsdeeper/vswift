@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import type { SSelectProps } from '.'
 
-defineProps<{
+const _props = defineProps<{
   props?: SSelectProps
 }>()
 
 const model = defineModel<string | number | boolean | Record<string, any> | any[]>()
+const options = ref<Record<string, any>[]>([])
+
+watch(() => _props.props?.options, async () => {
+  if (Array.isArray(_props.props?.options)) {
+    options.value = _props.props!.options
+  } else if (Object.prototype.toString.call(_props.props?.options) === '[object AsyncFunction]') {
+    options.value = await _props.props!.options!()
+  }
+}, { once: true })
 </script>
 
 <template>
@@ -18,7 +27,7 @@ const model = defineModel<string | number | boolean | Record<string, any> | any[
     }"
   >
     <el-option
-      v-for="item in props?.options"
+      v-for="item in options"
       :key="item[props?.itemValue ?? 'value']"
       :label="item[props?.itemLabel ?? 'label']"
       :value="item[props?.itemValue ?? 'value']"

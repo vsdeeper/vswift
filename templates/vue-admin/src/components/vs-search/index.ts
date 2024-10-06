@@ -8,7 +8,7 @@ export interface VsSearchOptionItem {
   // 组件类型
   type?: 'input' | 'select' | 'cascader' | 'date' | 'time' | 'tree-select'
   label?: string
-  // el组件的源属性设置
+  // el组件的源属性设置或其他自定义属性
   props?: Record<string, any>
 }
 export type VsSearchOptions = VsSearchOptionItem[]

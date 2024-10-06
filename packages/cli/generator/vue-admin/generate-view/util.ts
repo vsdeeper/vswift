@@ -298,10 +298,78 @@ export function getSearch(components: Record<string, any>[]) {
     codeArr.push('options: [')
     for (const item of options.searchConditionItems) {
       codeArr.push(
-        `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: {} as S${pascal(item.type)}Props }`,
+        `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: { ${transProps(item).join('\n')} } as S${pascal(item.type)}Props }`,
       )
     }
-    codeArr.push('})')
+    codeArr.push(']')
+  }
+  codeArr.push('})')
+  return codeArr
+}
+
+function transProps(item: Record<string, any>) {
+  const codeArr: string[] = []
+  if (item.placeholder) {
+    codeArr.push(`placeholder: ${item.placeholder},`)
+  }
+  switch (item.type) {
+    case 'Select': {
+      if (item.itemLabel) {
+        codeArr.push(`itemLabel: ${item.itemLabel},`)
+      }
+      if (item.itemValue) {
+        codeArr.push(`itemValue: ${item.itemValue},`)
+      }
+      if (typeof item.multiple === 'boolean') {
+        codeArr.push(`multiple: ${item.multiple},`)
+      }
+      if (item.optionDataType === 'static_data' /** 静态数据 */) {
+        codeArr.push(`options: ${item.staticDataKey},`)
+      } else if (item.optionDataType === 'definition' /** 定义 */) {
+        if (item.dataSource === 'api' /** 接口定义 */) {
+          codeArr.push(`options: async () => await get${pascal(item.key)}Data()`)
+        } else if (item.dataSource === 'custom' /** 自定义 */) {
+          codeArr.push(`options: [`)
+          for (const optionItem of item.options) {
+            codeArr.push(
+              `{ label: ${optionItem.label}, value: ${optionItem.valueType === 'number' ? +optionItem.value : optionItem.value} }`,
+            )
+          }
+          codeArr.push(`]`)
+        }
+      }
+      break
+    }
+    case 'Cascader': {
+      if (item.itemLabel) {
+        codeArr.push(`label: ${item.itemLabel},`)
+      }
+      if (item.itemValue) {
+        codeArr.push(`value: ${item.itemValue},`)
+      }
+      if (item.itemChildren) {
+        codeArr.push(`children: ${item.itemChildren},`)
+      }
+      if (typeof item.multiple === 'boolean') {
+        codeArr.push(`multiple: ${item.multiple},`)
+      }
+      if (item.optionDataType === 'static_data' /** 静态数据 */) {
+        codeArr.push(`options: ${item.staticDataKey},`)
+      } else if (item.optionDataType === 'definition' /** 定义 */) {
+        if (item.dataSource === 'api' /** 接口定义 */) {
+          codeArr.push(`options: async () => await get${pascal(item.key)}Data()`)
+        } else if (item.dataSource === 'custom' /** 自定义 */) {
+          codeArr.push(`options: [`)
+          for (const optionItem of item.options) {
+            codeArr.push(
+              `{ label: ${optionItem.label}, value: ${optionItem.valueType === 'number' ? +optionItem.value : optionItem.value} }`,
+            )
+          }
+          codeArr.push(`]`)
+        }
+      }
+      break
+    }
   }
   return codeArr
 }
