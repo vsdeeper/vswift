@@ -288,9 +288,10 @@ export function getParams(components: Record<string, any>[]) {
 }
 
 export function getSearch(components: Record<string, any>[]) {
-  const codeArr: string[] = ['const search = ref<VsSearchProps>({']
+  const codeArr: string[] = []
   const findSearch = components.find(e => e.type === 'Search')
   if (findSearch) {
+    codeArr.push('const search = ref<VsSearchProps>({')
     const { options } = findSearch
     if (options.labelWidth) {
       codeArr.push(`labelWidth: '${options.labelWidth}px',`)
@@ -298,16 +299,88 @@ export function getSearch(components: Record<string, any>[]) {
     codeArr.push('options: [')
     for (const item of options.searchConditionItems) {
       codeArr.push(
-        `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: { ${transProps(item).join('\n')} } as S${pascal(item.type)}Props }`,
+        `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: { ${transPropsForSearch(item).join('\n')} } as S${pascal(item.type)}Props }`,
       )
     }
     codeArr.push(']')
+    codeArr.push('})')
   }
-  codeArr.push('})')
   return codeArr
 }
 
-function transProps(item: Record<string, any>) {
+export function getTable(components: Record<string, any>[]) {
+  const codeArr: string[] = []
+  const findTable = components.find(e => e.type === 'Table')
+  if (findTable) {
+    codeArr.push('const TableRef = ref<VsTableInstance>()')
+    codeArr.push('const table = ref<Partial<VsTableProps>>({')
+    codeArr.push('loading: false,')
+    const { options } = findTable
+    if (options.showPagination) {
+      codeArr.push('total: 0,')
+    }
+    if (options.showSelection) {
+      codeArr.push('showSelection: true,')
+    }
+    if (options.operateColumnWidth) {
+      codeArr.push(`operateColumnWidth: ${options.operateColumnWidth}px`)
+    }
+    codeArr.push('data: [],')
+
+    if (options.tableOperations?.length) {
+      codeArr.push('operateOptions: [')
+      for (const item of options.tableOperations) {
+        codeArr.push(
+          `{
+            label: ${item.label},
+            value: ${item.value},
+            ${item.code ? `code: ${item.code},` : ''}
+            ${item.type ? `type: ${item.type},` : ''}
+            show: (code) => permissionCodes.value.includes(code!)
+          }`,
+        )
+      }
+      codeArr.push('],')
+    }
+
+    if (options.tableColumnItems?.length) {
+      codeArr.push('columns: [')
+      // TODO 子表列
+      for (const item of options.tableColumnItems) {
+        codeArr.push(
+          `{
+            label: ${item.label},
+            prop: ${item.prop},
+            ${item.width ? `width: ${item.width},` : ''}
+          }`,
+        )
+      }
+      codeArr.push('],')
+    }
+
+    if (options.tableColumnOperations?.length) {
+      codeArr.push('rowOperateOptions: [')
+      for (const item of options.tableColumnOperations) {
+        codeArr.push(
+          `{
+            label: ${item.label},
+            value: ${item.value},
+            ${item.code ? `code: ${item.code},` : ''}
+            ${item.type ? `type: ${item.type},` : ''}
+            ${typeof item.showPopconfirm === 'boolean' ? `showPopconfirm: ${item.showPopconfirm}` : ''}
+            show: (code) => permissionCodes.value.includes(code!)
+          }`,
+        )
+      }
+      codeArr.push('],')
+    }
+
+    codeArr.push('})')
+  }
+  return codeArr
+}
+
+function transPropsForSearch(item: Record<string, any>) {
   const codeArr: string[] = []
   if (item.placeholder) {
     codeArr.push(`placeholder: ${item.placeholder},`)

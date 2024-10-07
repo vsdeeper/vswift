@@ -19,9 +19,9 @@ export interface VsTableColumnItem {
 export interface VsTableOperateItem {
   label: string
   value: string
-  code: string // 权限标识符
+  code?: string // 权限标识符
   type?: 'primary' | 'success' | 'warning' | 'danger' | 'info'
-  show?: (code: string, row?: Record<string, any>) => boolean
+  show?: (code?: string, row?: Record<string, any>) => boolean
   buttonProps?: Partial<ButtonProps>
 }
 export interface VsRowOperateOptionItem extends VsTableOperateItem {

@@ -14,6 +14,7 @@ import {
   getParams,
   getSearch,
   getStoresGlobalImports,
+  getTable,
   getUseStoreConst,
   getUseUserInfoStoreConst,
   getUtilsImports,
@@ -138,6 +139,12 @@ function transCode(configData: Record<string, any>) {
   const search = getSearch(components)
   if (search.length) {
     scriptCodeArr.push(search.join('\n'))
+  }
+
+  // table 定义
+  const table = getTable(components)
+  if (table.length) {
+    scriptCodeArr.push(table.join('\n'))
   }
 
   // script 生成结束
