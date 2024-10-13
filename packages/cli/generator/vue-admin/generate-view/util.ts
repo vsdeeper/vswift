@@ -1,13 +1,74 @@
+import consola from 'consola'
 import { camel, dash, last, pascal } from 'radash'
 
-export function getVswiftComponentsTypeImports(components: Record<string, any>[]) {
+// 生成 @/stores/global 导入
+export function genStoresGlobalImports(
+  findTable?: Record<string, any>,
+  searchConditionItems?: Record<string, any>[],
+  tableColumnItems?: Record<string, any>[],
+  tableOperationsHasPermissionCode?: Record<string, any>[],
+  tableColumnOperationsHasPermissionCode?: Record<string, any>[],
+) {
   const codeArr: string[] = []
-  if (components.some((e: Record<string, any>) => e.type === 'Search')) {
+  if (findTable?.options.showPagination /** 有分页，需要获取应用偏好设置的数据 */) {
+    codeArr.push('useAppSettingDataStore')
+  }
+  if (
+    tableOperationsHasPermissionCode?.length ||
+    tableColumnOperationsHasPermissionCode?.length /** 表格操作或表列操作配置了权限标识符，需要从用户store中获取权限码数据 */
+  ) {
+    codeArr.push('useUserInfoStore')
+  }
+  if (
+    searchConditionItems?.some(e => !!e.apiConfig?.useGlobalApi) ||
+    tableColumnItems?.some(
+      e => !!e.apiConfig?.useGlobalApi,
+    ) /** 搜索条件或表列配置了使用全局接口，需要从全局stroe中获取接口数据 */
+  ) {
+    codeArr.push('useApi')
+  }
+  return codeArr
+}
+
+// 生成 @/api/xxx 导入
+export function genApiImports(
+  tableOperationsNeedApi?: Record<string, any>[],
+  tableColumnOperationsNeedApi?: Record<string, any>[],
+) {
+  const codeArr: string[] = []
+  if (tableOperationsNeedApi?.length) {
+    for (const item of tableOperationsNeedApi) {
+      if (item.apiConfig?.method && item.apiConfig?.url) {
+        codeArr.push(item.apiConfig.name || last(item.apiConfig.url.split('/')))
+      }
+      if (item.echoApiConfig?.method && item.echoApiConfig?.url) {
+        codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
+      }
+    }
+  }
+  if (tableColumnOperationsNeedApi?.length) {
+    for (const item of tableColumnOperationsNeedApi) {
+      if (item.apiConfig?.method && item.apiConfig?.url) {
+        codeArr.push(item.apiConfig.name || last(item.apiConfig.url.split('/')))
+      }
+      if (item.echoApiConfig?.method && item.echoApiConfig?.url) {
+        codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
+      }
+    }
+  }
+
+  return codeArr
+}
+
+// 生成 @vswift/components 组建库类型导入
+export function genVswiftComponentsTypeImports(
+  findSearch: Record<string, any>,
+  findTable: Record<string, any>,
+) {
+  const codeArr: string[] = []
+  if (findSearch) {
     codeArr.push('VsSearchProps')
-    const filterSearch = components.filter(e => e.type === 'Search')
-    const searchConditionItems = filterSearch.reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.searchConditionItems ?? [])]
-    }, [])
+    const searchConditionItems = findSearch?.options?.searchConditionItems ?? []
     if (searchConditionItems.some(e => e.type === 'Cascader')) {
       codeArr.push('SCascaderProps')
     }
@@ -30,339 +91,70 @@ export function getVswiftComponentsTypeImports(components: Record<string, any>[]
       codeArr.push('STreeSelectProps')
     }
   }
-  if (components.some(e => e.type === 'Table')) {
+  if (findTable) {
     codeArr.push('VsTableInstance', 'VsTableProps')
   }
   return codeArr
 }
 
-export function getDateFnsImports(components: Record<string, any>[]) {
+// 生成 Search 配置
+export function genSearchConfig(searchConfig: Record<string, any>) {
   const codeArr: string[] = []
-  const tableColumnItems = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnItems ?? [])]
-    }, [])
-
-  if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
-    codeArr.push('format')
+  const { options } = searchConfig
+  if (options.labelWidth) {
+    codeArr.push(`labelWidth: '${options.labelWidth}px',`)
   }
-  return codeArr
-}
-
-export function getStoresGlobalImports(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const filterTables = components.filter(e => e.type === 'Table')
-  const tableOperationsHasPermissionCode = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableOperations ?? [])]
-    }, [])
-    .filter(e => !!e.code)
-  const tableColumnOperationsHasPermissionCode = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnOperations ?? [])]
-    }, [])
-    .filter(e => !!e.code)
-
-  if (filterTables.some(e => e.options.showPagination)) {
-    codeArr.push('useAppSettingDataStore')
-  }
-  if (tableOperationsHasPermissionCode.length || tableColumnOperationsHasPermissionCode.length) {
-    codeArr.push('permissionCodes')
-  }
-  return codeArr
-}
-
-export function getConstantsImports(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const staticDataKeyArrInSearch = components
-    .filter(e => e.type === 'Search')
-    .reduce((pre: string[], cur) => {
-      return [
-        ...pre,
-        ...(cur.options.searchConditionItems
-          ?.filter(
-            (a: Record<string, any>) => a.optionDataType === 'static_data' && !!a.staticDataKey,
-          )
-          ?.map((b: Record<string, any>) => b.staticDataKey) ?? []),
-      ]
-    }, [])
-  const staticDataKeyArrInTable = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: string[], cur) => {
-      return [
-        ...pre,
-        ...(cur.options.tableColumnItems
-          ?.filter(
-            (a: Record<string, any>) =>
-              a.formatterType === 'static_data_transform' && !!a.staticDataKey,
-          )
-          ?.map((b: Record<string, any>) => b.staticDataKey) ?? []),
-      ]
-    }, [])
-
-  const toDeduplicateStaticDataKeyArrInSearch = Array.from(new Set(staticDataKeyArrInSearch))
-  const toDeduplicateStaticDataKeyArrInTable = Array.from(new Set(staticDataKeyArrInTable))
-
-  if (toDeduplicateStaticDataKeyArrInSearch.length) {
-    codeArr.push(...toDeduplicateStaticDataKeyArrInSearch)
-  }
-
-  if (toDeduplicateStaticDataKeyArrInTable.length) {
-    codeArr.push(...toDeduplicateStaticDataKeyArrInTable)
-  }
-
-  return codeArr
-}
-
-export function getUtilsImports(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const tableColumnItems = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnItems ?? [])]
-    }, [])
-  if (tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && e.isTreeData)) {
-    codeArr.push('findArraryValueFromTreeData')
-  }
-  if (
-    tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && !e.isTreeData) ||
-    tableColumnItems.some(e => e.formatterType === 'static_data_transform' && !!e.staticDataKey)
-  ) {
-    codeArr.push('getLabelByValue')
-  }
-  return codeArr
-}
-
-export function getApiImports(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const tableOperationsNeedApi = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableOperations ?? [])]
-    }, [])
-    .filter(
-      e =>
-        (e.apiConfig?.method && e.apiConfig?.url) ||
-        (e.echoApiConfig?.method && e.echoApiConfig?.url),
-    )
-
-  const tableColumnOperationsNeedApi = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnOperations ?? [])]
-    }, [])
-    .filter(
-      e =>
-        (e.apiConfig?.method && e.apiConfig?.url) ||
-        (e.echoApiConfig?.method && e.echoApiConfig?.url),
-    )
-  if (tableOperationsNeedApi.length) {
-    for (const item of tableOperationsNeedApi) {
-      if (item.apiConfig?.method && item.apiConfig?.url) {
-        codeArr.push(item.apiConfig.name || last(item.apiConfig.url.split('/')))
-      }
-      if (item.echoApiConfig?.method && item.echoApiConfig?.url) {
-        codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
-      }
-    }
-  }
-  if (tableColumnOperationsNeedApi.length) {
-    for (const item of tableColumnOperationsNeedApi) {
-      if (item.apiConfig?.method && item.apiConfig?.url) {
-        codeArr.push(item.apiConfig.name || last(item.apiConfig.url.split('/')))
-      }
-      if (item.echoApiConfig?.method && item.echoApiConfig?.url) {
-        codeArr.push(item.echoApiConfig.name || last(item.echoApiConfig.url.split('/')))
-      }
-    }
-  }
-
-  return codeArr
-}
-
-export function getAsyncComponentConst(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const tableOperationsHasForm = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableOperations ?? [])]
-    }, [])
-    .filter(e => !!e.formConfig)
-
-  const tableColumnItemsHasForm = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnItems ?? [])]
-    }, [])
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
-    }, [])
-    .filter(e => !!e.formConfig)
-
-  if (tableOperationsHasForm.length) {
-    codeArr.push(...tableOperationsHasForm.map(e => `table-${dash(e.value)}`))
-  }
-
-  if (tableColumnItemsHasForm.length) {
-    codeArr.push(...tableColumnItemsHasForm.map(e => `row-${dash(e.value)}`))
-  }
-
-  return codeArr
-}
-
-export function getUseStoreConst(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const searchConditionItemsNeedStore = components
-    .filter(e => e.type === 'Search')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.searchConditionItems ?? [])]
-    }, [])
-    .filter(
-      e =>
-        ['Select', 'Cascader'].includes(e.type) &&
-        e.optionDataType === 'definition' &&
-        e.dataSource === 'api' &&
-        e.apiConfig?.method &&
-        e.apiConfig?.url,
-    )
-  const tableColumnItemsNeedStore = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnItems ?? [])]
-    }, [])
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
-    }, [])
-    .filter(
-      e => e.formatterType === 'dynamic_data_transform' && e.apiConfig?.method && e.apiConfig?.url,
-    )
-
-  if (searchConditionItemsNeedStore.length) {
+  codeArr.push('options: [')
+  for (const item of options.searchConditionItems) {
     codeArr.push(
-      ...searchConditionItemsNeedStore.map(
-        e => e.apiConfig.name || last(e.apiConfig.url.split('/')),
-      ),
+      `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: { ${transPropsForSearch(item).join('')} } as S${pascal(item.type)}Props }`,
     )
   }
-
-  if (tableColumnItemsNeedStore.length) {
-    codeArr.push(
-      ...tableColumnItemsNeedStore.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
-    )
-  }
-
-  return codeArr.map(e => `${camel(e)}Data`)
-}
-
-export function getUseUserInfoStoreConst(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const tableOperationsHasPermissionCode = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableOperations ?? [])]
-    }, [])
-    .filter(e => !!e.code)
-  const tableColumnOperationsHasPermissionCode = components
-    .filter(e => e.type === 'Table')
-    .reduce((pre: Record<string, any>[], cur) => {
-      return [...pre, ...(cur.options.tableColumnOperations ?? [])]
-    }, [])
-    .filter(e => !!e.code)
-  if (tableOperationsHasPermissionCode.length || tableColumnOperationsHasPermissionCode.length) {
-    codeArr.push('permissionCodes')
-  }
+  codeArr.push(']')
   return codeArr
 }
 
-export function getParams(components: Record<string, any>[]) {
-  const codeArr: string[] = ['const params = ref<PagingParams>({']
-  const filterTables = components.filter(e => e.type === 'Table')
-  if (filterTables.some(e => e.options.showPagination)) {
-    codeArr.push('pageIndex: 1,', 'pageSize: getPageSize()')
-  }
-  codeArr.push('})')
-  return codeArr
-}
-
-export function getSearch(components: Record<string, any>[]) {
+// 生成 Table 配置
+export function genTableConfig(tableConfig: Record<string, any>) {
   const codeArr: string[] = []
-  const findSearch = components.find(e => e.type === 'Search')
-  if (findSearch) {
-    codeArr.push('const search = ref<VsSearchProps>({')
-    const { options } = findSearch
-    if (options.labelWidth) {
-      codeArr.push(`labelWidth: '${options.labelWidth}px',`)
-    }
-    codeArr.push('options: [')
-    for (const item of options.searchConditionItems) {
+  codeArr.push('loading: false,')
+  const { options } = tableConfig
+  if (options.showPagination) {
+    codeArr.push('total: 0,')
+  }
+  if (options.showSelection) {
+    codeArr.push('showSelection: true,')
+  }
+  if (options.operateColumnWidth) {
+    codeArr.push(`operateColumnWidth: ${options.operateColumnWidth}px`)
+  }
+  codeArr.push('data: [],')
+
+  if (options.tableOperations?.length) {
+    codeArr.push('operateOptions: [')
+    for (const item of options.tableOperations) {
       codeArr.push(
-        `{ id: ${item.key}, type: ${item.type}, label: ${item.label}, props: { ${transPropsForSearch(item).join('\n')} } as S${pascal(item.type)}Props }`,
-      )
-    }
-    codeArr.push(']')
-    codeArr.push('})')
-  }
-  return codeArr
-}
-
-export function getTable(components: Record<string, any>[]) {
-  const codeArr: string[] = []
-  const findTable = components.find(e => e.type === 'Table')
-  if (findTable) {
-    codeArr.push('const TableRef = ref<VsTableInstance>()')
-    codeArr.push('const table = ref<Partial<VsTableProps>>({')
-    codeArr.push('loading: false,')
-    const { options } = findTable
-    if (options.showPagination) {
-      codeArr.push('total: 0,')
-    }
-    if (options.showSelection) {
-      codeArr.push('showSelection: true,')
-    }
-    if (options.operateColumnWidth) {
-      codeArr.push(`operateColumnWidth: ${options.operateColumnWidth}px`)
-    }
-    codeArr.push('data: [],')
-
-    if (options.tableOperations?.length) {
-      codeArr.push('operateOptions: [')
-      for (const item of options.tableOperations) {
-        codeArr.push(
-          `{
+        `{
             label: ${item.label},
             value: ${item.value},
             ${item.code ? `code: ${item.code},` : ''}
             ${item.type ? `type: ${item.type},` : ''}
             show: (code) => permissionCodes.value.includes(code!)
           }`,
-        )
-      }
-      codeArr.push('],')
+      )
     }
+    codeArr.push('],')
+  }
 
-    if (options.tableColumnItems?.length) {
-      codeArr.push('columns: [')
-      // TODO 子表列
-      for (const item of options.tableColumnItems) {
-        codeArr.push(
-          `{
-            label: ${item.label},
-            prop: ${item.prop},
-            ${item.width ? `width: ${item.width},` : ''}
-          }`,
-        )
-      }
-      codeArr.push('],')
-    }
+  if (options.tableColumnItems?.length) {
+    transColumnsForTable(options.tableColumnItems)
+  }
 
-    if (options.tableColumnOperations?.length) {
-      codeArr.push('rowOperateOptions: [')
-      for (const item of options.tableColumnOperations) {
-        codeArr.push(
-          `{
+  if (options.tableColumnOperations?.length) {
+    codeArr.push('rowOperateOptions: [')
+    for (const item of options.tableColumnOperations) {
+      codeArr.push(
+        `{
             label: ${item.label},
             value: ${item.value},
             ${item.code ? `code: ${item.code},` : ''}
@@ -370,14 +162,66 @@ export function getTable(components: Record<string, any>[]) {
             ${typeof item.showPopconfirm === 'boolean' ? `showPopconfirm: ${item.showPopconfirm}` : ''}
             show: (code) => permissionCodes.value.includes(code!)
           }`,
-        )
-      }
-      codeArr.push('],')
+      )
     }
-
-    codeArr.push('})')
+    codeArr.push('],')
   }
   return codeArr
+}
+
+// 生成 Table 模板
+export function genTableTemplate(tableConfig: Record<string, any>) {
+  const codeArr: string[] = []
+  // TODO
+  if (tableConfig) return []
+  return codeArr
+}
+
+// 生成 date-fns 导入
+export function genDateFnsImports(tableColumnItems: Record<string, any>[]) {
+  const codeArr: string[] = []
+  if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
+    codeArr.push('format')
+  }
+  return codeArr
+}
+
+// 生成异步组件定义
+export function genAsyncComponentConst(
+  tableOperationsHasForm?: Record<string, any>[],
+  tableColumnItemsHasForm?: Record<string, any>[],
+) {
+  const codeArr: string[] = []
+  if (tableOperationsHasForm?.length) {
+    codeArr.push(...tableOperationsHasForm.map(e => `table-${dash(e.value)}`))
+  }
+
+  if (tableColumnItemsHasForm?.length) {
+    codeArr.push(...tableColumnItemsHasForm.map(e => `row-${dash(e.value)}`))
+  }
+  return codeArr
+}
+
+// 生成 useXxxStore 定义
+export function genUseStoreConst(
+  searchConditionItemsNeedStore?: Record<string, any>[],
+  tableColumnItemsNeedStore?: Record<string, any>[],
+) {
+  const codeArr: string[] = []
+  if (searchConditionItemsNeedStore?.length) {
+    codeArr.push(
+      ...searchConditionItemsNeedStore.map(
+        e => e.apiConfig.name || last(e.apiConfig.url.split('/')),
+      ),
+    )
+  }
+
+  if (tableColumnItemsNeedStore?.length) {
+    codeArr.push(
+      ...tableColumnItemsNeedStore.map(e => e.apiConfig.name || last(e.apiConfig.url.split('/'))),
+    )
+  }
+  return codeArr.map(e => `${camel(e)}`)
 }
 
 function transPropsForSearch(item: Record<string, any>) {
@@ -445,4 +289,62 @@ function transPropsForSearch(item: Record<string, any>) {
     }
   }
   return codeArr
+}
+
+function transColumnsForTable(items: Record<string, any>[]) {
+  const looper = (data: Record<string, any>[]) => {
+    const codeArr: string[] = []
+    codeArr.push('columns: [')
+    for (const item of data) {
+      codeArr.push(
+        `{
+          label: ${item.label},
+          prop: ${item.prop},
+          ${item.width ? `width: ${item.width},` : ''}
+          ${item.tableColumnItems?.length ? `${looper(item.tableColumnItems).join('\n')},` : ''}
+        }`,
+      )
+    }
+    codeArr.push('],')
+    return codeArr
+  }
+  return looper(items)
+}
+
+export function resolveImport(importCode: string) {
+  const arr = importCode.split(' ').filter(e => e !== ' ' && e !== ',' /** 去空格和逗号 */)
+  if (arr.length < 4) {
+    consola.error(`"${importCode}" is invalid`)
+    return
+  }
+  const leftBracketIndex = arr.indexOf('{')
+  const rightBracketIndex = arr.indexOf('}', leftBracketIndex)
+  if (arr[1] === 'type' /** 导入的全部为类型 */) {
+    return {
+      typeImports: arr.slice(leftBracketIndex + 1, rightBracketIndex),
+      modleImports: [],
+    }
+  } else if (arr.includes('type') /** 有类型导入 */) {
+    const imports = arr.slice(leftBracketIndex + 1, rightBracketIndex)
+    return {
+      typeImports: imports.map((e, i, a) => (e === 'type' ? a[i + 1] : null)).filter(e => !!e),
+      modleImports: imports.map((e, i, a) => (e === 'type' && a[i + 2] !== 'type' ? a[i + 2] : e)),
+    }
+  } else {
+    return {
+      typeImports: [],
+      modleImports: arr.slice(leftBracketIndex + 1, rightBracketIndex),
+    }
+  }
+}
+
+export function resolveDestructuringVar(varCode: string) {
+  const arr = varCode.split(' ').filter(e => e !== ' ' && e !== ',' /** 去空格和逗号 */)
+  if (arr.length < 5) {
+    consola.error(`"${varCode}" is invalid`)
+    return
+  }
+  const leftBracketIndex = arr.indexOf('{')
+  const rightBracketIndex = arr.indexOf('}', leftBracketIndex)
+  return arr.slice(leftBracketIndex + 1, rightBracketIndex)
 }
