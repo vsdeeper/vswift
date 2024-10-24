@@ -21,6 +21,7 @@ const importCodeArr: string[] = []
 const definitionCodeArr: string[] = []
 const templateCodeArr: string[] = []
 const paramsCodeArr: string[] = []
+const onMountedCodeArr: string[] = []
 
 /**
  * 生成SFC格式
@@ -36,7 +37,7 @@ export async function generateView(name: string) {
   const configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
   const { options, components } = configData
 
-  // 2. 提取一些数据，方便判断代码生成
+  // 2. 提取一些数据，方便判断代码生成逻辑
   const findSearch = components.find(e => e.type === 'Search')
   const findTable = components.find(e => e.type === 'Table')
   const searchConditionItems = findSearch?.options?.searchConditionItems
@@ -93,7 +94,7 @@ export async function generateView(name: string) {
     e => e.formatterType === 'dynamic_data_transform' && e.apiConfig?.method && e.apiConfig?.url,
   )
 
-  // 3. 默认添加
+  // 3. 默认代码添加
   addImportCode(
     'module',
     genStoresGlobalImports(
@@ -116,7 +117,7 @@ export async function generateView(name: string) {
     `'@/stores/'${options.name}'`,
   )
 
-  // 4. 分析配置数据，生成代码
+  // 4. 有搜索或表格时
   if (findSearch || findTable /** 有使用@vswift/components组建库 */) {
     addImportCode(
       'type',
@@ -124,60 +125,67 @@ export async function generateView(name: string) {
       '@vswift/components',
     )
   }
+  // 5. 有搜索时
   if (findSearch) {
     addDefinitionCode(
       `const search = ref<VsSearchProps>({${genSearchConfig(findSearch).join('')}})`,
     )
     addTemplateCode(`<VsSearch v-bind="search" @inquire="onInquire" @reset="onReset"></VsSearch>`)
+    // 5.1 搜索中配置了静态数据key
+    if (staticDataKeyArrInSearch.length /** 搜索中配置了静态数据key */) {
+      addImportCode('module', staticDataKeyArrInSearch, './constants')
+    }
   }
+  // 6. 有表格时
   if (findTable) {
-    addDefinitionCode(
+    addDefinitionCode([
       'const TableRef = ref<VsTableInstance>()',
       `const table = ref<Partial<VsTableProps>>({${genTableConfig(findTable).join('')}})`,
-    )
+    ])
     addTemplateCode(
       `<VsTable ref="TableRef" v-model:page-size="params.pageSize" v-model:current-page="params.pageIndex" v-bind="table" @operate="onOperate" @paging-change="onPagingChange">${genTableTemplate(findTable).join('')}</VsTable>`,
     )
     if (findTable?.options?.showPagination) {
       addParamsCode('pageIndex: 1,', 'pageSize: getPageSize()')
     }
-  }
-  if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
-    addImportCode('module', ['format'], 'date-fns')
-  }
-  if (tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && e.isTreeData)) {
-    addImportCode('module', ['findArraryValueFromTreeData'], '@/utils')
-  }
-  if (
-    tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && !e.isTreeData) ||
-    tableColumnItems.some(e => e.formatterType === 'static_data_transform' && !!e.staticDataKey)
-  ) {
-    addImportCode('module', ['getLabelByValue'], '@/utils')
-  }
-  if (staticDataKeyArrInSearch.length /** 搜索中配置了静态数据key */) {
-    addImportCode('module', staticDataKeyArrInSearch, './constants')
+
+    // 6.1 表格列有日期格式化
+    if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
+      addImportCode('module', ['format'], 'date-fns')
+    }
+    // 6.2 表格列有动态数据转换且是树形数据
+    if (tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && e.isTreeData)) {
+      addImportCode('module', ['findArraryValueFromTreeData'], '@/utils')
+    }
+    // 6.3 表格列有动态数据转换且不是树形数据或表格列有静态数据转换且有静态数据key
+    if (
+      tableColumnItems.some(e => e.formatterType === 'dynamic_data_transform' && !e.isTreeData) ||
+      tableColumnItems.some(e => e.formatterType === 'static_data_transform' && !!e.staticDataKey)
+    ) {
+      addImportCode('module', ['getLabelByValue'], '@/utils')
+    }
+    // 6.4 表格中配置了静态数据key
+    if (staticDataKeyArrInTable.length /** 表格中配置了静态数据key */) {
+      addImportCode('module', staticDataKeyArrInTable, './constants')
+    }
   }
 
-  if (staticDataKeyArrInTable.length /** 表格中配置了静态数据key */) {
-    addImportCode('module', staticDataKeyArrInTable, './constants')
-  }
-
-  // 异步组件定义
+  // 7. 有异步组件定义时
   const asyncComponentConstants = genAsyncComponentConst(
     tableOperationsHasForm,
     tableColumnItemsHasForm,
   )
   if (asyncComponentConstants.length) {
-    addDefinitionCode(
+    addDefinitionCode([
       ...asyncComponentConstants.map(
         e =>
           `const ${camel(e)} = defineAsyncComponent(() => import('./components/${e}/${pascal(e)}.vue'))`,
       ),
       ...asyncComponentConstants.map(e => `const ${pascal(e)}Ref = ref<${pascal(e)}Instance>()`),
-    )
+    ])
   }
 
-  // useXxxStore 定义
+  // 8. 有 useXxxStore 定义时
   const useStoreConst = genUseStoreConst(searchConditionItemsNeedStore, tableColumnItemsNeedStore)
   if (useStoreConst.length) {
     const name = pascal(last(options.name.split('/'))!)
@@ -187,12 +195,37 @@ export async function generateView(name: string) {
     }
   }
 
-  // useUserInfoStore 定义
+  // 9. 有 useUserInfoStore 定义时
   if (tableOperationsHasPermissionCode?.length || tableColumnOperationsHasPermissionCode?.length) {
     addDestructuringVar('permissionCodes', 'storeToRefs(useUserInfoStore())')
   }
+
+  // 10. onMounted 代码生成
+  if (definitionCodeArr.includes('useApi') /** 有全局api导入 */) {
+    const apiNamesForSearch = searchConditionItems
+      ?.filter(e => !!e.apiConfig?.useGlobalApi)
+      ?.map(e => e.apiConfig.useGlobalApi)
+
+    const apiNamesForTable = tableColumnItems
+      ?.filter(e => !!e.apiConfig?.useGlobalApi)
+      ?.map(e => e.apiConfig.useGlobalApi)
+
+    const _apiNamesForSearch: string[] = Array.from(new Set(apiNamesForSearch))
+    const _apiNamesForTable: string[] = Array.from(new Set(apiNamesForTable))
+    const apiNames = Array.from(new Set([..._apiNamesForSearch, ..._apiNamesForTable]))
+    for (const apiName of apiNames) {
+      addDestructuringVar(apiName, 'useApi()')
+      addDefinitionCode(`const ${apiName.replace(/^get/, '')} = ref<Record<string, any>[]>([])`)
+      addOnMountedCode(
+        `${apiName}().then((res) => (${apiName.replace(/^get/, '')}.value = res ?? []))`,
+      )
+    }
+  }
 }
 
+/**
+ * 添加导入代码
+ */
 function addImportCode(importType: 'type' | 'module', importNames: string[], importPath: string) {
   const code = importCodeArr.find(e => e.includes(importPath))
   const index = importCodeArr.findIndex(e => e.includes(importPath))
@@ -220,10 +253,24 @@ function addImportCode(importType: 'type' | 'module', importNames: string[], imp
   }
 }
 
-function addDefinitionCode(...code: string[]) {
-  definitionCodeArr.push(...code)
+/**
+ * 添加定义代码
+ * 适用于一次性添加
+ */
+function addDefinitionCode(code: string | string[], fromIndex?: number) {
+  if (typeof fromIndex === 'undefined') {
+    // 添加到末尾
+    definitionCodeArr.push(...code)
+  } else {
+    // 添加到指定位置
+    definitionCodeArr.splice(fromIndex, 0, ...code)
+  }
 }
 
+/**
+ * 添加解构变量
+ * 本质上也是添加定义代码，不同在于是解构变量
+ */
 function addDestructuringVar(name: string, source: string) {
   const code = definitionCodeArr.find(e => e.includes(source))
   const index = definitionCodeArr.findIndex(e => e.includes(source))
@@ -236,10 +283,31 @@ function addDestructuringVar(name: string, source: string) {
   }
 }
 
+/**
+ * 添加模板代码
+ */
 function addTemplateCode(...code: string[]) {
   templateCodeArr.push(...code)
 }
 
+/**
+ * 添加params定义代码
+ * params可能在不同地方追加代码
+ * 适用于多次添加
+ */
 function addParamsCode(...code: string[]) {
   paramsCodeArr.push(...code)
+}
+
+/**
+ * 添加onMounted阶段代码
+ */
+function addOnMountedCode(code: string | string[], fromIndex?: number) {
+  if (typeof fromIndex === 'undefined') {
+    // 添加到末尾
+    onMountedCodeArr.push(...code)
+  } else {
+    // 添加到指定位置
+    onMountedCodeArr.splice(fromIndex, 0, ...code)
+  }
 }
