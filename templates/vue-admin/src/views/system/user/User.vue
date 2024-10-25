@@ -118,8 +118,8 @@ onMounted(() => {
 })
 
 function onInquire(val: Record<string, any>) {
-  params.value.pageIndex = 1
-  getTableList({ ...params.value, ...val })
+  params.value = { ...params.value, ...val, pageIndex: 1 }
+  getTableList(params.value)
 }
 
 function onReset() {

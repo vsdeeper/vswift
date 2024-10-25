@@ -168,6 +168,8 @@ export async function generateView(name: string) {
     if (staticDataKeyArrInTable.length /** 表格中配置了静态数据key */) {
       addImportCode('module', staticDataKeyArrInTable, './constants')
     }
+    // 6.5 获取表格数据
+    addOnMountedCode(`getTableList(params.value)`)
   }
 
   // 7. 有异步组件定义时
@@ -221,6 +223,49 @@ export async function generateView(name: string) {
       )
     }
   }
+
+  // 11. 添加搜索逻辑,分页改变逻辑
+  if (findTable?.options.showPagination /** 有分页 */) {
+    addDefinitionCode([
+      `
+      const onInquire = (val: Record<string, any>) => {
+        params.value = { ...params.value, ...val, pageIndex: 1 }
+        getTableList(params.value)
+      }
+      `,
+      `
+      const onReset = () => {
+        params.value.pageIndex = 1
+        getTableList(params.value)
+      }
+      `,
+      `
+      const onPagingChange = (val: PagingParams) {
+        params.value.pageIndex = val.pageIndex
+        params.value.pageSize = val.pageSize
+        getTableList(params.value)
+      }
+      `,
+    ])
+  }
+
+  // 12. 添加表格数据获取逻辑
+  if (findTable) {
+    addDefinitionCode(
+      `
+      const getTableList = async(params: PagingParams) {
+        table.value.loading = true
+        const res = await queryUserList(params)
+        table.value.loading = false
+        table.value.total = res?.total ?? 0
+        table.value.data = res?.list ?? []
+      }
+      `,
+    )
+  }
+
+  // 13. 添加表格操作逻辑
+  // TODO
 }
 
 /**
