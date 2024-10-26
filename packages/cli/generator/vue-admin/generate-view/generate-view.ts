@@ -22,6 +22,7 @@ const definitionCodeArr: string[] = []
 const templateCodeArr: string[] = []
 const paramsCodeArr: string[] = []
 const onMountedCodeArr: string[] = []
+const onOperateCodeArr: string[] = []
 
 /**
  * 生成SFC格式
@@ -264,8 +265,57 @@ export async function generateView(name: string) {
     )
   }
 
-  // 13. 添加表格操作逻辑
-  // TODO
+  // 13. 添加操作逻辑
+  for (const item of tableOperations /** 表格操作 */) {
+    if (item.formConfig && Object.keys(item.formConfig).length /** 有表单配置 */) {
+      addOnOperateCode(
+        `case '${item.value}': { Table${pascal(item.value)}Ref.value?.open() break }`,
+      )
+    } else {
+      // 批量操作，常规只需配一个参数，这里只取第一个参数
+      const [param] = item.apiConfig.params
+      addOnOperateCode(
+        `
+        const selected = TableRef.value?.getSelectionRows()
+        if (!selected?.length) {
+          ElMessage.error('请选择要${item.label}的项')
+          return
+        }
+        await ElMessageBox.confirm('确定${item.label}吗？', '提示', { type: 'warning' })
+        const ${param.key} = selected.map((e) => e.${param.value})
+        if (await ${item.apiConfig.apiName}({ ${param.key} })) {
+          ElMessage.success('${item.label}成功')
+          getTableList(params.value)
+        }
+        `,
+      )
+    }
+  }
+  for (const item of tableColumnOperations /** 表列操作 */) {
+    if (item.formConfig && Object.keys(item.formConfig).length /** 有表单配置 */) {
+      addOnOperateCode(
+        `case '${item.value}': { Table${pascal(item.value)}Ref.value?.open(val) break }`,
+      )
+    } else {
+      const transParams = (arr: Record<string, any>[]) => {
+        return arr
+          .map(e => e.key)
+          .map(e => `${e}: val!.${e}`)
+          .join(',')
+      }
+      addOnOperateCode(
+        `
+        case '${item.value}': {
+          if (await ${item.apiConfig.name}({ ${transParams(item.apiConfig.params)} })) {
+            ElMessage.success('${item.label}成功')
+            getTableList(params.value)
+          }
+          break
+        }
+        `,
+      )
+    }
+  }
 }
 
 /**
@@ -354,5 +404,18 @@ function addOnMountedCode(code: string | string[], fromIndex?: number) {
   } else {
     // 添加到指定位置
     onMountedCodeArr.splice(fromIndex, 0, ...code)
+  }
+}
+
+/**
+ * 添加onOperate代码
+ */
+function addOnOperateCode(code: string | string[], fromIndex?: number) {
+  if (typeof fromIndex === 'undefined') {
+    // 添加到末尾
+    onOperateCodeArr.push(...code)
+  } else {
+    // 添加到指定位置
+    onOperateCodeArr.splice(fromIndex, 0, ...code)
   }
 }
