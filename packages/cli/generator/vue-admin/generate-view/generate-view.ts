@@ -144,7 +144,11 @@ export async function generateView(name: string) {
       `const table = ref<Partial<VsTableProps>>({${genTableConfig(findTable).join('')}})`,
     ])
     addTemplateCode(
-      `<VsTable ref="TableRef" v-model:page-size="params.pageSize" v-model:current-page="params.pageIndex" v-bind="table" @operate="onOperate" @paging-change="onPagingChange">${genTableTemplate(findTable).join('')}</VsTable>`,
+      `
+      <VsTable ref="TableRef" ${findTable?.options?.showPagination ? 'v-model:page-size="params.pageSize" v-model:current-page="params.pageIndex" @paging-change="onPagingChange"' : ''} v-bind="table" @operate="onOperate">
+        ${genTableTemplate(findTable).join('')}
+      </VsTable>
+      `,
     )
     if (findTable?.options?.showPagination) {
       addParamsCode('pageIndex: 1,', 'pageSize: getPageSize()')
