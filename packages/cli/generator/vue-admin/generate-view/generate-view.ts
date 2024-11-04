@@ -38,7 +38,7 @@ export async function generateView(name: string) {
   const configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
   const { options, components } = configData
 
-  // 2. 提取一些数据，方便判断代码生成逻辑
+  // 2. 预提取一些数据，方便重复使用
   const findSearch = components.find(e => e.type === 'Search')
   const findTable = components.find(e => e.type === 'Table')
   const searchConditionItems = findSearch?.options?.searchConditionItems
@@ -207,26 +207,22 @@ export async function generateView(name: string) {
     addDestructuringVar('permissionCodes', 'storeToRefs(useUserInfoStore())')
   }
 
-  // 10. onMounted 代码生成
-  if (definitionCodeArr.includes('useApi') /** 有全局api导入 */) {
-    const apiNamesForSearch = searchConditionItems
-      ?.filter(e => !!e.apiConfig?.useGlobalApi)
-      ?.map(e => e.apiConfig.useGlobalApi)
+  // 10. useApi 全局api引用相关代码生成
+  const apiNamesForSearch = searchConditionItems
+    ?.filter(e => !!e.apiConfig?.useGlobalApi)
+    ?.map(e => e.apiConfig.useGlobalApi)
 
-    const apiNamesForTable = tableColumnItems
-      ?.filter(e => !!e.apiConfig?.useGlobalApi)
-      ?.map(e => e.apiConfig.useGlobalApi)
+  const apiNamesForTable = tableColumnItems
+    ?.filter(e => !!e.apiConfig?.useGlobalApi)
+    ?.map(e => e.apiConfig.useGlobalApi)
 
-    const _apiNamesForSearch: string[] = Array.from(new Set(apiNamesForSearch))
-    const _apiNamesForTable: string[] = Array.from(new Set(apiNamesForTable))
-    const apiNames = Array.from(new Set([..._apiNamesForSearch, ..._apiNamesForTable]))
-    for (const apiName of apiNames) {
-      addDestructuringVar(apiName, 'useApi()')
-      addDefinitionCode(`const ${apiName.replace(/^get/, '')} = ref<Record<string, any>[]>([])`)
-      addOnMountedCode(
-        `${apiName}().then((res) => (${apiName.replace(/^get/, '')}.value = res ?? []))`,
-      )
-    }
+  const _apiNamesForSearch: string[] = Array.from(new Set(apiNamesForSearch))
+  const _apiNamesForTable: string[] = Array.from(new Set(apiNamesForTable))
+  const apiNames = Array.from(new Set([..._apiNamesForSearch, ..._apiNamesForTable]))
+  for (const apiName of apiNames) {
+    addDestructuringVar(apiName, 'useApi()')
+    addDestructuringVar(apiName.replace(/^get/, ''), 'storeToRefs(useApi())')
+    addOnMountedCode(`${apiName}()`)
   }
 
   // 11. 添加搜索逻辑,分页改变逻辑

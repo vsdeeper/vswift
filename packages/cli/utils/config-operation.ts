@@ -1,15 +1,15 @@
 import consola from 'consola'
 
-export function changeConfig(key: string, val: string, configStr: string) {
+export function changeConfig(key: string, val: string, config: string) {
   const keyLen = (key + '=').length
-  const index = configStr.indexOf(key + '=')
-  const endIndex = getEndIndex(configStr, index)
+  const index = config.indexOf(key + '=')
+  const endIndex = getEndIndex(config, index)
   if (index > -1 && endIndex > -1) {
-    const oldVal = configStr.substring(index + keyLen, endIndex)
-    return configStr.replace(`${key}=${oldVal}`, `${key}=${val}`)
+    const oldVal = config.substring(index + keyLen, endIndex)
+    return config.replace(`${key}=${oldVal}`, `${key}=${val}`)
   } else {
     // 新增
-    return configStr + `${key}=${val}\n`
+    return config + `${key}=${val}\n`
   }
 }
 

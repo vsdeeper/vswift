@@ -170,10 +170,65 @@ export function genTableConfig(tableConfig: Record<string, any>) {
 }
 
 // 生成 Table 模板
-export function genTableTemplate(tableConfig: Record<string, any>) {
+export function genTableTemplate(tableColumnItems: Record<string, any>[]) {
   const codeArr: string[] = []
-  // TODO
-  if (tableConfig) return []
+  for (const tableColumnItem of tableColumnItems) {
+    const {
+      prop,
+      formatterType,
+      staticDataKey,
+      isTreeData,
+      apiConfig = {},
+      format,
+    } = tableColumnItem
+    if (formatterType === 'static_data_transform') {
+      codeArr.push(
+        `
+        <template #${prop}="{ row }">
+          {{ getLabelByValue(row.${prop}, ${staticDataKey}) }}
+        </template>
+        `,
+      )
+    } else if (formatterType === 'dynamic_data_transform') {
+      const { useGlobalApi, name } = apiConfig
+      const optionsDataVarName = useGlobalApi
+        ? `${useGlobalApi.replace(/^get/, '')}`
+        : `${name.replace(/^get/, '')}`
+      if (isTreeData) {
+        codeArr.push(
+          `
+          <template #${prop}="{ row }">
+            {{
+              findArraryValueFromTreeData(row.${prop}, ${optionsDataVarName}, {
+                returnType: 'labels'
+              })?.join('/')
+            }}
+          </template>
+          `,
+        )
+      } else {
+        codeArr.push(
+          `
+          <template #${prop}="{ row }">
+            {{
+              getLabelByValue(row.${prop}, ${optionsDataVarName}, {
+                returnType: 'labels'
+              })?.join('/')
+            }}
+          </template>
+          `,
+        )
+      }
+    } else if (formatterType === 'date_format') {
+      codeArr.push(
+        `
+        <template #${prop}="{ row }">
+          {{ format(row.${prop}, ${format}) }}
+        </template>
+        `,
+      )
+    }
+  }
   return codeArr
 }
 
