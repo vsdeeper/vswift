@@ -17,12 +17,16 @@ import {
   resolveImport,
 } from './util.js'
 
+// view.vue 变量
 const importCodeArr: string[] = []
 const definitionCodeArr: string[] = []
 const templateCodeArr: string[] = []
 const paramsCodeArr: string[] = []
 const onMountedCodeArr: string[] = []
 const onOperateCodeArr: string[] = []
+
+// constants.ts变量
+const constantsCodeArr: string[] = []
 
 /**
  * 生成SFC格式
@@ -37,6 +41,19 @@ export async function generateView(name: string) {
   }
   const configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
   const { options, components } = configData
+
+  // 1.1 添加constants代码
+  if (options.saticDataConfig?.length) {
+    for (const item of options.saticDataConfig) {
+      addConstantsCode(
+        `
+        export const ${item.key} = [
+          ${item.value?.map(e => `{ label: ${e.label}, value: ${e.valueType === 'number' ? +e.value : e.value} },`).join('\n')}
+        ]
+        `,
+      )
+    }
+  }
 
   // 2. 预提取一些数据，方便重复使用
   const findSearch = components.find(e => e.type === 'Search')
@@ -418,4 +435,11 @@ function addOnOperateCode(code: string | string[], fromIndex?: number) {
     // 添加到指定位置
     onOperateCodeArr.splice(fromIndex, 0, ...code)
   }
+}
+
+/**
+ * 添加constants代码
+ */
+function addConstantsCode(code: string | string[]) {
+  constantsCodeArr.push(...code)
 }
