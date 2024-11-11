@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAppSettingDataStore, type AppSetting } from '@/stores/global'
+import { useAppSettingStore, type AppSetting } from '@/stores/global'
 import { APP_SETTING_STORAGE_KEY } from '@/utils/constants'
 import localforage from 'localforage'
 import { storeToRefs } from 'pinia'
@@ -11,8 +11,8 @@ const appSetting = ref<AppSetting>({
   main: {},
   dataTable: {}
 })
-const { appSettingData } = storeToRefs(useAppSettingDataStore())
-const { getAppSettingData, appSettingConst, setAppSettingData } = useAppSettingDataStore()
+const { appSettingData } = storeToRefs(useAppSettingStore())
+const { getAppSettingData, appSettingConst, setAppSettingData } = useAppSettingStore()
 
 onMounted(async () => {
   appSetting.value = getAppSettingData()

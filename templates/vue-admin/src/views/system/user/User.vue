@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { VsSearchProps, VsTableInstance, VsTableProps, SSelectProps, SInputProps } from '@/components'
-import { useAppSettingDataStore, useUserInfoStore } from '@/stores/global'
+import { useAppSettingStore, useUserInfoStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils/constants'
 import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
 import { findArraryValueFromTreeData, getLabelByValue } from '@/utils'
@@ -16,7 +16,7 @@ const EditItemRef = ref<EditItemInstance>()
 const CheckItemRef = ref<CheckItemInstance>()
 
 const { permissionCodes } = storeToRefs(useUserInfoStore())
-const { getPageSize } = useAppSettingDataStore()
+const { getPageSize } = useAppSettingStore()
 const params = ref<PagingParams>({
   pageIndex: 1,
   pageSize: getPageSize()

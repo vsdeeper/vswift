@@ -224,7 +224,7 @@ export async function generateView(name: string) {
     addDestructuringVar('permissionCodes', 'storeToRefs(useUserInfoStore())')
   }
 
-  // 10. useApi 全局api引用相关代码生成
+  // 10. useGlobalApi 全局api引用相关代码生成
   const apiNamesForSearch = searchConditionItems
     ?.filter(e => !!e.apiConfig?.useGlobalApi)
     ?.map(e => e.apiConfig.useGlobalApi)
@@ -237,8 +237,8 @@ export async function generateView(name: string) {
   const _apiNamesForTable: string[] = Array.from(new Set(apiNamesForTable))
   const apiNames = Array.from(new Set([..._apiNamesForSearch, ..._apiNamesForTable]))
   for (const apiName of apiNames) {
-    addDestructuringVar(apiName, 'useApi()')
-    addDestructuringVar(apiName.replace(/^get/, ''), 'storeToRefs(useApi())')
+    addDestructuringVar(apiName, 'useGlobalApi()')
+    addDestructuringVar(apiName.replace(/^get/, ''), 'storeToRefs(useGlobalApi())')
     addOnMountedCode(`${apiName}()`)
   }
 

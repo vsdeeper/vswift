@@ -2,12 +2,12 @@
 import { Logo } from '@/components'
 import { MenuBar, TopBar, NavRecordBar, type NavRecordDataItem, AppSetting } from './components'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
+import { useAppSettingStore, useMenuDataStore } from '@/stores/global'
 import type { BreadcrumbDataItem } from '@/components'
 import { storeToRefs } from 'pinia'
 import { Setting } from '@element-plus/icons-vue'
 
-const { appSettingData } = storeToRefs(useAppSettingDataStore())
+const { appSettingData } = storeToRefs(useAppSettingStore())
 const collapse = ref(false)
 const showXsAside = ref(false)
 const router = useRouter()

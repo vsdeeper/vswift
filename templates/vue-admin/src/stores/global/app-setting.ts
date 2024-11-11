@@ -21,7 +21,7 @@ export interface AppSetting {
   }
 }
 
-const useAppSettingDataStore = defineStore('global/app-setting', () => {
+const useAppSettingStore = defineStore('global/app-setting', () => {
   const appSettingConst: AppSetting = {
     theme: {
       mode: 'no-preference'
@@ -63,4 +63,4 @@ const useAppSettingDataStore = defineStore('global/app-setting', () => {
   }
 })
 
-export { useAppSettingDataStore }
+export { useAppSettingStore }

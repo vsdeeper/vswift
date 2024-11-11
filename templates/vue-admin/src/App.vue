@@ -3,15 +3,15 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import localforage from 'localforage'
 import { getColorPrefers } from '@/utils'
 import { APP_SETTING_STORAGE_KEY } from './utils/constants'
-import { useAppSettingDataStore, type AppSetting } from './stores/global'
+import { useAppSettingStore, type AppSetting } from './stores/global'
 import { storeToRefs } from 'pinia'
 
-const { appSettingData } = storeToRefs(useAppSettingDataStore())
+const { appSettingData } = storeToRefs(useAppSettingStore())
 
 onMounted(async () => {
   // 获取本地存储应用设置
   const storeAppSetting: AppSetting | null = await localforage.getItem(APP_SETTING_STORAGE_KEY)
-  const { setAppSettingData, appSettingConst } = useAppSettingDataStore()
+  const { setAppSettingData, appSettingConst } = useAppSettingStore()
   storeAppSetting ? setAppSettingData(storeAppSetting) : setAppSettingData(appSettingConst)
 })
 

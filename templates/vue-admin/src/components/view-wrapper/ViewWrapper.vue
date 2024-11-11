@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ArrowRight } from '@element-plus/icons-vue'
 import type { BreadcrumbDataItem } from '.'
-import { useAppSettingDataStore } from '@/stores/global'
+import { useAppSettingStore } from '@/stores/global'
 import { storeToRefs } from 'pinia'
-const { appSettingData } = storeToRefs(useAppSettingDataStore())
+const { appSettingData } = storeToRefs(useAppSettingStore())
 
 const breadcrumbData = inject<Ref<BreadcrumbDataItem[]>>('breadcrumbData')
 </script>

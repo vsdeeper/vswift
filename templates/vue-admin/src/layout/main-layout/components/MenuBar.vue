@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useAppSettingDataStore, useMenuDataStore } from '@/stores/global'
+import { useAppSettingStore, useMenuDataStore } from '@/stores/global'
 import MenuItem from './MenuItem.vue'
 import { storeToRefs } from 'pinia'
 
@@ -11,7 +11,7 @@ defineProps<{
   defaultActive?: string
 }>()
 
-const { appSettingData } = storeToRefs(useAppSettingDataStore())
+const { appSettingData } = storeToRefs(useAppSettingStore())
 const menuData = computed(() => useMenuDataStore().menuData)
 const uniqueOpened = computed(() => appSettingData.value?.menu.uniqueOpened)
 

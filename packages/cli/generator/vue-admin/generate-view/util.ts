@@ -11,7 +11,7 @@ export function genStoresGlobalImports(
 ) {
   const codeArr: string[] = []
   if (findTable?.options.showPagination /** 有分页，需要获取应用偏好设置的数据 */) {
-    codeArr.push('useAppSettingDataStore')
+    codeArr.push('useAppSettingStore')
   }
   if (
     tableOperationsHasPermissionCode?.length ||
@@ -25,7 +25,7 @@ export function genStoresGlobalImports(
       e => !!e.apiConfig?.useGlobalApi,
     ) /** 搜索条件或表列配置了使用全局接口，需要从全局stroe中获取接口数据 */
   ) {
-    codeArr.push('useApi')
+    codeArr.push('useGlobalApi')
   }
   return codeArr
 }
