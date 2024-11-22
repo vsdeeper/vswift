@@ -32,7 +32,7 @@ const constantsCodeArr: string[] = []
  * 生成SFC格式
  */
 export async function generateView(name: string) {
-  // 1. 解析配置数据
+  // 解析配置数据
   const config = parseConfig()
   const configFilePath = `${config.downloadDir}/${name + '.json'}`
   if (!pathExistsSync(configFilePath)) {
@@ -41,6 +41,9 @@ export async function generateView(name: string) {
   }
   const configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
   const { options, components } = configData
+
+  // 解析视图数据对象
+  // const view: Record<string, any> = {}
 
   // 1.1 添加constants代码
   if (options.saticDataConfig?.length) {

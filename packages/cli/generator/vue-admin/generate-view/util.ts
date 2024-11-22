@@ -1,6 +1,19 @@
 import consola from 'consola'
 import { camel, dash, last, pascal } from 'radash'
 
+// 解析view对象结构
+export function resolveViewObject(options: Record<string, any>, components: Record<string, any>[]) {
+  const viewObject: Record<string, any> = {}
+  const { name } = options ?? {}
+  if (name) {
+    viewObject[`${pascal(name)}.vue`] = undefined
+  }
+  if (components.length) {
+    viewObject.components = {}
+  }
+  return viewObject
+}
+
 // 生成 @/stores/global 导入
 export function genStoresGlobalImports(
   findTable?: Record<string, any>,
