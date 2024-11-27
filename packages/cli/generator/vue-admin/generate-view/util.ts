@@ -1,5 +1,5 @@
-import consola from 'consola'
 import { camel, dash, last, pascal } from 'radash'
+import { storeCodeSnippets, addImportCode, storeCodeSnippetOfDestructuringVar } from '../../util.js'
 
 // 解析视图view对象结构
 export function resolveViewObject(options: Record<string, any>, components: Record<string, any>[]) {
@@ -8,8 +8,7 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
   if (name) {
     const nameArr = name.split('/')
     viewObject.base = `/view${name.startsWith('/') ? name : `/${name}`}`
-    viewObject[`/${pascal(last(nameArr)!)}.vue`] = undefined
-    genComponentCode(options, components)
+    viewObject[`/${pascal(last(nameArr)!)}.vue`] = genComponentCode(options, components)
   }
   if (saticDataConfig?.length) {
     viewObject['/constants.ts'] = undefined
@@ -230,19 +229,17 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
 
   // 生成定义代码片段并存储
   if (findSearch /**有搜索 */) {
-    addDefinitionCode(
+    storeCodeSnippets(
       [`const search = ref<VsSearchProps>({${genSearchConfig(findSearch).join('')}})`],
-      null,
       definitionCodeArr,
     )
   }
   if (findTable /**有表格 */) {
-    addDefinitionCode(
+    storeCodeSnippets(
       [
         'const TableRef = ref<VsTableInstance>()',
         `const table = ref<Partial<VsTableProps>>({${genTableConfig(findTable).join('')}})`,
       ],
-      null,
       definitionCodeArr,
     )
   }
@@ -251,7 +248,7 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
     tableColumnOperationsHasForm,
   )
   if (asyncComponentConstants.length /** 有异步组件 */) {
-    addDefinitionCode(
+    storeCodeSnippets(
       [
         ...asyncComponentConstants.map(
           e =>
@@ -259,12 +256,11 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
         ),
         ...asyncComponentConstants.map(e => `const ${pascal(e)}Ref = ref<${pascal(e)}Instance>()`),
       ],
-      null,
       definitionCodeArr,
     )
   }
   if (findTable?.options.showPagination /** 有分页 */) {
-    addDefinitionCode(
+    storeCodeSnippets(
       [
         `
       const onInquire = (val: Record<string, any>) => {
@@ -286,12 +282,11 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
       }
       `,
       ],
-      null,
       definitionCodeArr,
     )
   }
   if (findTable /**有表格 */) {
-    addDefinitionCode(
+    storeCodeSnippets(
       [
         `
       const getTableList = async(params: PagingParams) {
@@ -303,7 +298,6 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
       }
       `,
       ],
-      null,
       definitionCodeArr,
     )
   }
@@ -311,15 +305,23 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
   if (useStoreConst.length /**有 useXxxStore 定义 */) {
     const name = pascal(last(options.name.split('/'))!)
     for (const item of useStoreConst) {
-      addDestructuringVar(`get${pascal(item)}`, `use${name}Store()`, definitionCodeArr)
-      addDestructuringVar(item, `storeToRefs(use${name}Store())`, definitionCodeArr)
+      storeCodeSnippetOfDestructuringVar(
+        `get${pascal(item)}`,
+        `use${name}Store()`,
+        definitionCodeArr,
+      )
+      storeCodeSnippetOfDestructuringVar(item, `storeToRefs(use${name}Store())`, definitionCodeArr)
     }
   }
   if (
     tableOperationsHasPermissionCode?.length ||
     tableColumnOperationsHasPermissionCode?.length /** 有 useUserInfoStore 定义 */
   ) {
-    addDestructuringVar('permissionCodes', 'storeToRefs(useUserInfoStore())', definitionCodeArr)
+    storeCodeSnippetOfDestructuringVar(
+      'permissionCodes',
+      'storeToRefs(useUserInfoStore())',
+      definitionCodeArr,
+    )
   }
   const apiNamesForSearch = searchConditionItems
     ?.filter(e => !!e.apiConfig?.useGlobalApi)
@@ -333,29 +335,28 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
   const _apiNamesForTable: string[] = Array.from(new Set(apiNamesForTable))
   const apiNames = Array.from(new Set([..._apiNamesForSearch, ..._apiNamesForTable]))
   for (const apiName of apiNames /**useGlobalApi 全局api引用相关代码生成 */) {
-    addDestructuringVar(apiName, 'useGlobalApi()', definitionCodeArr)
-    addDestructuringVar(
+    storeCodeSnippetOfDestructuringVar(apiName, 'useGlobalApi()', definitionCodeArr)
+    storeCodeSnippetOfDestructuringVar(
       apiName.replace(/^get/, ''),
       'storeToRefs(useGlobalApi())',
       definitionCodeArr,
     )
   }
   if (findTable?.options?.showPagination /**有分页 */) {
-    addParamsCode(['pageIndex: 1,', 'pageSize: getPageSize()'], paramsCodeArr)
+    storeCodeSnippets(['pageIndex: 1,', 'pageSize: getPageSize()'], paramsCodeArr)
   }
 
   // 生成 onOperate 代码
   for (const item of tableOperations /** 表格操作 */) {
     if (item.formConfig && Object.keys(item.formConfig).length /** 有表单配置 */) {
-      addOnOperateCode(
+      storeCodeSnippets(
         [`case '${item.value}': { Table${pascal(item.value)}Ref.value?.open() break }`],
-        null,
         onOperateCodeArr,
       )
     } else {
       // 批量操作，常规只需配一个参数，这里只取第一个参数
       const [param] = item.apiConfig.params
-      addOnOperateCode(
+      storeCodeSnippets(
         [
           `
         const selected = TableRef.value?.getSelectionRows()
@@ -371,16 +372,14 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
         }
         `,
         ],
-        null,
         onOperateCodeArr,
       )
     }
   }
   for (const item of tableColumnOperations /** 表列操作 */) {
     if (item.formConfig && Object.keys(item.formConfig).length /** 有表单配置 */) {
-      addOnOperateCode(
+      storeCodeSnippets(
         [`case '${item.value}': { Table${pascal(item.value)}Ref.value?.open(val) break }`],
-        null,
         onOperateCodeArr,
       )
     } else {
@@ -390,7 +389,7 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
           .map(e => `${e}: val!.${e}`)
           .join(',')
       }
-      addOnOperateCode(
+      storeCodeSnippets(
         [
           `
         case '${item.value}': {
@@ -402,7 +401,6 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
         }
         `,
         ],
-        null,
         onOperateCodeArr,
       )
     }
@@ -410,22 +408,21 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
 
   // 生成 onMounted 代码
   if (findTable /**有表格 */) {
-    addOnMountedCode([`getTableList(params.value)`], null, onMountedCodeArr)
+    storeCodeSnippets([`getTableList(params.value)`], onMountedCodeArr)
   }
   for (const apiName of apiNames) {
-    addOnMountedCode([`${apiName}()`], null, onMountedCodeArr)
+    storeCodeSnippets([`${apiName}()`], onMountedCodeArr)
   }
 
   // 生成template代码
   if (findSearch /** 有搜索 */) {
-    addTemplateCode(
+    storeCodeSnippets(
       [`<VsSearch v-bind="search" @inquire="onInquire" @reset="onReset"></VsSearch>`],
-      null,
       templateCodeArr,
     )
   }
   if (findTable /**有表格 */) {
-    addTemplateCode(
+    storeCodeSnippets(
       [
         `
       <VsTable ref="TableRef" ${findTable?.options?.showPagination ? 'v-model:page-size="params.pageSize" v-model:current-page="params.pageIndex" @paging-change="onPagingChange"' : ''} v-bind="table" @operate="onOperate">
@@ -433,137 +430,41 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
       </VsTable>
       `,
       ],
-      null,
       templateCodeArr,
     )
   }
 
-  console.log(
-    111,
-    importCodeArr,
-    definitionCodeArr,
-    paramsCodeArr,
-    onOperateCodeArr,
-    onMountedCodeArr,
-    templateCodeArr,
-  )
-}
+  console.log('importCodeArr ->', importCodeArr)
+  console.log('definitionCodeArr ->', definitionCodeArr)
+  console.log('paramsCodeArr ->', paramsCodeArr)
+  console.log('onOperateCodeArr ->', onOperateCodeArr)
+  console.log('onMountedCodeArr ->', onMountedCodeArr)
+  console.log('templateCodeArr ->', templateCodeArr)
 
-/**
- * 添加导入代码
- */
-function addImportCode(
-  importType: 'type' | 'module',
-  importNames: string[],
-  importPath: string,
-  storeObject: string[],
-) {
-  const code = storeObject.find(e => e.includes(importPath))
-  const index = storeObject.findIndex(e => e.includes(importPath))
-  if (!code /** 首次导入 */) {
-    if (importType === 'type') {
-      storeObject.push(`import type { ${importNames.join(',')} } from '${importPath}'`)
-    } else if (importType === 'module') {
-      storeObject.push(`import { ${importNames.join(',')} } from '${importPath}'`)
-    }
-  } else {
-    const importObj = resolveImport(code)
-    if (importType === 'type') {
-      importObj?.typeImports.push(...importNames)
-    } else if (importType === 'module') {
-      importObj?.modleImports.push(...importNames)
-    }
-    if (!importObj?.modleImports.length) {
-      storeObject[index] =
-        `import type { ${importObj?.typeImports.join(',')} } from '${importPath}'`
-    } else {
-      const typeCodes = importObj?.typeImports.map(e => `type ${e}`)
-      storeObject[index] =
-        `import { ${typeCodes.length ? typeCodes.join(',') : ''}${importObj.modleImports.join(',')} } from '${importPath}'`
-    }
-  }
-}
-
-/**
- * 添加定义代码
- * 适用于一次性添加
- */
-function addDefinitionCode(code: string[], fromIndex: number | null, storeObject: string[]) {
-  if (typeof fromIndex === 'number') {
-    // 添加到指定位置
-    storeObject.splice(fromIndex, 0, ...code)
-  } else {
-    // 添加到末尾
-    storeObject.push(...code)
-  }
-}
-
-/**
- * 添加解构变量
- * 本质上也是添加定义代码，不同在于是解构变量
- */
-function addDestructuringVar(name: string, source: string, storeObject: string[]) {
-  const code = storeObject.find(e => e.includes(source))
-  const index = storeObject.findIndex(e => e.includes(source))
-  if (!code /** 首次导入 */) {
-    storeObject.push(`const { ${name} } = ${source}`)
-  } else {
-    const varArr = resolveDestructuringVar(code)
-    varArr?.push(name)
-    storeObject[index] = `const { ${varArr?.length ? varArr.join(',') : ''} } = ${source}`
-  }
-}
-
-/**
- * 添加params定义代码
- * params可能在不同地方追加代码
- * 适用于多次添加
- */
-function addParamsCode(code: string[], storeObject: string[]) {
-  storeObject.push(...code)
-}
-
-/**
- * 添加onOperate代码
- */
-function addOnOperateCode(code: string[], fromIndex: number | null, storeObject: string[]) {
-  if (typeof fromIndex === 'number') {
-    // 添加到指定位置
-    storeObject.splice(fromIndex, 0, ...code)
-  } else {
-    // 添加到末尾
-    storeObject.push(...code)
-  }
-}
-
-/**
- * 添加onMounted阶段代码
- */
-function addOnMountedCode(code: string[], fromIndex: number | null, storeObject: string[]) {
-  if (typeof fromIndex === 'number') {
-    // 添加到指定位置
-    storeObject.splice(fromIndex, 0, ...code)
-  } else {
-    // 添加到末尾
-    storeObject.push(...code)
-  }
-}
-
-/**
- * 添加模板代码
- */
-function addTemplateCode(code: string[], fromIndex: number | null, storeObject: string[]) {
-  if (typeof fromIndex === 'number') {
-    // 添加到指定位置
-    storeObject.splice(fromIndex, 0, ...code)
-  } else {
-    // 添加到末尾
-    storeObject.push(...code)
-  }
+  return `<script setup lang="ts">
+            ${importCodeArr.join('\n')}
+            ${definitionCodeArr.join('\n')}
+            const params = ref<PagingParams>({
+              ${paramsCodeArr.join(',')}
+            })
+            async function onOperate(key: string, val?: any) {
+              switch (key) {
+                ${onOperateCodeArr.join('\n')}
+              }
+            }
+            onMounted(() => {
+              ${onMountedCodeArr.join('\n')}
+            })
+          </script>
+          <template>
+            <ViewWrapper>
+              ${templateCodeArr.join('\n')}
+            </ViewWrapper>
+          </template>`
 }
 
 // 生成 @/stores/global 导入
-export function genStoresGlobalImports(
+function genStoresGlobalImports(
   findTable?: Record<string, any>,
   searchConditionItems?: Record<string, any>[],
   tableColumnItems?: Record<string, any>[],
@@ -592,7 +493,7 @@ export function genStoresGlobalImports(
 }
 
 // 生成 @/api/xxx 导入
-export function genApiImports(
+function genApiImports(
   tableOperationsNeedApi?: Record<string, any>[],
   tableColumnOperationsNeedApi?: Record<string, any>[],
 ) {
@@ -622,7 +523,7 @@ export function genApiImports(
 }
 
 // 生成 @vswift/components 组建库类型导入
-export function genVswiftComponentsTypeImports(
+function genVswiftComponentsTypeImports(
   findSearch?: Record<string, any>,
   findTable?: Record<string, any>,
 ) {
@@ -659,7 +560,7 @@ export function genVswiftComponentsTypeImports(
 }
 
 // 生成 Search 配置
-export function genSearchConfig(searchConfig: Record<string, any>) {
+function genSearchConfig(searchConfig: Record<string, any>) {
   const codeArr: string[] = []
   const { options } = searchConfig
   if (options.labelWidth) {
@@ -676,7 +577,7 @@ export function genSearchConfig(searchConfig: Record<string, any>) {
 }
 
 // 生成 Table 配置
-export function genTableConfig(tableConfig: Record<string, any>) {
+function genTableConfig(tableConfig: Record<string, any>) {
   const codeArr: string[] = []
   codeArr.push('loading: false,')
   const { options } = tableConfig
@@ -731,7 +632,7 @@ export function genTableConfig(tableConfig: Record<string, any>) {
 }
 
 // 生成 Table 模板
-export function genTableTemplate(tableColumnItems: Record<string, any>[]) {
+function genTableTemplate(tableColumnItems: Record<string, any>[]) {
   const codeArr: string[] = []
   for (const tableColumnItem of tableColumnItems) {
     const {
@@ -793,17 +694,8 @@ export function genTableTemplate(tableColumnItems: Record<string, any>[]) {
   return codeArr
 }
 
-// 生成 date-fns 导入
-export function genDateFnsImports(tableColumnItems: Record<string, any>[]) {
-  const codeArr: string[] = []
-  if (tableColumnItems.some(e => e.formatterType === 'date_format')) {
-    codeArr.push('format')
-  }
-  return codeArr
-}
-
 // 生成异步组件定义
-export function genAsyncComponentConst(
+function genAsyncComponentConst(
   tableOperationsHasForm?: Record<string, any>[],
   tableColumnItemsHasForm?: Record<string, any>[],
 ) {
@@ -819,7 +711,7 @@ export function genAsyncComponentConst(
 }
 
 // 生成 useXxxStore 定义
-export function genUseStoreConst(
+function genUseStoreConst(
   searchConditionItemsNeedStore?: Record<string, any>[],
   tableColumnItemsNeedStore?: Record<string, any>[],
 ) {
@@ -925,42 +817,4 @@ function transColumnsForTable(items: Record<string, any>[]) {
     return codeArr
   }
   return looper(items)
-}
-
-export function resolveImport(importCode: string) {
-  const arr = importCode.split(' ').filter(e => e !== ' ' && e !== ',' /** 去空格和逗号 */)
-  if (arr.length < 4) {
-    consola.error(`"${importCode}" is invalid`)
-    return
-  }
-  const leftBracketIndex = arr.indexOf('{')
-  const rightBracketIndex = arr.indexOf('}', leftBracketIndex)
-  if (arr[1] === 'type' /** 导入的全部为类型 */) {
-    return {
-      typeImports: arr.slice(leftBracketIndex + 1, rightBracketIndex),
-      modleImports: [],
-    }
-  } else if (arr.includes('type') /** 有类型导入 */) {
-    const imports = arr.slice(leftBracketIndex + 1, rightBracketIndex)
-    return {
-      typeImports: imports.map((e, i, a) => (e === 'type' ? a[i + 1] : null)).filter(e => !!e),
-      modleImports: imports.map((e, i, a) => (e === 'type' && a[i + 2] !== 'type' ? a[i + 2] : e)),
-    }
-  } else {
-    return {
-      typeImports: [],
-      modleImports: arr.slice(leftBracketIndex + 1, rightBracketIndex),
-    }
-  }
-}
-
-export function resolveDestructuringVar(varCode: string) {
-  const arr = varCode.split(' ').filter(e => e !== ' ' && e !== ',' /** 去空格和逗号 */)
-  if (arr.length < 5) {
-    consola.error(`"${varCode}" is invalid`)
-    return
-  }
-  const leftBracketIndex = arr.indexOf('{')
-  const rightBracketIndex = arr.indexOf('}', leftBracketIndex)
-  return arr.slice(leftBracketIndex + 1, rightBracketIndex)
 }
