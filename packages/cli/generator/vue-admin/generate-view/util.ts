@@ -8,14 +8,14 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
   if (name) {
     const nameArr = name.split('/')
     viewObject.base = `/view${name.startsWith('/') ? name : `/${name}`}`
-    viewObject[`/${pascal(last(nameArr)!)}.vue`] = genComponentCode(options, components)
+    viewObject[`/${pascal(last(nameArr)!)}.vue`] = genViewComponentCode(options, components)
   }
   if (saticDataConfig?.length) {
-    viewObject['/constants.ts'] = undefined
+    viewObject['/constants.ts'] = genConstantsCode(options)
   }
   const findTable = components.find(e => e.type === 'Table')
   if (findTable) {
-    viewObject['/utils.ts'] = undefined
+    viewObject['/utils.ts'] = genUtilsCode()
     viewObject['/components'] = {}
     const tableOperations = findTable?.options?.tableOperations
     const tableColumnOperations = findTable?.options?.tableColumnOperations
@@ -26,15 +26,16 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
       e => !e.formConfig?.useOtherOperateForm && !!e.formConfig,
     )
     if (tableOperationsHasForm?.length || tableColumnOperationsHasForm?.length) {
-      viewObject['/components']['/index.ts'] = undefined
+      viewObject['/components']['/index.ts'] = genIndexOfComponents(components)
     }
     for (const item of tableOperationsHasForm) {
-      viewObject['/components'][`/table-${item.value}`] = {}
-      viewObject['/components'][`/table-${item.value}`]['/index.ts'] = undefined
-      viewObject['/components'][`/table-${item.value}`][`/${pascal(`table-${item.value}`)}.vue`] =
-        undefined
+      const dashName = `table-${item.value}`
+      viewObject['/components'][`/${dashName}`] = {}
+      viewObject['/components'][`/${dashName}`]['/index.ts'] = genIndexOfComponent(dashName)
+      viewObject['/components'][`/${dashName}`][`/${pascal(dashName)}.vue`] =
+        genTableOperationComponentCode(options, item)
       if (item.formConfig) {
-        viewObject['/components'][`/table-${item.value}`]['/components'] = {
+        viewObject['/components'][`/${dashName}`]['/components'] = {
           '/index.ts': undefined,
           '/form-detail': {
             '/index.ts': undefined,
@@ -44,12 +45,12 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
       }
     }
     for (const item of tableColumnOperationsHasForm) {
-      viewObject['/components'][`/row-${item.value}`] = {}
-      viewObject['/components'][`/row-${item.value}`]['/index.ts'] = undefined
-      viewObject['/components'][`/row-${item.value}`][`/${pascal(`row-${item.value}`)}.vue`] =
-        undefined
+      const dashName = `row-${item.value}`
+      viewObject['/components'][`/${dashName}`] = {}
+      viewObject['/components'][`/${dashName}`]['/index.ts'] = genIndexOfComponent(dashName)
+      viewObject['/components'][`/${dashName}`][`/${pascal(dashName)}.vue`] = undefined
       if (item.formConfig) {
-        viewObject['/components'][`/row-${item.value}`]['/components'] = {
+        viewObject['/components'][`/${dashName}`]['/components'] = {
           '/index.ts': undefined,
           '/form-detail': {
             '/index.ts': undefined,
@@ -87,8 +88,8 @@ export function resolveStoreObjectOfView(options: Record<string, any>) {
   return storeObject
 }
 
-// 生成组件代码
-function genComponentCode(options: Record<string, any>, components: Record<string, any>[]) {
+// 生成视图组件代码
+function genViewComponentCode(options: Record<string, any>, components: Record<string, any>[]) {
   // 提取数据
   const { name } = options
   const nameArr = name.split('/').filter(e => !!e)
@@ -460,7 +461,150 @@ function genComponentCode(options: Record<string, any>, components: Record<strin
             <ViewWrapper>
               ${templateCodeArr.join('\n')}
             </ViewWrapper>
-          </template>`
+          </template> `
+}
+
+// 生成constants.ts代码
+function genConstantsCode(options: Record<string, any>) {
+  const { saticDataConfig = [] } = options
+  const genValueOptionsCode = (data: Record<string, any>[]) => {
+    return data
+      .map(e => `{ label: ${e.label}, value: ${e.valueType === 'number' ? +e.value : e.value} }`)
+      .join(',')
+  }
+  return `${saticDataConfig.map(item => `export const ${item.key} = [${genValueOptionsCode(item.value)}]`).join('\n')}`
+}
+
+// 生成utils.ts代码
+function genUtilsCode() {
+  return `// 对前端获取的表单数据进行处理
+          export function toSubmitData(data: Record<string, any>) {
+            const _data: Record<string, any> = JSON.parse(JSON.stringify(data))
+            // 数据转换...
+            return _data
+          }
+
+          // 对后端返回的数据进行处理
+          export function toRenderData(data: Record<string, any>) {
+            const _data: Record<string, any> = JSON.parse(JSON.stringify(data))
+            // 数据转换...
+            return _data
+          }`
+}
+
+// 生成多个组件的导出文件代码 components/index.ts
+export function genIndexOfComponents(components: Record<string, any>[]) {
+  const findTable = components.find(e => e.type === 'Table')
+  const tableOperations = findTable?.options?.tableOperations
+  const tableColumnOperations = findTable?.options?.tableColumnOperations
+  const tableOperationsHasForm = tableOperations?.filter(
+    e => !e.formConfig?.useOtherOperateForm && !!e.formConfig,
+  )
+  const tableColumnOperationsHasForm = tableColumnOperations?.filter(
+    e => !e.formConfig?.useOtherOperateForm && !!e.formConfig,
+  )
+  const mergeData = [...(tableOperationsHasForm ?? []), ...(tableColumnOperationsHasForm ?? [])]
+  return `${mergeData.map(item => `export * from './table-${item.value}'`).join('\n')}`
+}
+
+// 生成单个组件的导出文件代码 table-add/index.ts
+export function genIndexOfComponent(name: string) {
+  return `import ${pascal(name)} from './${pascal(name)}.vue'
+
+          export type ${pascal(name)}Instance = InstanceType<typeof ${pascal(name)}>
+          export { ${pascal(name)} }`
+}
+
+// 生成表格操作组件代码
+export function genTableOperationComponentCode(
+  options: Record<string, any>,
+  operationItem: Record<string, any>,
+) {
+  // 提取数据
+  const { name } = options
+  const { apiConfig = {}, label } = operationItem
+  const base = `${name.startsWith('/') ? name : `/${name}`}`
+
+  // 存储组件导入代码
+  const importCodeArr: string[] = []
+  // 存储emit代码
+  const emitCodeArr: string[] = []
+  // 存储组件定义代码
+  const definitionCodeArr: string[] = []
+  // 存储template代码
+  const templateCodeArr: string[] = []
+
+  // 存储代码片段
+  storeCodeSnippets(
+    [
+      "import { sleep } from 'radash'",
+      `import { ${apiConfig.name} } from '@/api${base}'`,
+      "import type { FormDetailInstance } from './components'",
+      "import { toSubmitData } from '../../util'",
+    ],
+    importCodeArr,
+  )
+  storeCodeSnippets(["(e: 'succeed'): void"], emitCodeArr)
+  storeCodeSnippets(
+    [
+      "const FormDetail = defineAsyncComponent(() => import('./components/form-detail/FormDetail.vue'))",
+      'const FormDetailRef = ref<FormDetailInstance>()',
+      '\n',
+      'const show = ref(false)',
+      'const form = ref<Record<string, any>>(genInitFormData())',
+      'const loading = ref(false)',
+      '\n',
+      `const onConfirm = async () => {
+        const valid = await FormDetailRef.value?.validate()
+        if (!valid) return
+        loading.value = true
+        if (await addItem(toSubmitData(form.value))) {
+          ElMessage.success('${label}成功')
+          emit('succeed')
+        }
+        loading.value = false
+        show.value = false
+      }`,
+      '\n',
+      `const onClose = () => {
+        form.value = genInitFormData()
+        await sleep(50)
+        FormDetailRef.value?.clearValidate()
+      }`,
+      '\n',
+      `const genInitFormData = () => ({})`,
+      '\n',
+      `// 以下 defineExpose
+      const open = () => {
+        show.value = true
+      }`,
+      '\n',
+      `defineExpose({
+        open,
+      })`,
+    ],
+    definitionCodeArr,
+  )
+  storeCodeSnippets(
+    [
+      `<el-dialog v-model="show" title="${label}" @close="onClose">
+        <FormDetail ref="FormDetailRef" v-model="form" />
+        <template #footer>
+          <el-button @click="show = false">取消</el-button>
+          <el-button type="primary" :loading="loading" @click="onConfirm">确定</el-button>
+        </template>
+      </el-dialog>`,
+    ],
+    templateCodeArr,
+  )
+
+  return `<script setup lang="ts">
+            ${importCodeArr.join('\n')}
+            ${definitionCodeArr.join('\n')}
+          </script>
+          <template>
+            ${templateCodeArr.join('\n')}
+          </template> `
 }
 
 // 生成 @/stores/global 导入
