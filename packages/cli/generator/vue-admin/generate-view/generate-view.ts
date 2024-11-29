@@ -23,10 +23,10 @@ export async function generateView(name: string) {
   const viewObject = resolveViewObject(options, components)
 
   // 解析视图api对象结构
-  const apiObject = resolveApiObjectOfView(options)
+  const apiObject = resolveApiObjectOfView(options, components)
 
   // 解析视图store对象结构
-  const storeObject = resolveStoreObjectOfView(options)
+  const storeObject = resolveStoreObjectOfView(options, components)
 
   console.log('generateView ->', viewObject, apiObject, storeObject)
 }

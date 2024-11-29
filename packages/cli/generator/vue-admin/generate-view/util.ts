@@ -1,4 +1,4 @@
-import { camel, dash, last, pascal } from 'radash'
+import { camel, capitalize, dash, last, pascal } from 'radash'
 import { storeCodeSnippets, addImportCode, storeCodeSnippetOfDestructuringVar } from '../../util.js'
 
 // 解析视图view对象结构
@@ -35,12 +35,15 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
       viewObject['/components'][`/${dashName}`][`/${pascal(dashName)}.vue`] =
         genTableOperationComponentCode(options, item)
       if (item.formConfig) {
-        viewObject['/components'][`/${dashName}`]['/components'] = {
-          '/index.ts': undefined,
-          '/form-detail': {
-            '/index.ts': undefined,
-            '/FormDetail.vue': undefined,
-          },
+        viewObject['/components'][`/${dashName}`]['/components'] = {}
+        viewObject['/components'][`/${dashName}`]['/components']['/index.ts'] =
+          `export * from './form-detail'`
+        viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
+          '/index.ts': `import FormDetail from './FormDetail.vue'
+                        export type FormDetailInstance = InstanceType<typeof FormDetail>
+                        export { FormDetail }
+                        `,
+          '/FormDetail.vue': genFormDetailComponentCode(options),
         }
       }
     }
@@ -50,12 +53,15 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
       viewObject['/components'][`/${dashName}`]['/index.ts'] = genIndexOfComponent(dashName)
       viewObject['/components'][`/${dashName}`][`/${pascal(dashName)}.vue`] = undefined
       if (item.formConfig) {
-        viewObject['/components'][`/${dashName}`]['/components'] = {
-          '/index.ts': undefined,
-          '/form-detail': {
-            '/index.ts': undefined,
-            '/FormDetail.vue': undefined,
-          },
+        viewObject['/components'][`/${dashName}`]['/components'] = {}
+        viewObject['/components'][`/${dashName}`]['/components']['/index.ts'] =
+          `export * from './form-detail'`
+        viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
+          '/index.ts': `import FormDetail from './FormDetail.vue'
+                        export type FormDetailInstance = InstanceType<typeof FormDetail>
+                        export { FormDetail }
+                        `,
+          '/FormDetail.vue': genFormDetailComponentCode(options),
         }
       }
     }
@@ -64,26 +70,31 @@ export function resolveViewObject(options: Record<string, any>, components: Reco
 }
 
 // 解析视图api对象结构
-export function resolveApiObjectOfView(options: Record<string, any>) {
+export function resolveApiObjectOfView(
+  options: Record<string, any>,
+  components: Record<string, any>[],
+) {
   const apiObject: Record<string, any> = {}
   const { name } = options ?? {}
   if (name) {
     const nameArr = name.split('/').filter(e => !!e)
     apiObject.base = `/api${nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''}`
-    apiObject[`/${dash(last(nameArr)!)}.ts`] = undefined
+    apiObject[`/${dash(last(nameArr)!)}.ts`] = genApiCodeOfView(components)
   }
   return apiObject
 }
 
 // 解析视图store对象结构
-export function resolveStoreObjectOfView(options: Record<string, any>) {
+export function resolveStoreObjectOfView(
+  options: Record<string, any>,
+  components: Record<string, any>[],
+) {
   const storeObject: Record<string, any> = {}
   const { name } = options ?? {}
   if (name) {
     const nameArr = name.split('/').filter(e => !!e)
     storeObject.base = `/stores${nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''}`
-    storeObject['/index.ts'] = undefined
-    storeObject[`/${dash(last(nameArr)!)}.ts`] = undefined
+    storeObject[`/${dash(last(nameArr)!)}.ts`] = genStoreCodeOfView(options, components)
   }
   return storeObject
 }
@@ -435,13 +446,6 @@ function genViewComponentCode(options: Record<string, any>, components: Record<s
     )
   }
 
-  console.log('importCodeArr ->', importCodeArr)
-  console.log('definitionCodeArr ->', definitionCodeArr)
-  console.log('paramsCodeArr ->', paramsCodeArr)
-  console.log('onOperateCodeArr ->', onOperateCodeArr)
-  console.log('onMountedCodeArr ->', onMountedCodeArr)
-  console.log('templateCodeArr ->', templateCodeArr)
-
   return `<script setup lang="ts">
             ${importCodeArr.join('\n')}
             ${definitionCodeArr.join('\n')}
@@ -493,7 +497,7 @@ function genUtilsCode() {
 }
 
 // 生成多个组件的导出文件代码 components/index.ts
-export function genIndexOfComponents(components: Record<string, any>[]) {
+function genIndexOfComponents(components: Record<string, any>[]) {
   const findTable = components.find(e => e.type === 'Table')
   const tableOperations = findTable?.options?.tableOperations
   const tableColumnOperations = findTable?.options?.tableColumnOperations
@@ -508,7 +512,7 @@ export function genIndexOfComponents(components: Record<string, any>[]) {
 }
 
 // 生成单个组件的导出文件代码 table-add/index.ts
-export function genIndexOfComponent(name: string) {
+function genIndexOfComponent(name: string) {
   return `import ${pascal(name)} from './${pascal(name)}.vue'
 
           export type ${pascal(name)}Instance = InstanceType<typeof ${pascal(name)}>
@@ -516,7 +520,7 @@ export function genIndexOfComponent(name: string) {
 }
 
 // 生成表格操作组件代码
-export function genTableOperationComponentCode(
+function genTableOperationComponentCode(
   options: Record<string, any>,
   operationItem: Record<string, any>,
 ) {
@@ -605,6 +609,200 @@ export function genTableOperationComponentCode(
           <template>
             ${templateCodeArr.join('\n')}
           </template> `
+}
+
+// 生成表单详情组件代码
+function genFormDetailComponentCode(
+  options: Record<string, any>,
+  // formConfig: Record<string, any>,
+) {
+  // 提取数据
+  const { name } = options
+  const nameArr = name.split('/').filter(e => !!e)
+  const storePath = nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''
+
+  // 存储组件导入代码
+  const importCodeArr: string[] = []
+  // 存储组件定义代码
+  const definitionCodeArr: string[] = []
+  // 存储template代码
+  const templateCodeArr: string[] = []
+
+  // 存储代码片段
+  storeCodeSnippets(
+    [
+      `import { use${last(nameArr)}Store } from '@/stores${storePath}'`,
+      "import type { FormInstance } from 'element-plus'",
+    ],
+    importCodeArr,
+  )
+
+  storeCodeSnippets(
+    [
+      'const formRef = ref<FormInstance>()',
+      'const form = defineModel<Record<string, any>>({ default: () => ({}) })',
+      '\n',
+      `// 以下 defineExpose
+      async function validate() {
+        return await formRef.value?.validate()
+      }`,
+      '\n',
+      `async function clearValidate() {
+        formRef.value?.clearValidate()
+      }`,
+      '\n',
+      `defineExpose({
+        validate,
+        clearValidate,
+      })`,
+    ],
+    definitionCodeArr,
+  )
+
+  storeCodeSnippets(
+    [
+      `<el-form ref="formRef" :model="form" label-width="100px" :inline="false">
+        <!-- 根据表单详情配置数据动态生成... -->
+        <el-form-item label="输入框" prop="input" :rules="[{ required: true, message: '必填项' }]">
+          <el-input v-model="form.input" placeholder="请输入"></el-input>
+        </el-form-item>
+        <el-form-item label="数字输入框" prop="input_number" :rules="[{ required: true, message: '必填项' }]">
+          <el-input-number
+            v-model="form.input_number"
+            placeholder="请输入"
+            :min="0"
+            :max="Number.MAX_SAFE_INTEGER"
+            :step="1"
+            :controls="true"
+            controls-position="right"
+          >
+          </el-input-number>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入" autosize> </el-input>
+        </el-form-item>
+      </el-form>`,
+    ],
+    templateCodeArr,
+  )
+
+  return `<script setup lang="ts">
+            ${importCodeArr.join('\n')}
+            ${definitionCodeArr.join('\n')}
+          </script>
+          <template>
+            ${templateCodeArr.join('\n')}
+          </template> `
+}
+
+// 生成视图api代码
+function genApiCodeOfView(components: Record<string, any>[]) {
+  // 提取数据
+  const findSearch = components.find(e => e.type === 'Search')
+  const findTable = components.find(e => e.type === 'Table')
+  const tableOperations = findTable?.options?.tableOperations
+  const tableColumnOperations = findTable?.options?.tableColumnOperations
+  const apiConfigOfTable = findTable?.options?.apiConfig?.useGlobalApi
+    ? []
+    : [{ ...findTable?.options?.apiConfig, useGlobalApi: undefined }]
+  const apiConfigOfSearchConditionItems = findSearch?.options?.searchConditionItems
+    ?.filter(e => !e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url)
+    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
+  const apiConfigOfTableOperations = tableOperations
+    ?.filter(
+      e =>
+        (!e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url) ||
+        (!e.echoApiConfig?.useGlobalApi && e.echoApiConfig?.method && e.echoApiConfig?.url),
+    )
+    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
+  const apiConfigOfTableColumnOperations = tableColumnOperations
+    ?.filter(
+      e =>
+        (!e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url) ||
+        (!e.echoApiConfig?.useGlobalApi && e.echoApiConfig?.method && e.echoApiConfig?.url),
+    )
+    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
+
+  const mergeApiConfig = [
+    ...apiConfigOfTable,
+    ...apiConfigOfSearchConditionItems,
+    ...apiConfigOfTableOperations,
+    ...apiConfigOfTableColumnOperations,
+  ]
+
+  const toArg = (e: Record<string, any>) =>
+    `${e.params?.length ? (e.method === 'GET' ? 'params' : 'data') : ''}`
+  const toArgType = (e: Record<string, any>) => `${e.params?.length ? ': Record<string, any>' : ''}`
+
+  return `import { http } from '@/utils/http'
+
+          ${mergeApiConfig
+            .map(
+              e => `export const ${e.name} = async (${toArg(e)}${toArgType(e)}) => {
+                    try {
+                      await http({
+                        method: '${e.method}',
+                        url: '${e.url}',
+                        ${toArg(e)}
+                      })
+                      return true
+                    } catch (error) {
+                      console.error('${e.name} ->', error)
+                    }
+                  }`,
+            )
+            .join('\n')}
+          `
+}
+
+// 生成视图store代码
+function genStoreCodeOfView(options: Record<string, any>, components: Record<string, any>[]) {
+  // 提取数据
+  const { name } = options
+  const base = `${name.startsWith('/') ? name : `/${name}`}`
+  const findSearch = components.find(e => e.type === 'Search')
+  const findTable = components.find(e => e.type === 'Table')
+  const tableColumnItems = findTable?.options?.tableColumnItems.reduce(
+    (pre: Record<string, any>[], cur: Record<string, any>) => {
+      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
+    },
+    [],
+  )
+  const apiConfigOfSearchConditionItems = findSearch?.options?.searchConditionItems
+    ?.filter(e => !e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url)
+    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
+  const apiConfigOfTableColumnItems = tableColumnItems
+    ?.filter(e => !e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url)
+    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
+
+  const mergeApiConfig = [...apiConfigOfSearchConditionItems, ...apiConfigOfTableColumnItems]
+
+  const toName = (e: Record<string, any>) => `${e.name.repalce(/^query/, '')}`
+  return `import { defineStore } from 'pinia'
+          import { ${mergeApiConfig.map(e => `${e.name}`).join(',')} } from '@/api${base}'
+
+          export const useViewDataStore = defineStore('${base}', () => {
+            ${mergeApiConfig.map(e => `const ${toName(e)}Data = ref<Record<string, any>[]>()`).join('\n')}
+
+            ${mergeApiConfig
+              .map(
+                e => `async function get${capitalize(toName(e))}() {
+                        if (${toName(e)}.value?.length) return ${toName(e)}.value
+                        ${toName(e)}.value = await ${e.name}()
+                        return ${toName(e)}.value
+                      }
+
+                      function set${capitalize(toName(e))}(data?: Record<string, any>[]) {
+                        ${toName(e)}.value = data
+                      }`,
+              )
+              .join('\n')}
+
+
+            return {
+              ${mergeApiConfig.map(e => `${toName(e)}, get${capitalize(toName(e))}, set${capitalize(toName(e))}`).join(',')}
+            }
+        })`
 }
 
 // 生成 @/stores/global 导入
