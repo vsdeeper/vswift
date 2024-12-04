@@ -4,8 +4,7 @@
   "tabWidth": 2,
   "singleQuote": true,
   "printWidth": 100,
-  "trailingComma": "all",
-  "endOfLine": "auto",
   "arrowParens": "avoid",
-  "parser": "babel-ts"
+  "trailingComma": "all",
+  "endOfLine": "auto"
 }

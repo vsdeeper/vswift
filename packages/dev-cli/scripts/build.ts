@@ -25,7 +25,7 @@ export async function buildTask(options: CommandOptions) {
 
       spinner.start('Start Compiling...')
       await $({
-        stdio: 'inherit'
+        stdio: 'inherit',
       })`pnpm tsc --project tsconfig.${pkg}.json`
       spinner.succeed('Compilation done')
 
@@ -44,7 +44,7 @@ export async function buildTask(options: CommandOptions) {
       const dest = path.resolve(process.cwd(), `packages/${pkg}/dist/templates`)
       const source = path.resolve(process.cwd(), `templates`)
       await copy(source, dest, {
-        filter: (source) => !(source.endsWith('dist') || source.endsWith('node_modules'))
+        filter: source => !(source.endsWith('dist') || source.endsWith('node_modules')),
       })
       spinner.succeed('Copy templates to build directory done')
       spinner.succeed('Build success')
@@ -57,7 +57,7 @@ export async function buildTask(options: CommandOptions) {
 
       spinner.start('Type outputting...' + os.EOL)
       await $({
-        stdin: 'inherit'
+        stdin: 'inherit',
       })`pnpm tsc --project packages/${pkg}/tsconfig.build.json`
       spinner.succeed('Type output done\n')
 
@@ -68,17 +68,17 @@ export async function buildTask(options: CommandOptions) {
           sourcemap: true,
           lib: {
             entry: 'index.ts',
-            fileName: (format) => {
+            fileName: format => {
               return `index.${format === 'es' ? 'js' : 'cjs'}`
             },
-            formats: ['es', 'cjs']
+            formats: ['es', 'cjs'],
           },
 
           rollupOptions: {
             // 确保外部化处理那些你不想打包进库的依赖
-            external: ['xlsx-js-style']
-          }
-        }
+            external: ['xlsx-js-style'],
+          },
+        },
       })
       break
     }

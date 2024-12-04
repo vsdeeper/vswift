@@ -1,5 +1,8 @@
 import chalk from 'chalk'
 import consola from 'consola'
+import { outputFile } from 'fs-extra'
+import path from 'node:path'
+import prettier from 'prettier'
 
 export function finalOutput(projectName: string) {
   console.log(
@@ -10,6 +13,10 @@ export function finalOutput(projectName: string) {
   )
 }
 
+/**
+ * 生成空格
+ * @param num
+ */
 export function genSpace(num: number) {
   let str = ''
   while (num-- > 0) {
@@ -138,5 +145,41 @@ export function resolveImport(importCode: string) {
       typeImports: [],
       modleImports: arr.slice(leftBracketIndex + 1, rightBracketIndex),
     }
+  }
+}
+
+/**
+ * 生成代码文件
+ * @param data
+ */
+export async function genCodeFiles(data: Record<string, any>) {
+  try {
+    const { base } = data
+    const formatOptions = await prettier.resolveConfig(
+      path.resolve(process.cwd(), 'templates/vue-admin/src/main.ts'),
+    )
+    const transParser = (filePath: string) => {
+      if (filePath.endsWith('.ts')) return 'typescript'
+      else if (filePath.endsWith('.vue')) return 'vue'
+    }
+    const recurObject = async (obj: Record<string, any>, base: string) => {
+      for (const key in obj) {
+        if (key.startsWith('/') /** 说明是路径 */) {
+          if (typeof obj[key] === 'string' /** 源代码 */) {
+            const filePath = path.resolve(process.cwd(), `templates/vue-admin/src/${base}${key}`)
+            const formatted = await prettier.format(obj[key], {
+              ...formatOptions,
+              parser: transParser(filePath),
+            })
+            await outputFile(filePath, formatted!)
+          } /** 子目录 */ else {
+            recurObject(obj[key], `${base}${key}`)
+          }
+        }
+      }
+    }
+    await recurObject(data, base)
+  } catch (error) {
+    consola.error('genCodeFiles ->', error)
   }
 }

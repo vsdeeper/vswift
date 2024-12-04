@@ -1,15 +1,15 @@
 import { readFileSync } from 'fs'
 import { pathExistsSync } from 'fs-extra/esm'
-import { parseConfig } from '../../../utils/index.js'
 import consola from 'consola'
 import chalk from 'chalk'
+import { parseConfig } from '../../../utils/index.js'
+import { genCodeFiles } from '../../util.js'
 import { resolveApiObjectOfView, resolveStoreObjectOfView, resolveViewObject } from './util.js'
 
 /**
  * 生成SFC格式
  */
 export async function generateView(name: string) {
-  // 解析配置数据
   const config = parseConfig()
   const configFilePath = `${config.downloadDir}/${name + '.json'}`
   if (!pathExistsSync(configFilePath)) {
@@ -28,5 +28,10 @@ export async function generateView(name: string) {
   // 解析视图store对象结构
   const storeObject = resolveStoreObjectOfView(options, components)
 
-  console.log('generateView ->', viewObject, apiObject, storeObject)
+  // console.log('generateView ->', viewObject, apiObject, storeObject)
+
+  // 生成代码文件
+  genCodeFiles(viewObject)
+  genCodeFiles(apiObject)
+  genCodeFiles(storeObject)
 }

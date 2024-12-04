@@ -17,7 +17,7 @@ onMounted(async () => {
 
 watch(
   () => appSettingData.value?.theme.mode,
-  (val) => {
+  val => {
     // 主体外观设置
     const el = document.documentElement
     if (val === 'no-preference') {
@@ -27,7 +27,7 @@ watch(
       val === 'dark' ? el.classList.add('dark') : el.classList.remove('dark')
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
