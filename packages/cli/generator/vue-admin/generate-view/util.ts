@@ -213,11 +213,11 @@ function genViewComponentCode(options: Record<string, any>, components: Record<s
     importCodeArr,
   )
   addImportCode('module', [`useViewDataStore`], `@/stores${`/${nameArr.join('/')}`}`, importCodeArr)
-  if (findSearch || findTable /** 有搜索或表格默认使用了@vswift/components组建库 */) {
+  if (findSearch || findTable /** 有搜索或表格，需导入vs-search, vs-table组件的相关类型 */) {
     addImportCode(
       'type',
       genVswiftComponentsTypeImports(findSearch, findTable),
-      '@vswift/components',
+      '@/components',
       importCodeArr,
     )
   }
@@ -969,7 +969,7 @@ function genApiImports(
   return codeArr
 }
 
-// 生成 @vswift/components 组建库类型导入
+// 生成 vs-search, vs-table 组件类型导入
 function genVswiftComponentsTypeImports(
   findSearch?: Record<string, any>,
   findTable?: Record<string, any>,
