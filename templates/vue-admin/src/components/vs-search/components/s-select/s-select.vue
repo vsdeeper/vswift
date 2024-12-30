@@ -8,13 +8,17 @@ const _props = defineProps<{
 const model = defineModel<string | number | boolean | Record<string, any> | any[]>()
 const options = ref<Record<string, any>[]>([])
 
-watch(() => _props.props?.options, async () => {
-  if (Array.isArray(_props.props?.options)) {
-    options.value = _props.props!.options
-  } else if (Object.prototype.toString.call(_props.props?.options) === '[object AsyncFunction]') {
-    options.value = await _props.props!.options!()
-  }
-}, { once: true })
+watch(
+  () => _props.props?.options,
+  async () => {
+    if (Array.isArray(_props.props?.options)) {
+      options.value = _props.props!.options
+    } else if (Object.prototype.toString.call(_props.props?.options) === '[object AsyncFunction]') {
+      options.value = await _props.props!.options!()
+    }
+  },
+  { once: true }
+)
 </script>
 
 <template>

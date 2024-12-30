@@ -24,12 +24,8 @@ onMounted(async () => {
               vswift
             </el-link>
             ，
-            <el-link
-              type="primary"
-              href="https://github.com/vsdeeper/vswift-components"
-              target="_blank"
-            >
-              vswift-components
+            <el-link type="primary" href="https://github.com/vsdeeper/vswift-form" target="_blank">
+              vswift-form
             </el-link>
             ，
             <el-link
@@ -55,18 +51,16 @@ onMounted(async () => {
         <el-divider direction="horizontal" content-position="left">技术栈</el-divider>
         <a href="https://skillicons.dev" rel="nofollow">
           <img
-            src="https://camo.githubusercontent.com/d43d2f0f9c9d97da4a6df4efc8bfc1ffaa453819316f9ac27f16aba32fad61c9/68747470733a2f2f736b696c6c69636f6e732e6465762f69636f6e733f693d6a732c747970657363726970742c736373732c7675652c72656163742c616e67756c61722c6e6f64656a732c6e6573746a732c6d7973716c"
+            src="https://skillicons.dev/icons?i=js,typescript,scss,vue,react,angular,nodejs,nestjs,mysql"
             alt="My Skills"
-            data-canonical-src="https://skillicons.dev/icons?i=js,typescript,scss,vue,react,angular,nodejs,nestjs,mysql"
             style="max-width: 100%"
           />
         </a>
         <el-divider direction="horizontal" content-position="left">使用工具</el-divider>
         <a href="https://skillicons.dev" rel="nofollow">
           <img
-            src="https://camo.githubusercontent.com/ee224976fd679f32a8eb4c01b85caf55de0f74dfd62f5bdc0c00b9a614350943/68747470733a2f2f736b696c6c69636f6e732e6465762f69636f6e733f693d7673636f64652c766974652c7765627061636b2c67756c702c6769742c6769746875622c766974657374"
+            src="https://skillicons.dev/icons?i=vscode,vite,webpack,gulp,git,github,vitest"
             alt="My Skills"
-            data-canonical-src="https://skillicons.dev/icons?i=vscode,vite,webpack,gulp,git,github,vitest"
             style="max-width: 100%"
           />
         </a>

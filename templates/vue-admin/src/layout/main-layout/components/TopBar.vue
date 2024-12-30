@@ -22,7 +22,7 @@ const router = useRouter()
 const searchRef = ref<InputInstance>()
 const searchWord = ref<string>()
 const fastLinkData = ref<FastLinkDataItem[]>(
-  genFastLinkData(useMenuDataStore().menuData as VsMenuDataItem[])
+  genFastLinkData(useMenuDataStore().menuData as VsMenuDataItem[]),
 )
 const storeFastLinkData = ref<FastLinkDataItem[]>(JSON.parse(JSON.stringify(fastLinkData.value)))
 const showLogo = ref(false)
@@ -34,12 +34,12 @@ const messageData = ref<Record<string, any>[]>([
   { id: 4, title: '收到新消息', desc: '有个流程需要您审批', read: true },
   { id: 5, title: '收到新消息', desc: '有个流程需要您审批', read: true },
   { id: 6, title: '收到新消息', desc: '有个流程需要您审批', read: true },
-  { id: 7, title: '收到新消息', desc: '有个流程需要您审批', read: true }
+  { id: 7, title: '收到新消息', desc: '有个流程需要您审批', read: true },
 ])
 const personalCenterData = ref<Record<string, any>[]>([
   { key: 'profile', title: '资料', desc: '账户设置', icon: profileIcon },
   { key: 'inbox', title: '收件箱', desc: '消息和电子邮件', icon: inboxIcon },
-  { key: 'tasks', title: '任务', desc: '待办事项和日常任务', icon: tasksIcon }
+  { key: 'tasks', title: '任务', desc: '待办事项和日常任务', icon: tasksIcon },
 ])
 
 function onCollapse() {
@@ -48,7 +48,7 @@ function onCollapse() {
 
 const onInputSearch = throttle({ interval: 500 }, (word: string) => {
   fastLinkData.value =
-    storeFastLinkData.value.filter((e) => e.name?.includes(word) || e.path?.includes(word)) ?? []
+    storeFastLinkData.value.filter(e => e.name?.includes(word) || e.path?.includes(word)) ?? []
 })
 
 function onSearchVisibleChange(visible: boolean) {
@@ -61,7 +61,7 @@ function onSignOut() {
   Cookies.remove('token')
   router.replace({
     path: '/login',
-    replace: true
+    replace: true,
   })
 }
 
@@ -69,38 +69,38 @@ function onGoto(key: string, val?: any) {
   switch (key) {
     case 'fastlink': {
       router.push({
-        path: val
+        path: val,
       })
       break
     }
     case 'messageDetail': {
       router.push({
         path: '/messageDetail',
-        query: { id: val }
+        query: { id: val },
       })
       break
     }
     case 'messageAll': {
       router.push({
-        path: '/message'
+        path: '/message',
       })
       break
     }
     case 'profile': {
       router.push({
-        path: '/profile'
+        path: '/profile',
       })
       break
     }
     case 'inbox': {
       router.push({
-        path: '/inbox'
+        path: '/inbox',
       })
       break
     }
     case 'tasks': {
       router.push({
-        path: '/tasks'
+        path: '/tasks',
       })
       break
     }
@@ -113,7 +113,7 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
       ...prev,
       ...(cur.children?.length
         ? [{ name: cur.menuName, path: cur.path }, ...genFastLinkData(cur.children)]
-        : [{ name: cur.menuName, path: cur.path }])
+        : [{ name: cur.menuName, path: cur.path }]),
     ]
   }, [])
 }
@@ -128,7 +128,7 @@ function setShowTogglebutton(val: boolean) {
 
 defineExpose({
   setShowLogo,
-  setShowTogglebutton
+  setShowTogglebutton,
 })
 </script>
 
@@ -261,13 +261,7 @@ defineExpose({
               </el-dropdown-item>
             </el-dropdown-menu>
             <footer>
-              <el-button
-                class="footer-button"
-                type="danger"
-                plain
-                auto-insert-space
-                @click="onSignOut"
-              >
+              <el-button class="footer-button" type="danger" auto-insert-space @click="onSignOut">
                 登出
               </el-button>
             </footer>

@@ -82,9 +82,9 @@ declare module 'vue' {
     TableColumn: typeof import('./../src/components/vs-table/table-column.vue')['default']
     TopBar: typeof import('./../src/layout/main-layout/components/TopBar.vue')['default']
     ViewWrapper: typeof import('./../src/components/view-wrapper/ViewWrapper.vue')['default']
-    VsSearch: typeof import('./../src/components/vs-search/vs-search.vue')['default']
-    VsTable: typeof import('./../src/components/vs-table/vs-table.vue')['default']
-    VsTreeSelect: typeof import('./../src/components/vs-tree-select/vs-tree-select.vue')['default']
+    VsSearch: typeof import('./../src/components/vs-search/VsSearch.vue')['default']
+    VsTable: typeof import('./../src/components/vs-table/VsTable.vue')['default']
+    VsTreeSelect: typeof import('./../src/components/vs-tree-select/VsTreeSelect.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

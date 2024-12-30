@@ -1,4 +1,4 @@
-import VsSearch from './vs-search.vue'
+import VsSearch from './VsSearch.vue'
 
 export * from './components'
 

@@ -2,8 +2,8 @@ import type { ISelectProps } from 'element-plus'
 import SSelect from './s-select.vue'
 
 interface OptionItem {
-  id?: number | string;
-  label?: string;
+  id?: number | string
+  label?: string
   [key: string]: any
 }
 export type SSelectInstance = InstanceType<typeof SSelect>

@@ -3,9 +3,9 @@ import type {
   PaginationProps,
   PopconfirmProps,
   TableColumnCtx,
-  TableProps
+  TableProps,
 } from 'element-plus'
-import VsTable from './vs-table.vue'
+import VsTable from './VsTable.vue'
 import type { LoadingBinding } from 'element-plus/es/components/loading/src/directive.mjs'
 
 export type VsTableInstance = InstanceType<typeof VsTable>
