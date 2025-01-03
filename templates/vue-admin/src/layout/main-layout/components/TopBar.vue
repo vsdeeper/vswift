@@ -214,7 +214,7 @@ defineExpose({
             </el-dropdown-item>
           </el-dropdown-menu>
           <footer>
-            <el-button class="footer-button" type="primary" plain @click="onGoto('messageAll')">
+            <el-button class="footer-button" type="primary" @click="onGoto('messageAll')">
               查看所有通知
             </el-button>
           </footer>
