@@ -114,7 +114,7 @@ function createGitignore(path: string) {
   writeFileSync(path, rules.join('\n'))
 }
 
-function generateEnv(dest: string, options: Record<string, any>) {
+async function generateEnv(dest: string, options: Record<string, any>) {
   const envConfigPath = path.resolve(dest, '.env')
   const envTestConfigPath = path.resolve(dest, '.env.test')
   const envProdConfigPath = path.resolve(dest, '.env.prod')

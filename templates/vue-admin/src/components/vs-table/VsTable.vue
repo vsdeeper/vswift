@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<VsTableProps>(), {
   showRowOperate: true,
   showPagination: true,
   paginationAlign: 'left',
-  tableOperateAlign: 'left'
+  tableOperateAlign: 'left',
 })
 
 const emit = defineEmits<{
@@ -55,25 +55,25 @@ onUnmounted(() => {
 
 watch(
   () => props.currentPage,
-  (val) => {
+  val => {
     _currentPage.value = val
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
   () => props.pageSize,
-  (val) => {
+  val => {
     _pageSize.value = val
   },
-  { immediate: true }
+  { immediate: true },
 )
 
-watch(_currentPage, (val) => {
+watch(_currentPage, val => {
   emit('update:currentPage', val!)
 })
 
-watch(_pageSize, (val) => {
+watch(_pageSize, val => {
   emit('update:pageSize', val!)
 })
 
@@ -182,7 +182,7 @@ defineExpose({
   sort,
   scrollTo,
   setScrollTop,
-  setScrollLeft
+  setScrollLeft,
 })
 </script>
 
@@ -211,12 +211,12 @@ defineExpose({
         <slot name="empty" v-bind="scope"></slot>
       </template>
       <el-table-column v-if="showSelection" type="selection" fixed="left" width="55" />
-      <el-table-column v-if="showIndex" type="index" width="50" :index="(index) => index + 1" />
+      <el-table-column v-if="showIndex" type="index" width="50" :index="index => index + 1" />
       <TableColumn v-for="(col, index) in columns" :key="`${col.label}${col.prop}${index}`" :col>
         <template v-for="slot in getSlots(columns)" #[slot]="scope">
           <slot :name="slot" v-bind="scope" />
         </template>
-        <template v-for="slot in getSlots(columns).map((e) => `${e}-header`)" #[slot]="scope">
+        <template v-for="slot in getSlots(columns).map(e => `${e}-header`)" #[slot]="scope">
           <slot :name="slot" v-bind="scope" />
         </template>
       </TableColumn>
@@ -253,7 +253,7 @@ defineExpose({
                   :type="item.type ?? 'primary'"
                   v-bind="{
                     ...item.buttonProps,
-                    link: true
+                    link: true,
                   }"
                   @click="onOperate(item.value, row)"
                 >
@@ -276,7 +276,7 @@ defineExpose({
           layout: paginationLayout,
           pagerCount: paginationPagerCount,
           background: true,
-          ...paginationProps
+          ...paginationProps,
         }"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"

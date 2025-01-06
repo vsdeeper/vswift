@@ -5,7 +5,7 @@ export type VsTreeSelectValueItem = TreeKey | Record<string, any>
 export type VsTreeSelectValue = VsTreeSelectValueItem | VsTreeSelectValueItem[]
 export interface VsTreeSelectProps {
   modelValue?: VsTreeSelectValue
-  options?: Record<string, any>[] // 可选数据
+  optionData?: Record<string, any>[] // 可选数据
   sourceOptions?: Record<string, any>[] // 全量数据，包含禁用状态
   title?: string
   lazy?: boolean

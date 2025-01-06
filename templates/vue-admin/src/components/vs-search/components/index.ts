@@ -5,11 +5,12 @@ import type {
   SCascaderInstance,
   SDateInstance,
   STimeInstance,
-  STreeSelectInstance
+  STreeSelectInstance,
 } from '.'
 import type { AsyncComponentLoader } from 'vue'
 
 export * from './s-input'
+export * from './s-input-number'
 export * from './s-select'
 export * from './s-cascader'
 export * from './s-date'
@@ -33,10 +34,10 @@ const SComponent: SComponentMap = {}
 for (const filePath in matchFiles) {
   const filePathArr = filePath.split('/')
   const key = pascal(
-    last(filePathArr)?.replace('s-', '').replace('.vue', '') ?? 'Unknown'
+    last(filePathArr)?.replace('s-', '').replace('.vue', '') ?? 'Unknown',
   ) as SComponentKey
   SComponent[key] = defineAsyncComponent({
-    loader: matchFiles[filePath] as AsyncComponentLoader
+    loader: matchFiles[filePath] as AsyncComponentLoader,
   })
 }
 

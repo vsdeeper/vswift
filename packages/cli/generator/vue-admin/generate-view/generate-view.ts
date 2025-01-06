@@ -5,6 +5,9 @@ import chalk from 'chalk'
 import { parseConfig } from '../../../utils/index.js'
 import { genCodeFiles } from '../../util.js'
 import { resolveApiObjectOfView, resolveStoreObjectOfView, resolveViewObject } from './util.js'
+import ora from 'ora'
+import os from 'os'
+import type { ViewDesignData } from 'visual-development'
 
 /**
  * 生成SFC格式
@@ -16,22 +19,31 @@ export async function generateView(name: string) {
     consola.error(`Configuration file ${chalk.green(configFilePath)} not found`)
     return
   }
-  const configData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
-  const { options, components } = configData
+  const configData: ViewDesignData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
+  const { options, components = [] } = configData
 
-  // 解析视图view对象结构
-  const viewObject = resolveViewObject(options, components)
-
-  // 解析视图api对象结构
-  const apiObject = resolveApiObjectOfView(options, components)
-
-  // 解析视图store对象结构
-  const storeObject = resolveStoreObjectOfView(options, components)
+  const spinner = ora({ spinner: 'line' })
+  spinner.start('Resolving data...' + os.EOL)
+  const [
+    viewObject /**视图view对象结构 */,
+    apiObject /**视图api对象结构 */,
+    storeObject /**视图store对象结构 */,
+  ] = await Promise.all([
+    resolveViewObject(options, components),
+    resolveApiObjectOfView(options, components),
+    resolveStoreObjectOfView(options, components),
+  ])
+  spinner.succeed('Resolve data done.')
 
   // console.log('generateView ->', viewObject, apiObject, storeObject)
 
-  // 生成代码文件
-  genCodeFiles(viewObject)
-  genCodeFiles(apiObject)
-  genCodeFiles(storeObject)
+  spinner.start('Generating code...' + os.EOL)
+  const [filePathsOfView, filePathsOfApi, filePathsOfStore] = await Promise.all([
+    genCodeFiles(viewObject),
+    genCodeFiles(apiObject),
+    genCodeFiles(storeObject),
+  ])
+  spinner.succeed(
+    `Generate code successfully, your code files has been created.\nView files:\n${chalk.green(filePathsOfView?.join('\n'))}\nApi files:\n${chalk.green(filePathsOfApi?.join('\n'))}\nStore files:\n${chalk.green(filePathsOfStore?.join('\n'))}`,
+  )
 }

@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import type { VsSearchProps, VsTableInstance, VsTableProps, SSelectProps, SInputProps } from '@/components'
+import type {
+  VsSearchProps,
+  VsTableInstance,
+  VsTableProps,
+  SSelectProps,
+  SInputProps,
+} from '@/components'
 import { useAppSettingStore, useUserInfoStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils/constants'
 import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
@@ -19,7 +25,7 @@ const { permissionCodes } = storeToRefs(useUserInfoStore())
 const { getPageSize } = useAppSettingStore()
 const params = ref<PagingParams>({
   pageIndex: 1,
-  pageSize: getPageSize()
+  pageSize: getPageSize(),
 })
 const search = ref<VsSearchProps>({
   labelWidth: '110px',
@@ -28,23 +34,23 @@ const search = ref<VsSearchProps>({
       id: 'searchStr',
       type: 'input',
       label: '员工姓名/工号',
-      props: {} as SInputProps
+      props: {} as SInputProps,
     },
     {
       id: 'status',
       type: 'select',
       label: '员工状态',
       props: {
-        options: EMPLOYEE_STATUS_OPTIONS
-      } as SSelectProps
+        optionData: EMPLOYEE_STATUS_OPTIONS,
+      } as SSelectProps,
     },
     {
       id: 'phone',
       type: 'input',
       label: '手机号',
-      props: {} as SInputProps
-    }
-  ]
+      props: {} as SInputProps,
+    },
+  ],
 })
 const TableRef = ref<VsTableInstance>()
 const table = ref<Partial<VsTableProps>>({
@@ -58,35 +64,35 @@ const table = ref<Partial<VsTableProps>>({
       label: '新增',
       value: 'add',
       code: 'add',
-      show: (code) => permissionCodes.value.includes(code!)
+      show: code => permissionCodes.value.includes(code!),
     },
     {
       label: '批量删除',
       value: 'batch_delete',
       code: 'delete',
       type: 'danger',
-      show: (code) => permissionCodes.value.includes(code!)
-    }
+      show: code => permissionCodes.value.includes(code!),
+    },
   ],
   rowOperateOptions: [
     {
       label: '查看',
       value: 'check',
       code: 'check',
-      show: (code) => permissionCodes.value.includes(code!)
+      show: code => permissionCodes.value.includes(code!),
     },
     {
       label: '编辑',
       value: 'edit',
       code: 'edit',
-      show: (code) => permissionCodes.value.includes(code!)
+      show: code => permissionCodes.value.includes(code!),
     },
     {
       label: '复制',
       value: 'copy',
       code: 'copy',
       showPopconfirm: true,
-      show: (code) => permissionCodes.value.includes(code!)
+      show: code => permissionCodes.value.includes(code!),
     },
     {
       label: '删除',
@@ -94,8 +100,8 @@ const table = ref<Partial<VsTableProps>>({
       value: 'delete',
       code: 'delete',
       showPopconfirm: true,
-      show: (code) => permissionCodes.value.includes(code!)
-    }
+      show: code => permissionCodes.value.includes(code!),
+    },
   ],
   columns: [
     { label: '员工姓名', prop: 'name' },
@@ -106,14 +112,14 @@ const table = ref<Partial<VsTableProps>>({
     { label: '手机号', prop: 'phone' },
     { label: '邮箱', prop: 'email' },
     { label: '更新信息', prop: 'updatedInfo' },
-    { label: '创建信息', prop: 'createdInfo' }
-  ]
+    { label: '创建信息', prop: 'createdInfo' },
+  ],
 })
 const departmentOptions = ref<Record<string, any>[]>([])
 const { getdDepartmentData } = useUserStore()
 
 onMounted(() => {
-  getdDepartmentData().then((res) => (departmentOptions.value = res ?? []))
+  getdDepartmentData().then(res => (departmentOptions.value = res ?? []))
   getTableList(params.value)
 })
 
@@ -135,7 +141,7 @@ async function getTableList(params: PagingParams) {
   table.value.data = res?.list ?? []
 }
 
-async function onOperate(key: string, val?: any) {
+async function onOperate(key: string, val: any) {
   switch (key) {
     case 'add': {
       AddItemRef.value?.open()
@@ -170,7 +176,7 @@ async function onOperate(key: string, val?: any) {
         return
       }
       await ElMessageBox.confirm('确定删除吗？', '提示', { type: 'warning' })
-      const ids = selected.map((e) => e.id)
+      const ids = selected.map(e => e.id)
       if (await deleteItems(ids)) {
         ElMessage.success('删除成功')
         getTableList(params.value)
@@ -203,7 +209,7 @@ function onPagingChange(val: PagingParams) {
       <template #departmentId="{ row }">
         {{
           findArraryValueFromTreeData(row.departmentId, departmentOptions, {
-            returnType: 'labels'
+            returnType: 'labels',
           })?.join('/')
         }}
       </template>

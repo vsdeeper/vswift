@@ -1,10 +1,18 @@
 {
-  "include": ["packages/cli/**/*.ts"],
-  "exclude": ["**/__tests__/*", "**/dist/**/*"],
+  "include": [
+    "packages/cli/**/*.ts"
+  ],
+  "exclude": [
+    "**/__tests__/*",
+    "**/dist/**/*"
+  ],
   "compilerOptions": {
     "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": [
+      "node"
+    ],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": true,

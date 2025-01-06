@@ -47,19 +47,32 @@ export function addImportCode(
       storeObject.push(`import { ${importNames.join(',')} } from '${importPath}'`)
     }
   } else {
+    // 解析导入代码
     const importObj = resolveImport(code)
     if (importType === 'type') {
       importObj?.typeImports.push(...importNames)
     } else if (importType === 'module') {
       importObj?.modleImports.push(...importNames)
     }
-    if (!importObj?.modleImports.length) {
-      storeObject[index] =
-        `import type { ${importObj?.typeImports.join(',')} } from '${importPath}'`
+    // 去重
+    if (importObj?.typeImports.length) {
+      importObj.typeImports = Array.from(new Set(importObj.typeImports))
+    }
+    if (importObj?.modleImports.length) {
+      importObj.modleImports = Array.from(new Set(importObj.modleImports))
+    }
+    if (!importObj?.modleImports.length /** 纯类型导入 */) {
+      if (importObj?.typeImports.length) {
+        storeObject[index] =
+          `import type { ${importObj.typeImports.join(',')} } from '${importPath}'`
+      }
     } else {
-      const typeCodes = importObj?.typeImports.map(e => `type ${e}`)
-      storeObject[index] =
-        `import { ${typeCodes.length ? typeCodes.join(',') : ''}${importObj.modleImports.join(',')} } from '${importPath}'`
+      if (importObj?.typeImports.length /**类型、模块混合导入 */) {
+        storeObject[index] =
+          `import { ${importObj?.typeImports.map(e => `type ${e}`).join(',')},${importObj.modleImports.join(',')} } from '${importPath}'`
+      } /** 纯模块导入 */ else {
+        storeObject[index] = `import { ${importObj.modleImports.join(',')} } from '${importPath}'`
+      }
     }
   }
 }
@@ -154,6 +167,7 @@ export function resolveImport(importCode: string) {
  */
 export async function genCodeFiles(data: Record<string, any>) {
   try {
+    const filePaths: string[] = []
     const { base } = data
     const formatOptions = await prettier.resolveConfig(
       path.resolve(process.cwd(), 'templates/vue-admin/src/main.ts'),
@@ -172,6 +186,7 @@ export async function genCodeFiles(data: Record<string, any>) {
               parser: transParser(filePath),
             })
             await outputFile(filePath, formatted!)
+            filePaths.push(filePath)
           } /** 子目录 */ else {
             recurObject(obj[key], `${base}${key}`)
           }
@@ -179,6 +194,7 @@ export async function genCodeFiles(data: Record<string, any>) {
       }
     }
     await recurObject(data, base)
+    return filePaths
   } catch (error) {
     consola.error('genCodeFiles ->', error)
   }
