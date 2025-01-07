@@ -32,13 +32,13 @@ const search = ref<VsSearchProps>({
   options: [
     {
       id: 'searchStr',
-      type: 'input',
+      type: 'Input',
       label: '员工姓名/工号',
       props: {} as SInputProps,
     },
     {
       id: 'status',
-      type: 'select',
+      type: 'Select',
       label: '员工状态',
       props: {
         optionData: EMPLOYEE_STATUS_OPTIONS,
@@ -46,7 +46,7 @@ const search = ref<VsSearchProps>({
     },
     {
       id: 'phone',
-      type: 'input',
+      type: 'Input',
       label: '手机号',
       props: {} as SInputProps,
     },

@@ -12,9 +12,9 @@ const model = defineModel<Date | [Date, Date] | [number, number] | [string, stri
   <el-time-picker
     v-model="model"
     v-bind="{
+      valueFormat: 'x',
+      clearable: true,
       ...props,
-      valueFormat: props?.valueFormat ?? 'x',
-      clearable: props?.clearable ?? true
     }"
   >
   </el-time-picker>

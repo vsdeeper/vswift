@@ -5,7 +5,7 @@ import { pascal } from 'radash'
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 
 withDefaults(defineProps<VsSearchProps>(), {
-  showDividerLine: true
+  showDividerLine: true,
 })
 
 const emit = defineEmits<{
@@ -47,7 +47,7 @@ function onRest() {
 }
 
 defineExpose({
-  loading
+  loading,
 })
 </script>
 
@@ -68,7 +68,7 @@ defineExpose({
               'hidden-sm-and-down': !showMore && index > 0,
               'hidden-md-and-down': !showMore && index > 0,
               'hidden-lg-and-down': !showMore && index > 1,
-              'hidden-lg-and-up': !showMore && index > (appSettingMainWidth === 'full' ? 2 : 1)
+              'hidden-lg-and-up': !showMore && index > (appSettingMainWidth === 'full' ? 2 : 1),
             }"
           >
             <el-form-item :label="item.label" :prop="item.id">
@@ -106,7 +106,7 @@ defineExpose({
       </el-form>
       <el-divider v-if="showDividerLine" direction="horizontal" />
     </template>
-    <el-text v-else class="no-data" type="info" tag="i">未配置搜索选项</el-text>
+    <el-text v-else class="nodata" type="info" tag="i">未配置搜索选项</el-text>
   </div>
 </template>
 
@@ -135,7 +135,7 @@ defineExpose({
   :deep(div[class*='-date-editor ']) {
     flex: 1;
   }
-  .no-data {
+  .nodata {
     display: block;
     padding: 16px;
   }

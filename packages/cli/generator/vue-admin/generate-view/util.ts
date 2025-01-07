@@ -1,4 +1,4 @@
-import { camel, capitalize, dash, last, pascal } from 'radash'
+import { camel, dash, last, pascal } from 'radash'
 import {
   storeCodeSnippets,
   addImportCode,
@@ -6,7 +6,10 @@ import {
   genSpace,
 } from '../../util.js'
 import type {
+  ApiConfigModel,
   MergeDesignData,
+  OptionsConfigItem,
+  SearchConditionItem,
   SearchDesignData,
   TableColumnItem,
   TableDesignData,
@@ -21,12 +24,12 @@ export async function resolveViewObject(
   components: MergeDesignData[],
 ) {
   const viewObject: Record<string, any> = {}
-  const { name, saticDataConfig } = options ?? {}
-  if (name) {
-    const nameArr = name.split('/')
-    viewObject.base = `/views${name.startsWith('/') ? name : `/${name}`}`
-    viewObject[`/${pascal(last(nameArr)!)}.vue`] = genViewComponentCode(options, components)
-  }
+  const { name, saticDataConfig } = options
+  if (!name) return
+  const nameArr = name.split('/')
+  viewObject.base = `/views${name.startsWith('/') ? name : `/${name}`}`
+  viewObject[`/${pascal(last(nameArr)!)}.vue`] = genViewComponentCode(options, components)
+
   if (saticDataConfig?.length) {
     viewObject['/constants.ts'] = genConstantsCode(options)
   }
@@ -95,27 +98,25 @@ export async function resolveApiObjectOfView(
   components: MergeDesignData[],
 ) {
   const apiObject: Record<string, any> = {}
-  const { name } = options ?? {}
-  if (name) {
-    const nameArr = name.split('/').filter(e => !!e)
-    apiObject.base = `/api${nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''}`
-    apiObject[`/${dash(last(nameArr)!)}.ts`] = genApiCodeOfView(components)
-  }
+  const { name } = options
+  if (!name) return
+  const nameArr = name.split('/').filter(e => !!e)
+  apiObject.base = `/api${nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''}`
+  apiObject[`/${dash(last(nameArr)!)}.ts`] = genApiCodeOfView(components)
   return apiObject
 }
 
 // 解析视图store对象结构
 export async function resolveStoreObjectOfView(
-  options: Record<string, any>,
-  components: Record<string, any>[],
+  options: ViewDesignDataOptions,
+  components: MergeDesignData[],
 ) {
   const storeObject: Record<string, any> = {}
-  const { name } = options ?? {}
-  if (name) {
-    const nameArr = name.split('/').filter(e => !!e)
-    storeObject.base = `/stores${nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''}`
-    storeObject[`/${dash(last(nameArr)!)}.ts`] = genStoreCodeOfView(options, components)
-  }
+  const { name } = options
+  if (!name) return
+  const nameArr = name.split('/').filter(e => !!e)
+  storeObject.base = `/stores${nameArr.length > 1 ? `/${nameArr.slice(0, nameArr.length - 1).join('/')}` : ''}`
+  storeObject[`/${dash(last(nameArr)!)}.ts`] = genStoreCodeOfView(options, components)
   return storeObject
 }
 
@@ -181,14 +182,14 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
       ['Select', 'Cascader'].includes(e.type!) &&
       e.optionDataType === 'definition' &&
       e.dataSource === 'api' &&
-      !e.apiConfig?.useGlobalApi &&
+      e.apiConfig?.name &&
       e.apiConfig?.method &&
       e.apiConfig?.url,
   )
   const tableColumnItemsNeedStore = tableColumnItems?.filter(
     e =>
       e.formatterType === 'dynamic_data_transform' &&
-      !e.apiConfig?.useGlobalApi &&
+      e.apiConfig?.name &&
       e.apiConfig?.method &&
       e.apiConfig?.url,
   )
@@ -231,7 +232,12 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
     `@/api${name.startsWith('/') ? name : `/${name}`}`,
     importCodeArr,
   )
-  addImportCode('module', [`useViewDataStore`], `@/stores${`/${nameArr.join('/')}`}`, importCodeArr)
+  addImportCode(
+    'module',
+    [`use${pascal(last(nameArr)!)}Store`],
+    `@/stores${`/${nameArr.join('/')}`}`,
+    importCodeArr,
+  )
   if (findSearch || findTable /** 有搜索或表格，需导入vs-search, vs-table组件的相关类型 */) {
     addImportCode(
       'type',
@@ -302,22 +308,36 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
   }
   /** useUserInfoStore end */
 
-  const useStoreConst = genUseStoreConst(searchConditionItemsNeedStore, tableColumnItemsNeedStore)
-  if (useStoreConst.length /**有 useViewStore 定义 */) {
+  /** useViewStore start */
+  const useStoreConst = Array.from(
+    new Set(genUseStoreConst(searchConditionItemsNeedStore, tableColumnItemsNeedStore)),
+  )
+  if (useStoreConst.length) {
     storeCodeSnippets(['// 视图store'], varCodeArr)
     for (const item of useStoreConst) {
-      storeCodeSnippetOfDestructuringVar(`get${pascal(item)}`, `useViewDataStore()`, varCodeArr)
-      storeCodeSnippetOfDestructuringVar(item, `storeToRefs(useViewDataStore())`, varCodeArr)
+      storeCodeSnippetOfDestructuringVar(
+        `get${item}Data`,
+        `use${pascal(last(nameArr)!)}Store()`,
+        varCodeArr,
+      )
+      storeCodeSnippetOfDestructuringVar(
+        `${camel(item)}Data`,
+        `storeToRefs(use${pascal(last(nameArr)!)}Store())`,
+        varCodeArr,
+      )
     }
     storeCodeSnippets([''], varCodeArr)
   }
+  /** useViewStore end */
+
+  /** defineAsyncComponent start */
   if (asyncComponentConstants.length /** 有异步组件，异步组件定义在最上面 */) {
     storeCodeSnippets(
       [
         '// 异步组件及其实例定义',
         ...asyncComponentConstants.map(
           e =>
-            `const ${camel(e)} = defineAsyncComponent(() => import('./components/${e}/${pascal(e)}.vue'))`,
+            `const ${pascal(e)} = defineAsyncComponent(() => import('./components/${e}/${pascal(e)}.vue'))`,
         ),
         ...asyncComponentConstants.map(e => `const ${pascal(e)}Ref = ref<${pascal(e)}Instance>()`),
         '',
@@ -325,6 +345,9 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
       varCodeArr,
     )
   }
+  /** defineAsyncComponent end */
+
+  /** search start */
   if (findSearch /**有搜索 */) {
     storeCodeSnippets(
       [
@@ -337,6 +360,9 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
       varCodeArr,
     )
   }
+  /** search end */
+
+  /** table start */
   if (findTable /**有表格 */) {
     storeCodeSnippets(
       [
@@ -350,65 +376,83 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
       varCodeArr,
     )
   }
+  /** table end */
+
+  /** params start */
   if (findTable?.options?.showPagination /**有分页 */) {
     storeCodeSnippets(
       [`${genSpace(2)}pageIndex: 1,`, `${genSpace(2)}pageSize: getPageSize(),`],
       paramsCodeArr,
     )
   }
+  /** params end */
 
+  /** getTableList start */
   if (findTable /**有表格 */) {
     const { apiConfig = {} } = findTable.options
     storeCodeSnippets(
       [
         '// 获取列表数据',
-        `const getTableList = async (params: PagingParams) => {`,
+        `const getTableList = async () => {`,
         `${genSpace(2)}table.value.loading = true`,
-        `${genSpace(2)}const res = await ${apiConfig.name}(params)`,
+        `${genSpace(2)}const res = await ${apiConfig.name}(params.value)`,
         `${genSpace(2)}table.value.loading = false`,
-        `${genSpace(2)}table.value.total = res?.total ?? 0`,
-        `${genSpace(2)}table.value.data = res?.list ?? []`,
+      ],
+      funcCodeArr,
+    )
+    if (findTable.options.showPagination) {
+      storeCodeSnippets([`${genSpace(2)}table.value.total = res?.total ?? 0`], funcCodeArr)
+    }
+    storeCodeSnippets([`${genSpace(2)}table.value.data = res?.list ?? []`, `}`, ''], funcCodeArr)
+  }
+  /** getTableList end */
+
+  /** onInquire start */
+  storeCodeSnippets(
+    [
+      '// 搜索',
+      `const onInquire = (val: Record<string, any>) => {`,
+      `${genSpace(2)}params.value = { ...params.value, ...val, ${findTable?.options.showPagination ? 'pageIndex: 1' : ''} }`,
+      `${genSpace(2)}getTableList()`,
+      `}`,
+      '',
+    ],
+    funcCodeArr,
+  )
+  /** onInquire end */
+
+  /** onReset start */
+  storeCodeSnippets(
+    [
+      '// 重置',
+      `const onReset = () => {`,
+      `${genSpace(2)}params.value = { ${findTable?.options.showPagination ? 'pageIndex: 1, pageSize: getPageSize()' : ''} }`,
+      `${genSpace(2)}getTableList()`,
+      `}`,
+      '',
+    ],
+    funcCodeArr,
+  )
+  /** onReset end */
+
+  /** onPagingChange start */
+  if (findTable?.options.showPagination) {
+    storeCodeSnippets(
+      [
+        '// 分页改变',
+        `const onPagingChange = (val: PagingParams) => {`,
+        `${genSpace(2)}params.value.pageIndex = val.pageIndex`,
+        `${genSpace(2)}params.value.pageSize = val.pageSize`,
+        `${genSpace(2)}getTableList()`,
         `}`,
         '',
       ],
       funcCodeArr,
     )
   }
+  /** onPagingChange end */
 
-  if (findTable?.options.showPagination /** 有分页 */) {
-    storeCodeSnippets(
-      [
-        ...[
-          '// 搜索',
-          `const onInquire = (val: Record<string, any>) => {`,
-          `${genSpace(2)}params.value = { ...params.value, ...val, pageIndex: 1 }`,
-          `${genSpace(2)}getTableList(params.value)`,
-          `}`,
-        ],
-        '',
-        ...[
-          '// 重置',
-          `const onReset = () => {`,
-          `${genSpace(2)}params.value.pageIndex = 1`,
-          `${genSpace(2)}getTableList(params.value)`,
-          `}`,
-        ],
-        '',
-        ...[
-          '// 分页改变',
-          `const onPagingChange = (val: PagingParams) => {`,
-          `${genSpace(2)}params.value.pageIndex = val.pageIndex`,
-          `${genSpace(2)}params.value.pageSize = val.pageSize`,
-          `${genSpace(2)}getTableList(params.value)`,
-          `}`,
-        ],
-        '',
-      ],
-      funcCodeArr,
-    )
-  }
-
-  // 生成 onOperate 代码
+  /** onOperate start */
   for (const item of tableOperations /** 表格操作 */) {
     if (item.enableConfirmation /** 需二次确认，可选多行 */) {
       // 只取第一组参数，取 param.key 为入参，取 param.value 为取行数据的的字段
@@ -425,7 +469,7 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
           `${genSpace(6)}const ${param.key} = selected.map((e) => e.${param.value})`,
           `${genSpace(6)}if (await ${item.apiConfig?.name}({ ${param.key} })) {`,
           `${genSpace(8)}ElMessage.success('${item.label}成功')`,
-          `${genSpace(8)}getTableList(params.value)`,
+          `${genSpace(8)}getTableList()`,
           `${genSpace(6)}}`,
           `${genSpace(4)}}`,
         ],
@@ -466,7 +510,7 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
           `${genSpace(4)}case '${item.value}': {`,
           `${genSpace(6)}if (await ${item.apiConfig?.name}({${transParams(item.apiConfig?.params ?? [])}})) {`,
           `${genSpace(8)}ElMessage.success('${item.label}成功')`,
-          `${genSpace(8)}getTableList(params.value)`,
+          `${genSpace(8)}getTableList()`,
           `${genSpace(6)}}`,
           `${genSpace(6)}break`,
           `${genSpace(4)}}`,
@@ -475,13 +519,15 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
       )
     }
   }
+  /** onOperate end */
 
-  // 生成 onMounted 代码
+  /** onMounted start */
   if (findTable /**有表格 */) {
-    storeCodeSnippets([`${genSpace(2)}getTableList(params.value)`], onMountedCodeArr)
+    storeCodeSnippets([`${genSpace(2)}getTableList()`], onMountedCodeArr)
   }
+  /** onMounted end */
 
-  // 生成template代码
+  /** template start */
   if (findSearch /** 有搜索 */) {
     storeCodeSnippets(
       [`${genSpace(4)}<VsSearch v-bind="search" @inquire="onInquire" @reset="onReset"></VsSearch>`],
@@ -498,13 +544,31 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
       templateCodeArr,
     )
   }
+  if (asyncComponentConstants.length /** 有异步组件 */) {
+    storeCodeSnippets(
+      [
+        '',
+        ...asyncComponentConstants.map(
+          e => `<${pascal(e)} ref="${pascal(e)}Ref" @succeed="getTableList" />`,
+        ),
+        '',
+      ],
+      templateCodeArr,
+    )
+  }
+  /** template end */
 
   const _scriptCodeArr = [
     `<script setup lang="ts">`,
     ...importCodeArr,
     '',
     ...varCodeArr,
-    ...['// 参数定义', `const params = ref<PagingParams>({`, ...paramsCodeArr, `})`],
+    ...[
+      '// 参数定义',
+      `const params = ref<${findTable?.options.showPagination ? 'PagingParams' : 'Record<string, any>'}>({`,
+      ...paramsCodeArr,
+      `})`,
+    ],
     '',
     ...funcCodeArr,
     ...[
@@ -531,9 +595,9 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
 }
 
 // 生成constants.ts代码
-function genConstantsCode(options: Record<string, any>) {
+function genConstantsCode(options: ViewDesignDataOptions) {
   const { saticDataConfig = [] } = options
-  const genValueOptionsCode = (data: Record<string, any>[]) => {
+  const genValueOptionsCode = (data: OptionsConfigItem[]) => {
     return data
       .map(
         e =>
@@ -541,7 +605,7 @@ function genConstantsCode(options: Record<string, any>) {
       )
       .join(',')
   }
-  return `${saticDataConfig.map(item => `export const ${item.key} = [${genValueOptionsCode(item.value)}]`).join('\n')}`
+  return `${saticDataConfig.map(e => `export const ${e.key} = [${genValueOptionsCode(e.value ?? [])}]`).join('\n')}`
 }
 
 // 生成utils.ts代码
@@ -899,9 +963,19 @@ function genApiCodeOfView(components: MergeDesignData[]) {
   // 提取数据
   const findSearch = components.find(e => e.type === 'Search') as SearchDesignData | undefined
   const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
+  const tableColumnItems = findTable?.options?.tableColumnItems?.reduce(
+    (pre: TableColumnItem[], cur) => {
+      return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
+    },
+    [],
+  )
   const tableOperations = findTable?.options?.tableOperations
   const tableColumnOperations = findTable?.options?.tableColumnOperations
   const apiConfigOfTable = findTable?.options?.apiConfig
+  const apiConfigOfTableColumnItems =
+    tableColumnItems
+      ?.filter(e => e.apiConfig?.name && e.apiConfig?.method && e.apiConfig?.url)
+      ?.map(e => ({ ...e.apiConfig })) ?? []
   const apiConfigOfSearchConditionItems =
     findSearch?.options?.searchConditionItems
       ?.filter(e => e.apiConfig?.name && e.apiConfig?.method && e.apiConfig?.url)
@@ -925,7 +999,7 @@ function genApiCodeOfView(components: MergeDesignData[]) {
 
   codeArr.push(`import { http } from '@/utils/http'`, '')
 
-  const toArg = (e: Record<string, any>) => `${e.method === 'GET' ? 'params' : 'data'}`
+  const toArg = (e: ApiConfigModel) => `${e.method === 'GET' ? 'params' : 'data'}`
 
   if (apiConfigOfTable?.name) {
     codeArr.push(
@@ -933,6 +1007,7 @@ function genApiCodeOfView(components: MergeDesignData[]) {
       `${genSpace(2)}try {`,
       `${genSpace(4)}const { data: res } = await http({`,
       `${genSpace(6)}method: '${apiConfigOfTable.method}',`,
+      `${genSpace(6)}url: '${apiConfigOfTable.url}',`,
     )
     codeArr.push(`${genSpace(6)}${toArg(apiConfigOfTable)}`)
     codeArr.push(
@@ -946,55 +1021,13 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     )
   }
 
-  for (const item of apiConfigOfSearchConditionItems) {
-    // export const ${e.name} = async (${toArg(e)}${toArgType(e)}) => {
-    //   try {
-    //     await http({
-    //       method: '${e.method}',
-    //       url: '${e.url}',
-    //       ${toArg(e)}
-    //     })
-    //     return true
-    //   } catch (error) {
-    //     console.error('${e.name} ->', error)
-    //   }
-    // }
-    codeArr.push(
-      `export const ${item.name} = async (${toArg(item)}: Record<string, any>) => {`,
-      `${genSpace(2)}try {`,
-      `${genSpace(4)}const { data: res } = await http({`,
-      `${genSpace(6)}method: '${item.method}',`,
-    )
-    codeArr.push(`${genSpace(6)}${toArg(item)}`)
-    codeArr.push(
-      `${genSpace(4)}})`,
-      `${genSpace(4)}return res as Record<string, any>`,
-      `${genSpace(2)}} catch (error) {`,
-      `${genSpace(4)}console.error('${item.name} ->', error)`,
-      `${genSpace(2)}}`,
-      `}`,
-      '',
-    )
-  }
-
   for (const item of [...apiConfigOfTableOperations, ...apiConfigOfTableColumnOperations]) {
-    // export const ${e.name} = async (${toArg(e)}${toArgType(e)}) => {
-    //   try {
-    //     await http({
-    //       method: '${e.method}',
-    //       url: '${e.url}',
-    //       ${toArg(e)}
-    //     })
-    //     return true
-    //   } catch (error) {
-    //     console.error('${e.name} ->', error)
-    //   }
-    // }
     codeArr.push(
       `export const ${item.name} = async (${toArg(item)}: Record<string, any>) => {`,
       `${genSpace(2)}try {`,
       `${genSpace(4)}await http({`,
       `${genSpace(6)}method: '${item.method}',`,
+      `${genSpace(6)}url: '${item.url}',`,
     )
     codeArr.push(`${genSpace(6)}${toArg(item)}`)
     codeArr.push(
@@ -1008,43 +1041,93 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     )
   }
 
+  for (const item of [...apiConfigOfSearchConditionItems, ...apiConfigOfTableColumnItems].reduce(
+    (acc: ApiConfigModel[], cur) => {
+      if (!acc.some(e => e.name === cur.name)) acc.push(cur)
+      return acc
+    },
+    [],
+  )) {
+    const args: string[] = item.params?.length
+      ? item.params.map(e => `${e.key}: ${e.valueType === 'number' ? +e.value! : e.value}`)
+      : []
+    codeArr.push(
+      `export const ${item.name} = async () => {`,
+      `${genSpace(2)}try {`,
+      `${genSpace(4)}const { data: res } = await http({`,
+      `${genSpace(6)}method: '${item.method}',`,
+      `${genSpace(6)}url: '${item.url}',`,
+    )
+    if (args.length) {
+      codeArr.push(`${genSpace(6)}${toArg(item)}: { ${args.join(',')} }`)
+    }
+    codeArr.push(
+      `${genSpace(4)}})`,
+      `${genSpace(4)}return res as Record<string, any>[]`,
+      `${genSpace(2)}} catch (error) {`,
+      `${genSpace(4)}console.error('${item.name} ->', error)`,
+      `${genSpace(2)}}`,
+      `}`,
+      '',
+    )
+  }
+
   return codeArr.join('\n')
 }
 
 // 生成视图store代码
-function genStoreCodeOfView(options: Record<string, any>, components: Record<string, any>[]) {
+function genStoreCodeOfView(options: ViewDesignDataOptions, components: MergeDesignData[]) {
   const codeArr: string[] = []
   // 提取数据
-  const { name } = options
+  const { name = '' } = options
+  const nameArr = name.split('/').filter(e => !!e)
   const base = `${name.startsWith('/') ? name : `/${name}`}`
   const findSearch = components.find(e => e.type === 'Search')
   const findTable = components.find(e => e.type === 'Table')
-  const tableColumnItems = findTable?.options?.tableColumnItems.reduce(
-    (pre: Record<string, any>[], cur: Record<string, any>) => {
+  const searchConditionItems = findSearch?.options?.searchConditionItems
+  const tableColumnItems =
+    findTable?.options?.tableColumnItems?.reduce((pre: TableColumnItem[], cur: TableColumnItem) => {
       return [...pre, ...(cur.tableColumnItems?.length ? [cur, ...cur.tableColumnItems] : [cur])]
-    },
-    [],
+    }, []) ?? []
+
+  const apiNamesOfSearchConditionItems =
+    searchConditionItems
+      ?.filter(
+        e =>
+          ['Select', 'Cascader'].includes(e.type!) &&
+          e.optionDataType === 'definition' &&
+          e.dataSource === 'api' &&
+          e.apiConfig?.name &&
+          e.apiConfig?.method &&
+          e.apiConfig?.url,
+      )
+      ?.map(e => e.apiConfig!.name!) ?? []
+  const apiNamesOfTableColumnItems =
+    tableColumnItems
+      ?.filter(
+        e =>
+          e.formatterType === 'dynamic_data_transform' &&
+          e.apiConfig?.name &&
+          e.apiConfig?.method &&
+          e.apiConfig?.url,
+      )
+      ?.map(e => e.apiConfig!.name!) ?? []
+
+  const mergeApiConfig = Array.from(
+    new Set([...apiNamesOfSearchConditionItems, ...apiNamesOfTableColumnItems]),
   )
-  const apiConfigOfSearchConditionItems = findSearch?.options?.searchConditionItems
-    ?.filter(e => !e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url)
-    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
-  const apiConfigOfTableColumnItems = tableColumnItems
-    ?.filter(e => !e.apiConfig?.useGlobalApi && e.apiConfig?.method && e.apiConfig?.url)
-    ?.map(e => ({ ...e.apiConfig, useGlobalApi: undefined }))
 
-  const mergeApiConfig = [...apiConfigOfSearchConditionItems, ...apiConfigOfTableColumnItems]
-
-  const toName = (e: Record<string, any>) => `${e.name?.replace(/^query/, '')}`
+  const toApiName = (name: string) => `${name.replace(/^query/, '')}`
 
   codeArr.push(
     `import { defineStore } from 'pinia'`,
-    `import { ${mergeApiConfig.map(e => `${e.name}`).join(',')} } from '@/api${base}'`,
+    `import { ${mergeApiConfig.map(e => `${e}`).join(',')} } from '@/api${base}'`,
     '',
   )
-  codeArr.push(`export const useViewDataStore = defineStore('${base}', () => {`)
+  codeArr.push(`export const use${pascal(last(nameArr)!)}Store = defineStore('${base}', () => {`)
   codeArr.push(
     ...mergeApiConfig.map(
-      e => `${genSpace(2)}const ${toName(e)}Data = ref<Record<string, any>[]>()`,
+      e => `${genSpace(2)}const ${camel(toApiName(e))}Data = ref<Record<string, any>[]>()`,
     ),
     '',
   )
@@ -1059,21 +1142,21 @@ function genStoreCodeOfView(options: Record<string, any>, components: Record<str
     //   ${toName(e)}.value = data
     // }
     codeArr.push(
-      `${genSpace(2)}async function get${capitalize(toName(item))}Data() {`,
-      `${genSpace(4)}if (${toName(item)}Data.value?.length) return ${toName(item)}Data.value`,
-      `${genSpace(4)}${toName(item)}Data.value = await ${item.name}()`,
-      `${genSpace(4)}return ${toName(item)}Data.value`,
+      `${genSpace(2)}async function get${toApiName(item)}Data() {`,
+      `${genSpace(4)}if (${camel(toApiName(item))}Data.value?.length) return ${camel(toApiName(item))}Data.value`,
+      `${genSpace(4)}${camel(toApiName(item))}Data.value = await ${item}()`,
+      `${genSpace(4)}return ${camel(toApiName(item))}Data.value`,
       `${genSpace(2)}}`,
       '',
-      `${genSpace(2)}function set${capitalize(toName(item))}Data(data?: Record<string, any>[]) {`,
-      `${genSpace(4)}${toName(item)}Data.value = data`,
+      `${genSpace(2)}function set${toApiName(item)}Data(data?: Record<string, any>[]) {`,
+      `${genSpace(4)}${camel(toApiName(item))}Data.value = data`,
       `${genSpace(2)}}`,
     )
   }
   codeArr.push(
     '',
     `${genSpace(2)}return {`,
-    `${genSpace(4)}${mergeApiConfig.map(e => `${toName(e)}Data, get${capitalize(toName(e))}Data, set${capitalize(toName(e))}Data`).join(',')}`,
+    `${genSpace(4)}${mergeApiConfig.map(e => `${camel(toApiName(e))}Data, get${toApiName(e)}Data, set${toApiName(e)}Data`).join(',')}`,
     `${genSpace(2)}}`,
   )
   codeArr.push(`})`)
@@ -1122,7 +1205,7 @@ function genApiImports(
     codeArr.push(apiConfig.name)
   }
   for (const item of tableOperationsNeedApi) {
-    if (item.apiConfig?.name) {
+    if (item.enableConfirmation /** 需二次确认的接口才会在view中调用  */ && item.apiConfig?.name) {
       codeArr.push(item.apiConfig.name)
     }
     if (item.echoApiConfig?.name) {
@@ -1130,7 +1213,7 @@ function genApiImports(
     }
   }
   for (const item of tableColumnOperationsNeedApi) {
-    if (item.apiConfig?.name) {
+    if (item.enableConfirmation /** 需二次确认的接口才会在view中调用  */ && item.apiConfig?.name) {
       codeArr.push(item.apiConfig.name)
     }
     if (item.echoApiConfig?.name) {
@@ -1179,14 +1262,14 @@ function genVswiftComponentsTypeImports(
 }
 
 // 生成 Search 配置
-function genSearchConfig(searchConfig: Record<string, any>) {
+function genSearchConfig(searchConfig: SearchDesignData) {
   const codeArr: string[] = []
   const { options } = searchConfig
   if (options.labelWidth) {
     codeArr.push(`${genSpace(2)}labelWidth: '${options.labelWidth}px',`)
   }
   codeArr.push(`${genSpace(2)}options: [`)
-  for (const item of options.searchConditionItems) {
+  for (const item of options.searchConditionItems ?? []) {
     // {
     //   id: '${item.key}',
     //   type: '${item.type}',
@@ -1294,18 +1377,18 @@ function genTableTemplate(tableColumnItems: TableColumnItem[]) {
         `${genSpace(6)}</template>`,
       )
     } else if (formatterType === 'dynamic_data_transform') {
-      const { name } = apiConfig
-      const optionsDataVarName = `${name!.replace(/^get/, '')}`
+      const { name = '' } = apiConfig
+      const optionsDataVarName = `${camel(name.replace(/^query/, ''))}Data`
       if (isTreeData) {
         codeArr.push(
           `${genSpace(6)}<template #${prop}="{ row }">`,
-          `${genSpace(8)}{{findArraryValueFromTreeData(row.${prop}, ${optionsDataVarName}, {returnType: 'labels'})?.join('/')}}`,
+          `${genSpace(8)}{{findArraryValueFromTreeData(row.${prop}, ${optionsDataVarName} ?? [], {returnType: 'labels'})?.join('/')}}`,
           `${genSpace(6)}</template>`,
         )
       } else {
         codeArr.push(
           `${genSpace(6)}<template #${prop}="{ row }">`,
-          `${genSpace(8)}{{getLabelByValue(row.${prop}, ${optionsDataVarName}, {label: 'label'})}}`,
+          `${genSpace(8)}{{getLabelByValue(row.${prop}, ${optionsDataVarName} ?? [], {label: 'label'})}}`,
           `${genSpace(6)}</template>`,
         )
       }
@@ -1356,7 +1439,7 @@ function genUseStoreConst(
   return codeArr
 }
 
-function transPropsForSearch(item: Record<string, any>) {
+function transPropsForSearch(item: SearchConditionItem) {
   const codeArr: string[] = []
   if (item.placeholder) {
     codeArr.push(`${genSpace(8)}placeholder: '${item.placeholder}',`)
@@ -1373,13 +1456,14 @@ function transPropsForSearch(item: Record<string, any>) {
         codeArr.push(`${genSpace(8)}multiple: ${item.multiple},`)
       }
       if (item.optionDataType === 'static_data' /** 静态数据 */) {
-        codeArr.push(`${genSpace(8)}optionData: '${item.staticDataKey}',`)
+        codeArr.push(`${genSpace(8)}options: ${item.staticDataKey},`)
       } else if (item.optionDataType === 'definition' /** 定义 */) {
         if (item.dataSource === 'api' /** 接口定义 */) {
-          codeArr.push(`${genSpace(8)}optionData: async () => await get${pascal(item.key)}Data()`)
+          const apiName = item.apiConfig?.name ? item.apiConfig?.name.replace(/^query/, '') : ''
+          codeArr.push(`${genSpace(8)}options: async () => await get${apiName}Data()`)
         } else if (item.dataSource === 'custom' /** 自定义 */) {
-          codeArr.push(`${genSpace(8)}optionData: [`)
-          for (const optionItem of item.options) {
+          codeArr.push(`${genSpace(8)}options: [`)
+          for (const optionItem of item.options ?? []) {
             // {
             //   label: '${optionItem.label}',
             //   value: ${optionItem.valueType === 'number' ? +optionItem.value : `'${optionItem.value}'`}
@@ -1413,10 +1497,11 @@ function transPropsForSearch(item: Record<string, any>) {
         codeArr.push(`${genSpace(8)}options: ${item.staticDataKey},`)
       } else if (item.optionDataType === 'definition' /** 定义 */) {
         if (item.dataSource === 'api' /** 接口定义 */) {
-          codeArr.push(`${genSpace(8)}options: async () => await get${pascal(item.key)}Data()`)
+          const apiName = item.apiConfig?.name ? item.apiConfig?.name.replace(/^query/, '') : ''
+          codeArr.push(`${genSpace(8)}options: async () => await get${pascal(apiName)}Data()`)
         } else if (item.dataSource === 'custom' /** 自定义 */) {
           codeArr.push(`${genSpace(8)}options: [`)
-          for (const optionItem of item.options) {
+          for (const optionItem of item.options ?? []) {
             // {
             //   label: '${optionItem.label}',
             //   value: ${optionItem.valueType === 'number' ? +optionItem.value : `'${optionItem.value}'`}

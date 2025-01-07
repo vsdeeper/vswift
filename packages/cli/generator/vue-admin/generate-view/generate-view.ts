@@ -33,6 +33,9 @@ export async function generateView(name: string) {
     resolveApiObjectOfView(options, components),
     resolveStoreObjectOfView(options, components),
   ])
+  if (!viewObject) throw new Error('Can not resolve view object')
+  if (!apiObject) throw new Error('Can not resolve api object')
+  if (!storeObject) throw new Error('Can not resolve store object')
   spinner.succeed('Resolve data done.')
 
   // console.log('generateView ->', viewObject, apiObject, storeObject)
@@ -43,6 +46,9 @@ export async function generateView(name: string) {
     genCodeFiles(apiObject),
     genCodeFiles(storeObject),
   ])
+  if (!filePathsOfView) throw new Error('Can not generate view code files')
+  if (!filePathsOfApi) throw new Error('Can not generate api code files')
+  if (!filePathsOfStore) throw new Error('Can not generate sotre code files')
   spinner.succeed(
     `Generate code successfully, your code files has been created.\nView files:\n${chalk.green(filePathsOfView?.join('\n'))}\nApi files:\n${chalk.green(filePathsOfApi?.join('\n'))}\nStore files:\n${chalk.green(filePathsOfStore?.join('\n'))}`,
   )

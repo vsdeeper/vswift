@@ -12,9 +12,9 @@ const model = defineModel<SDateValue>()
   <el-date-picker
     v-model="model"
     v-bind="{
+      valueFormat: 'x',
+      clearable: true,
       ...props,
-      valueFormat: props?.valueFormat ?? 'x',
-      clearable: props?.clearable ?? true
     }"
   >
   </el-date-picker>

@@ -18,7 +18,7 @@ watch(
       options.value = await _props.props!.options!()
     }
   },
-  { once: true }
+  { once: true },
 )
 </script>
 
@@ -27,10 +27,10 @@ watch(
     v-model="model"
     v-bind="
       {
+        clearable: true,
+        filterable: true,
+        props: { value: 'id', options, ...props?.props },
         ...props,
-        clearable: props?.clearable ?? true,
-        filterable: props?.filterable ?? true,
-        props: { ...props?.props, value: props?.props?.value ?? 'id', options }
       } as CascaderPropTypes
     "
   >

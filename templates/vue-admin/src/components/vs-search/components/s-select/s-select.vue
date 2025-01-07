@@ -17,7 +17,7 @@ watch(
       options.value = await _props.props!.options!()
     }
   },
-  { once: true }
+  { once: true },
 )
 </script>
 
@@ -25,9 +25,9 @@ watch(
   <el-select
     v-model="model"
     v-bind="{
+      clearable: true,
+      filterable: true,
       ...props,
-      clearable: props?.clearable ?? true,
-      filterable: props?.filterable ?? true
     }"
   >
     <el-option
