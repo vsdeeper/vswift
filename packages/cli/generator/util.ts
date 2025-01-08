@@ -96,22 +96,22 @@ export function storeCodeSnippets(code: string[], storeObject: string[], fromInd
 /**
  * 存储解构变量的代码片段到指定对象
  * @param name
- * @param source
+ * @param storeKey
  * @param storeObject
  */
 export function storeCodeSnippetOfDestructuringVar(
   name: string,
-  sourceObject: string,
+  storeKey: string,
   storeObject: string[],
 ) {
-  const code = storeObject.find(e => e.includes(sourceObject))
-  const index = storeObject.findIndex(e => e.includes(sourceObject))
+  const code = storeObject.find(e => e.includes(storeKey))
+  const index = storeObject.findIndex(e => e.includes(storeKey))
   if (!code /** 首次导入 */) {
-    storeObject.push(`const { ${name} } = ${sourceObject}`)
+    storeObject.push(`const { ${name} } = ${storeKey}`)
   } else {
     const varArr = resolveDestructuringVar(code)
     varArr?.push(name)
-    storeObject[index] = `const { ${varArr?.length ? varArr.join(',') : ''} } = ${sourceObject}`
+    storeObject[index] = `const { ${varArr?.length ? varArr.join(',') : ''} } = ${storeKey}`
   }
 }
 
