@@ -17,6 +17,7 @@ import type {
   TableOperationsItem,
   ViewDesignDataOptions,
 } from 'visual-development'
+import type { WidgetDesignData } from 'vswift-form'
 
 // 解析视图view对象结构
 export async function resolveViewObject(
@@ -31,33 +32,20 @@ export async function resolveViewObject(
   viewObject[`/${pascal(last(nameArr)!)}.vue`] = genViewComponentCode(options, components)
 
   if (saticDataConfig?.length) {
-    viewObject['/constants.ts'] = genConstantsCode(options)
+    viewObject['/constants.ts'] = genConstantsCode(options, components)
   }
   const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
   if (findTable) {
     viewObject['/utils.ts'] = genUtilsCode()
     viewObject['/components'] = {}
-    if (
-      getTableOperationsHasForm(findTable)?.length ||
-      getTableColumnOperationsHasForm(findTable)?.length
-    ) {
-      viewObject['/components']['/index.ts'] = genIndexOfComponents(components)
-    }
     for (const item of getTableOperationsHasForm(findTable)) {
       const dashName = `table-${item.value}`
       viewObject['/components'][`/${dashName}`] = {}
-      viewObject['/components'][`/${dashName}`]['/index.ts'] = genIndexOfComponent(dashName)
       viewObject['/components'][`/${dashName}`][`/${pascal(dashName)}.vue`] =
         genTableOperationComponentCode(options, item, components)
       if (item.formConfig) {
         viewObject['/components'][`/${dashName}`]['/components'] = {}
-        viewObject['/components'][`/${dashName}`]['/components']['/index.ts'] =
-          `export * from './form-detail'`
         viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
-          '/index.ts': `import FormDetail from './FormDetail.vue'\n
-                        export type FormDetailInstance = InstanceType<typeof FormDetail>
-                        export { FormDetail }
-                        `,
           '/FormDetail.vue': genFormDetailComponentCode(options, item, components),
         }
       }
@@ -65,18 +53,11 @@ export async function resolveViewObject(
     for (const item of getTableColumnOperationsHasForm(findTable)) {
       const dashName = `row-${item.value}`
       viewObject['/components'][`/${dashName}`] = {}
-      viewObject['/components'][`/${dashName}`]['/index.ts'] = genIndexOfComponent(dashName)
       viewObject['/components'][`/${dashName}`][`/${pascal(dashName)}.vue`] =
-        genTableItemOperationComponentCode(options, item)
+        genTableItemOperationComponentCode(options, item, components)
       if (item.formConfig) {
         viewObject['/components'][`/${dashName}`]['/components'] = {}
-        viewObject['/components'][`/${dashName}`]['/components']['/index.ts'] =
-          `export * from './form-detail'`
         viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
-          '/index.ts': `import FormDetail from './FormDetail.vue'\n
-                        export type FormDetailInstance = InstanceType<typeof FormDetail>
-                        export { FormDetail }
-                        `,
           '/FormDetail.vue': genFormDetailComponentCode(options, item, components),
         }
       }
@@ -211,14 +192,6 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
     if (getStaticDataKeyArrInTable(findTable).length /** 表格中配置了静态数据key */) {
       addImportCode('module', getStaticDataKeyArrInTable(findTable), './constants', importCodeArr)
     }
-    if (asyncComponentConstants.length /** 有异步组件，导入异步组件实例类型 */) {
-      addImportCode(
-        'type',
-        asyncComponentConstants.map(e => `${pascal(e)}Instance`),
-        './components',
-        importCodeArr,
-      )
-    }
   }
   /** import end */
 
@@ -281,7 +254,9 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
           e =>
             `const ${pascal(e)} = defineAsyncComponent(() => import('./components/${e}/${pascal(e)}.vue'))`,
         ),
-        ...asyncComponentConstants.map(e => `const ${pascal(e)}Ref = ref<${pascal(e)}Instance>()`),
+        ...asyncComponentConstants.map(
+          e => `const ${pascal(e)}Ref = ref<InstanceType<typeof ${pascal(e)}>>()`,
+        ),
         '',
       ],
       varCodeArr,
@@ -552,8 +527,10 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
 }
 
 // 生成constants.ts代码
-function genConstantsCode(options: ViewDesignDataOptions) {
+function genConstantsCode(options: ViewDesignDataOptions, components: MergeDesignData[]) {
   const { saticDataConfig = [] } = options
+  const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
+  const widgetListHasStaticData = getWidgetListHasStaticData(findTable)
   const genValueOptionsCode = (data: OptionsConfigItem[]) => {
     return data
       .map(
@@ -562,7 +539,14 @@ function genConstantsCode(options: ViewDesignDataOptions) {
       )
       .join(',')
   }
-  return `${saticDataConfig.map(e => `export const ${e.key} = [${genValueOptionsCode(e.value ?? [])}]`).join('\n')}`
+  const mergeSaticDataConfig = [...saticDataConfig]
+  for (const widget of widgetListHasStaticData) {
+    const key = `${widget.idAlias?.toUpperCase()}_OPTIONS`
+    if (!mergeSaticDataConfig.some(e => e.key === key)) {
+      mergeSaticDataConfig.push({ key, value: widget.options.options })
+    }
+  }
+  return `${mergeSaticDataConfig.map(e => `export const ${e.key} = [${genValueOptionsCode(e.value ?? [])}]`).join('\n\n')}`
 }
 
 // 生成utils.ts代码
@@ -584,39 +568,6 @@ function genUtilsCode() {
   ].join('\n')
 }
 
-// 生成多个组件的导出文件代码 components/index.ts
-function genIndexOfComponents(components: MergeDesignData[]) {
-  const codeArr: string[] = []
-  const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
-  const tableOperations = findTable?.options?.tableOperations
-  const tableColumnOperations = findTable?.options?.tableColumnOperations
-  const tableOperationsHasForm =
-    tableOperations?.filter(
-      e => !e.enableConfirmation && (e.formConfig?.useOtherForm || !!e.formConfig),
-    ) ?? []
-  const tableColumnOperationsHasForm =
-    tableColumnOperations?.filter(
-      e => !e.enableConfirmation && (e.formConfig?.useOtherForm || !!e.formConfig),
-    ) ?? []
-  for (const item of tableOperationsHasForm) {
-    codeArr.push(`export * from './table-${item.value}'`)
-  }
-  for (const item of tableColumnOperationsHasForm) {
-    codeArr.push(`export * from './row-${item.value}'`)
-  }
-  return `${codeArr.join('\n')}`
-}
-
-// 生成单个组件的导出文件代码 table-add/index.ts
-function genIndexOfComponent(name: string) {
-  return [
-    `import ${pascal(name)} from './${pascal(name)}.vue'`,
-    '',
-    `export type ${pascal(name)}Instance = InstanceType<typeof ${pascal(name)}>`,
-    `export { ${pascal(name)} }`,
-  ].join('\n')
-}
-
 // 生成表格操作组件代码
 function genTableOperationComponentCode(
   options: ViewDesignDataOptions,
@@ -625,12 +576,12 @@ function genTableOperationComponentCode(
 ) {
   // 提取数据
   const { name = '' } = options
-  const { apiConfig = {}, label } = operationItem
+  const { apiConfig = {}, label, formConfig } = operationItem
   const base = `${name.startsWith('/') ? name : `/${name}`}`
   const storeName = `use${pascal(last(name.split('/'))!)}Store`
   const findSearch = components.find(e => e.type === 'Search') as SearchDesignData | undefined
   const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
-  const widgetListNeedDefineApi = getWidgetListNeedDefineApi(findSearch, findTable)
+  const resolvedApiInfo = resolveApiFromFormConfig(findSearch, findTable)
 
   // 存储组件导入代码
   const importCodeArr: string[] = []
@@ -645,9 +596,8 @@ function genTableOperationComponentCode(
   const genImportApiNames = () => {
     const codeArr: string[] = []
     if (apiConfig.name) codeArr.push(apiConfig.name)
-    for (const widget of widgetListNeedDefineApi) {
-      const apiName = `query${transIdToPascal(widget.idAlias)}List`
-      codeArr.push(apiName)
+    for (const api of resolvedApiInfo.allApis) {
+      codeArr.push(api.var)
     }
     return codeArr
   }
@@ -658,94 +608,95 @@ function genTableOperationComponentCode(
     ],
     importCodeArr,
   )
-  if (widgetListNeedDefineApi.length) {
+  if (resolvedApiInfo.widgetListNeedDefineApi.length) {
     storeCodeSnippets([`import { ${storeName} } from '@/stores${base}'`], importCodeArr)
   }
-  storeCodeSnippets(
-    [
-      "import type { FormDetailInstance } from './components'",
-      "import { toSubmitData } from '../../utils'",
-    ],
-    importCodeArr,
-  )
+  storeCodeSnippets(["import { toSubmitData } from '../../utils'"], importCodeArr)
   /** import end */
 
   /** defineEmits start */
   storeCodeSnippets(
-    [
-      '// 自定义事件',
-      'const emit = defineEmits<{',
-      `${genSpace(2)}(e: 'succeed'): void`,
-      '}>()',
-      '',
-    ],
+    ['const emit = defineEmits<{', `${genSpace(2)}(e: 'succeed'): void`, '}>()', ''],
     emitCodeArr,
   )
   /** defineEmits end */
 
   /** const start */
-  if (widgetListNeedDefineApi.length) {
-    storeCodeSnippets(['// 视图store'], definitionCodeArr)
-    for (const widget of widgetListNeedDefineApi) {
-      const apiName = `query${transIdToPascal(widget.idAlias)}List`
-      const setName = `set${apiName.replace(/^query/, '')}Data`
+  if (resolvedApiInfo.allApis.length) {
+    for (const api of resolvedApiInfo.allApis) {
+      const setName = `set${api.var.replace(/^query/, '')}Data`
       storeCodeSnippetOfDestructuringVar(setName, `${storeName}()`, definitionCodeArr)
     }
     storeCodeSnippets([''], definitionCodeArr)
   }
+
+  if (formConfig?.useOtherForm) {
+    let dashName = getFormOperationDashNameByUseOtherForm(formConfig.useOtherForm, findTable)
+    storeCodeSnippets(
+      [
+        `const FormDetail = defineAsyncComponent(() => import('../${dashName}/components/form-detail/FormDetail.vue'))`,
+      ],
+      definitionCodeArr,
+    )
+  } else {
+    storeCodeSnippets(
+      [
+        `const FormDetail = defineAsyncComponent(() => import('./components/form-detail/FormDetail.vue'))`,
+      ],
+      definitionCodeArr,
+    )
+  }
+  storeCodeSnippets(
+    ['const FormDetailRef = ref<InstanceType<typeof FormDetail>>()', ''],
+    definitionCodeArr,
+  )
+
   storeCodeSnippets(
     [
-      ...[
-        '// 异步组件及其实例定义',
-        `const FormDetail = defineAsyncComponent(() => import('./components/form-detail/FormDetail.vue'))`,
-        'const FormDetailRef = ref<FormDetailInstance>()',
-      ],
+      'const show = ref(false)',
+      'const loading = ref(false)',
+      'const genInitForm = () => ({})',
+      'const form = ref<Record<string, any>>(genInitForm())',
       '',
-      ...[
-        '// 变量定义',
-        'const show = ref(false)',
-        'const genInitFormData = () => ({})',
-        'const form = ref<Record<string, any>>(genInitFormData())',
-        'const loading = ref(false)',
-      ],
+    ],
+    definitionCodeArr,
+  )
+
+  storeCodeSnippets(
+    [
+      `const onConfirm = async () => {`,
+      `${genSpace(2)}const valid = await FormDetailRef.value?.validate()`,
+      `${genSpace(2)}if (!valid) return`,
+      `${genSpace(2)}loading.value = true`,
+      `${genSpace(2)}if (await ${apiConfig.name}(toSubmitData(form.value))) {`,
+      `${genSpace(4)}ElMessage.success('${label}成功')`,
+      `${genSpace(4)}emit('succeed')`,
+      `${genSpace(2)}}`,
+      `${genSpace(2)}loading.value = false`,
+      `${genSpace(2)}show.value = false`,
+      `}`,
       '',
-      ...[
-        '// 确认',
-        `const onConfirm = async () => {`,
-        `${genSpace(2)}const valid = await FormDetailRef.value?.validate()`,
-        `${genSpace(2)}if (!valid) return`,
-        `${genSpace(2)}loading.value = true`,
-        `${genSpace(2)}if (await ${apiConfig.name}(toSubmitData(form.value))) {`,
-        `${genSpace(4)}ElMessage.success('${label}成功')`,
-        `${genSpace(4)}emit('succeed')`,
-        `${genSpace(2)}}`,
-        `${genSpace(2)}loading.value = false`,
-        `${genSpace(2)}show.value = false`,
-        `}`,
-      ],
-      '',
-      ...[
-        '// 关闭弹框',
-        `const onClose = async () => {`,
-        `${genSpace(2)}form.value = genInitFormData()`,
-        `${genSpace(2)}await sleep(50)`,
-        `${genSpace(2)}FormDetailRef.value?.clearValidate()`,
-        `}`,
-      ],
+    ],
+    definitionCodeArr,
+  )
+
+  storeCodeSnippets(
+    [
+      `const onClose = async () => {`,
+      `${genSpace(2)}form.value = genInitForm()`,
+      `${genSpace(2)}await sleep(50)`,
+      `${genSpace(2)}FormDetailRef.value?.clearValidate()`,
+      `}`,
       '',
     ],
     definitionCodeArr,
   )
 
   /** const open start */
-  storeCodeSnippets(
-    ['// 以下defineExpose', `const open = () => {`, `${genSpace(2)}show.value = true`],
-    definitionCodeArr,
-  )
-  for (const widget of widgetListNeedDefineApi) {
-    const apiName = `query${transIdToPascal(widget.idAlias)}List`
-    const setName = `set${apiName.replace(/^query/, '')}Data`
-    storeCodeSnippets([`${apiName}().then(res => ${setName}(res))`, ''], definitionCodeArr)
+  storeCodeSnippets([`const open = () => {`, `${genSpace(2)}show.value = true`], definitionCodeArr)
+  for (const api of resolvedApiInfo.allApis) {
+    const setName = `set${api.var.replace(/^query/, '')}Data`
+    storeCodeSnippets([`${api.var}().then(res => ${setName}(res))`], definitionCodeArr)
   }
   storeCodeSnippets(['}', ''], definitionCodeArr)
   /** const open end */
@@ -786,11 +737,16 @@ function genTableOperationComponentCode(
 function genTableItemOperationComponentCode(
   options: ViewDesignDataOptions,
   operationItem: TableColumnItem,
+  components: MergeDesignData[],
 ) {
   // 提取数据
   const { name = '' } = options
-  const { apiConfig = {}, label } = operationItem
+  const { apiConfig = {}, label, formConfig } = operationItem
   const base = `${name.startsWith('/') ? name : `/${name}`}`
+  const storeName = `use${pascal(last(name.split('/'))!)}Store`
+  const findSearch = components.find(e => e.type === 'Search') as SearchDesignData | undefined
+  const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
+  const resolvedApiInfo = resolveApiFromFormConfig(findSearch, findTable)
 
   // 存储组件导入代码
   const importCodeArr: string[] = []
@@ -801,72 +757,126 @@ function genTableItemOperationComponentCode(
   // 存储template代码
   const templateCodeArr: string[] = []
 
-  // 存储代码片段
+  /** import start */
+  const genImportApiNames = () => {
+    const codeArr: string[] = []
+    if (apiConfig.name) codeArr.push(apiConfig.name)
+    for (const api of resolvedApiInfo.allApis) {
+      codeArr.push(api.var)
+    }
+    return codeArr
+  }
   storeCodeSnippets(
     [
       "import { sleep } from 'radash'",
-      `import { ${apiConfig.name} } from '@/api${base}'`,
-      "import type { FormDetailInstance } from './components'",
-      "import { toRenderData, toSubmitData } from '../../utils'",
+      `import { ${genImportApiNames().join(',')} } from '@/api${base}'`,
     ],
     importCodeArr,
   )
+  if (resolvedApiInfo.widgetListNeedDefineApi.length) {
+    storeCodeSnippets([`import { ${storeName} } from '@/stores${base}'`], importCodeArr)
+  }
+  storeCodeSnippets(["import { toRenderData, toSubmitData } from '../../utils'"], importCodeArr)
+  /** import end */
+
+  /** defineEmits start */
   storeCodeSnippets(
-    ['// 自定义事件', 'const emit = defineEmits<{', `${genSpace(2)}(e: 'succeed'): void`, '}>()'],
+    ['const emit = defineEmits<{', `${genSpace(2)}(e: 'succeed'): void`, '}>()', ''],
     emitCodeArr,
   )
+  /** defineEmits end */
+
+  /** const start */
+  if (resolvedApiInfo.allApis.length) {
+    for (const api of resolvedApiInfo.allApis) {
+      const setName = `set${api.var.replace(/^query/, '')}Data`
+      storeCodeSnippetOfDestructuringVar(setName, `${storeName}()`, definitionCodeArr)
+    }
+    storeCodeSnippets([''], definitionCodeArr)
+  }
+
+  if (formConfig?.useOtherForm) {
+    let dashName = getFormOperationDashNameByUseOtherForm(formConfig.useOtherForm, findTable)
+    storeCodeSnippets(
+      [
+        `const FormDetail = defineAsyncComponent(() => import('../${dashName}/components/form-detail/FormDetail.vue'))`,
+      ],
+      definitionCodeArr,
+    )
+  } else {
+    storeCodeSnippets(
+      [
+        `const FormDetail = defineAsyncComponent(() => import('./components/form-detail/FormDetail.vue'))`,
+      ],
+      definitionCodeArr,
+    )
+  }
+
+  storeCodeSnippets(
+    ['const FormDetailRef = ref<InstanceType<typeof FormDetail>>()', ''],
+    definitionCodeArr,
+  )
+
   storeCodeSnippets(
     [
-      ...[
-        '// 异步组件及其实例定义',
-        `const FormDetail = defineAsyncComponent(() => import('./components/form-detail/FormDetail.vue'))`,
-        'const FormDetailRef = ref<FormDetailInstance>()',
-      ],
+      'const show = ref(false)',
+      'const loading = ref(false)',
+      'const form = ref<Record<string, any>>({})',
       '',
-      ...[
-        '// 变量定义',
-        'const show = ref(false)',
-        'const genInitFormData = () => ({})',
-        'const form = ref<Record<string, any>>(genInitFormData())',
-        'const loading = ref(false)',
-      ],
-      '',
-      ...[
-        '// 确认',
-        `const onConfirm = async () => {`,
-        `${genSpace(2)}const valid = await FormDetailRef.value?.validate()`,
-        `${genSpace(2)}if (!valid) return`,
-        `${genSpace(2)}loading.value = true`,
-        `${genSpace(2)}if (await ${apiConfig.name}(toSubmitData(form.value))) {`,
-        `${genSpace(4)}ElMessage.success('${label}成功')`,
-        `${genSpace(4)}emit('succeed')`,
-        `${genSpace(2)}}`,
-        `${genSpace(2)}loading.value = false`,
-        `${genSpace(2)}show.value = false`,
-        `}`,
-      ],
-      '',
-      ...[
-        '// 关闭弹框',
-        `const onClose = async () => {`,
-        `${genSpace(2)}form.value = genInitFormData()`,
-        `${genSpace(2)}await sleep(50)`,
-        `${genSpace(2)}FormDetailRef.value?.clearValidate()`,
-        `}`,
-      ],
-      '',
-      ...[
-        '// 以下defineExpose',
-        `const open = (row: Record<string, any>) => {`,
-        `${genSpace(2)}show.value = true`,
-        `${genSpace(2)}form.value = toRenderData(row)`,
-        `}`,
-      ],
-      '',
-      ...[`defineExpose({`, `${genSpace(2)}open`, `})`],
     ],
     definitionCodeArr,
   )
+
+  storeCodeSnippets(
+    [
+      `const onConfirm = async () => {`,
+      `${genSpace(2)}const valid = await FormDetailRef.value?.validate()`,
+      `${genSpace(2)}if (!valid) return`,
+      `${genSpace(2)}loading.value = true`,
+      `${genSpace(2)}if (await ${apiConfig.name}(toSubmitData(form.value))) {`,
+      `${genSpace(4)}ElMessage.success('${label}成功')`,
+      `${genSpace(4)}emit('succeed')`,
+      `${genSpace(2)}}`,
+      `${genSpace(2)}loading.value = false`,
+      `${genSpace(2)}show.value = false`,
+      `}`,
+      '',
+    ],
+    definitionCodeArr,
+  )
+
+  storeCodeSnippets(
+    [
+      `const onClose = async () => {`,
+      `${genSpace(2)}form.value = {}`,
+      `${genSpace(2)}await sleep(50)`,
+      `${genSpace(2)}FormDetailRef.value?.clearValidate()`,
+      `}`,
+      '',
+    ],
+    definitionCodeArr,
+  )
+
+  /** const open start */
+  storeCodeSnippets(
+    [
+      `const open = (row: Record<string, any>) => {`,
+      `${genSpace(2)}show.value = true`,
+      `form.value = toRenderData(row)`,
+    ],
+    definitionCodeArr,
+  )
+  for (const api of resolvedApiInfo.allApis) {
+    const setName = `set${api.var.replace(/^query/, '')}Data`
+    storeCodeSnippets([`${api.var}().then(res => ${setName}(res))`], definitionCodeArr)
+  }
+  storeCodeSnippets(['}', ''], definitionCodeArr)
+  /** const open end */
+
+  storeCodeSnippets([`defineExpose({`, `${genSpace(2)}open`, `})`], definitionCodeArr)
+  /** const end */
+
+  /** template start */
   storeCodeSnippets(
     [
       `${genSpace(2)}<el-dialog v-model="show" title="${label}" @close="onClose">`,
@@ -879,6 +889,7 @@ function genTableItemOperationComponentCode(
     ],
     templateCodeArr,
   )
+  /** template end */
 
   const _scriptCodeArr = [
     `<script setup lang="ts">`,
@@ -901,15 +912,17 @@ function genFormDetailComponentCode(
   components: MergeDesignData[],
 ) {
   // 提取数据
-  const { name = '' } = options
   const { formConfig } = operationItem
+  if (formConfig?.useOtherForm /** 使用其他表单无需生成代码 */) return
+  const { name = '' } = options
   const form = formConfig?.data?.form
-  const widgetList = formConfig?.data?.widgetList
   const base = `${name.startsWith('/') ? name : `/${name}`}`
   const storeName = `use${pascal(last(name.split('/'))!)}Store`
   const findSearch = components.find(e => e.type === 'Search') as SearchDesignData | undefined
   const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
-  const widgetListNeedDefineApi = getWidgetListNeedDefineApi(findSearch, findTable)
+  const resolvedApiInfo = resolveApiFromFormConfig(findSearch, findTable)
+  const widgetListHasStaticData = getWidgetListHasStaticData(findTable)
+  const widgetList = formConfig?.data?.widgetList ?? []
 
   // 存储组件导入代码
   const importCodeArr: string[] = []
@@ -923,10 +936,18 @@ function genFormDetailComponentCode(
     [
       `import { ${storeName} } from '@/stores${base}'`,
       "import type { FormInstance } from 'element-plus'",
-      '',
     ],
     importCodeArr,
   )
+  if (widgetListHasStaticData.length) {
+    const names = Array.from(
+      new Set(widgetListHasStaticData.map(e => `${e.idAlias?.toUpperCase()}_OPTIONS`)),
+    )
+    storeCodeSnippets(
+      [`import { ${names.join(',')} } from '../../../../constants'`, ''],
+      importCodeArr,
+    )
+  }
   /** import end */
 
   /** defineProps start */
@@ -937,57 +958,58 @@ function genFormDetailComponentCode(
   storeCodeSnippets(
     [
       'const formRef = ref<FormInstance>()',
-      'const form = defineModel<Record<string, any>>({ default: () => ({}) })',
+      'const model = defineModel<Record<string, any>>({ default: () => ({}) })',
     ],
     definitionCodeArr,
   )
-  if (widgetListNeedDefineApi.length) {
-    for (const widget of widgetListNeedDefineApi) {
-      const name = `${transIdToCamel(widget.idAlias)}ListData`
+  if (resolvedApiInfo.allApis.length) {
+    for (const api of resolvedApiInfo.allApis) {
+      const name = `${camel(api.var.replace(/^query/, ''))}Data`
       storeCodeSnippetOfDestructuringVar(name, `storeToRefs(${storeName}())`, definitionCodeArr)
     }
     storeCodeSnippets([''], definitionCodeArr)
   }
+
+  if (
+    widgetList.some(e =>
+      [
+        'radio',
+        'checkbox',
+        'select',
+        'cascader',
+        'date-picker',
+        'datetime-picker',
+        'time-picker',
+      ].includes(e.type),
+    )
+  ) {
+    storeCodeSnippets(
+      [`const onChange = async (key: string, val: any) => { }`, ''],
+      definitionCodeArr,
+    )
+  }
+
   storeCodeSnippets(
     [
-      ...[
-        `// 以下defineExpose`,
-        `async function validate() {`,
-        `${genSpace(2)}return await formRef.value?.validate()`,
-        `}`,
-        '',
-        `async function clearValidate() {`,
-        `${genSpace(2)}formRef.value?.clearValidate()`,
-        `}`,
-        '',
-        `defineExpose({`,
-        `${genSpace(2)}validate,`,
-        `${genSpace(2)}clearValidate,`,
-        `})`,
-      ],
+      `const validate = async () => {`,
+      `${genSpace(2)}return await formRef.value?.validate()`,
+      `}`,
+      '',
+      `const clearValidate = () => {`,
+      `${genSpace(2)}formRef.value?.clearValidate()`,
+      `}`,
+      '',
+      `defineExpose({`,
+      `${genSpace(2)}validate,`,
+      `${genSpace(2)}clearValidate,`,
+      `})`,
     ],
     definitionCodeArr,
   )
   /** const end */
 
   /** template start */
-  // storeCodeSnippets(
-  //   [
-  //     `${genSpace(2)}<el-form ref="formRef" :model="form" label-position="${form?.labelPosition ?? 'left'}" label-width="${form?.labelWidth ?? 120}px">`,
-  //     `${genSpace(4)}<el-form-item label="输入框" prop="input" :rules="[{ required: true, message: '必填项' }]">`,
-  //     `${genSpace(6)}<el-input v-model="form.input" placeholder="请输入" />`,
-  //     `${genSpace(4)}</el-form-item>`,
-  //     `${genSpace(4)}<el-form-item label="数字输入框" prop="input_number" :rules="[{ required: true, message: '必填项' }]">`,
-  //     `${genSpace(6)}<el-input-number v-model="form.input_number" placeholder="请输入" :min="0" :max="Number.MAX_SAFE_INTEGER" :step="1" :controls="true" controls-position="right" />`,
-  //     `${genSpace(4)}</el-form-item>`,
-  //     `${genSpace(4)}<el-form-item label="备注" prop="remark">`,
-  //     `${genSpace(6)}<el-input v-model="form.remark" type="textarea" placeholder="请输入" autosize />`,
-  //     `${genSpace(4)}</el-form-item>`,
-  //     `${genSpace(2)}</el-form>`,
-  //   ],
-  //   templateCodeArr,
-  // )
-  const genRulesProp = (widget: Record<string, any>) => {
+  const genRulesProp = (widget: WidgetDesignData) => {
     const codeArr: string[] = []
     if (widget.options.required) {
       codeArr.push(`{ required: true, message: '必填项' }`)
@@ -1001,33 +1023,174 @@ function genFormDetailComponentCode(
       return `:rules="[${codeArr.join(',')}]"`
     } else return ''
   }
+  const genFormItemStart = (widget: WidgetDesignData) => {
+    return `${genSpace(4)}<el-form-item label="${widget.options.label}" prop="${widget.idAlias}" ${genRulesProp(widget)}>`
+  }
+  const genFormItemEnd = () => {
+    return `${genSpace(4)}</el-form-item>`
+  }
   storeCodeSnippets(
     [
-      `${genSpace(2)}<el-form ref="formRef" :model="form" label-position="${form?.labelPosition ?? 'left'}" label-width="${form?.labelWidth ?? 120}px" :disabled>`,
+      `${genSpace(2)}<el-form ref="formRef" :model label-position="${form?.labelPosition ?? 'left'}" label-width="${form?.labelWidth ?? 120}px" :disabled>`,
     ],
     templateCodeArr,
   )
-  for (const widget of widgetList ?? []) {
-    if (widget.type === 'input') {
+
+  for (const widget of widgetList) {
+    if (widget.type === 'text') {
       storeCodeSnippets(
         [
-          `${genSpace(4)}<el-form-item label="${widget.options.label}" prop="${widget.idAlias}" ${genRulesProp(widget)}>`,
-          `${genSpace(6)}<el-input v-model="form.${widget.idAlias}" type="${widget.options.type ?? 'text'}" placeholder="请输入" />`,
-          `${genSpace(4)}</el-form-item>`,
+          `${genSpace(6)}<el-text type="${widget.options.type ?? 'danger'}" style="display: block; width: 100%; padding: 12px 0;">`,
+          `${widget.options.text}`,
+          `</el-text>`,
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'divider') {
+      storeCodeSnippets(
+        [
+          `${genSpace(6)}<el-divider direction="${widget.options.direction ?? 'horizontal'}" border-style="${widget.options.borderStyle ?? 'solid'}" content-position="${widget.options.contentPosition ?? 'left'}">`,
+          `${widget.options.text ?? '标题'}`,
+          `</el-divider>`,
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'input') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-input v-model="model.${widget.idAlias}" type="${widget.options.type ?? 'text'}" placeholder="请输入" />`,
+          genFormItemEnd(),
         ],
         templateCodeArr,
       )
     } else if (widget.type === 'input-number') {
-      const genPrecisionProp = (widget: Record<string, any>) => {
+      const genPrecisionProp = (widget: WidgetDesignData) => {
         if (typeof widget.options.precision === 'number') {
           return `:precision="${widget.options.precision}"`
         } else return ''
       }
       storeCodeSnippets(
         [
-          `${genSpace(4)}<el-form-item label="${widget.options.label}" prop="${widget.idAlias}" ${genRulesProp(widget)}>`,
-          `${genSpace(6)}<el-input-number v-model="form.${widget.idAlias}" placeholder="请输入" :min="${widget.options.min ?? 0}" :max="${widget.options.max ?? 'Number.MAX_SAFE_INTEGER'}" ${genPrecisionProp(widget)} />`,
-          `${genSpace(4)}</el-form-item>`,
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-input-number v-model="model.${widget.idAlias}" placeholder="请输入" :min="${widget.options.min ?? 0}" :max="${widget.options.max ?? 'Number.MAX_SAFE_INTEGER'}" ${genPrecisionProp(widget)} />`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'radio') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-radio-group v-model="model.${widget.idAlias}" @change="onChange('${widget.idAlias}', $event)">`,
+          `${genSpace(8)}<el-radio v-for="item in ${widget.idAlias?.toUpperCase()}_OPTIONS" :key="item.value" :value="item.value">`,
+          `{{ item.label }}`,
+          `</el-radio>`,
+          `${genSpace(6)}</el-radio-group>`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'checkbox') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-checkbox-group v-model="model.${widget.idAlias}" @change="onChange('${widget.idAlias}', $event)">`,
+          `${genSpace(8)}<el-checkbox v-for="item in ${widget.idAlias?.toUpperCase()}_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />`,
+          `${genSpace(6)}</el-checkbox-group>`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'select') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-select v-model="model.${widget.idAlias}" clearable filterable @change="onChange('${widget.idAlias}', $event)">`,
+        ],
+        templateCodeArr,
+      )
+      if (widget.options.dataSource === 'customize') {
+        storeCodeSnippets(
+          [
+            `${genSpace(8)}<el-option v-for="item in ${widget.idAlias?.toUpperCase()}_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />`,
+          ],
+          templateCodeArr,
+        )
+      } else {
+        const apiVar = resolvedApiInfo.allApis.find(e => e.url === widget.options.systemApi)?.var
+        storeCodeSnippets(
+          [
+            `${genSpace(8)}<el-option v-for="item in ${camel(apiVar?.replace(/^query/, '') ?? 'undefined')}Data" :key="item.${widget.options.map?.value ?? 'id'}" :label="item.${widget.options.map?.label ?? 'label'}" :value="item.${widget.options.map?.value ?? 'id'}" />`,
+          ],
+          templateCodeArr,
+        )
+      }
+      storeCodeSnippets([`${genSpace(6)}</el-select>`, genFormItemEnd()], templateCodeArr)
+    } else if (widget.type === 'cascader') {
+      const apiVar = resolvedApiInfo.allApis.find(e => e.url === widget.options.systemApi)?.var
+      const genPropsProp = (widget: WidgetDesignData) => {
+        const codeArr: string[] = []
+        if (widget.options.map?.label) codeArr.push(`label: '${widget.options.map.label}'`)
+        if (widget.options.map?.value) codeArr.push(`value: '${widget.options.map.value}'`)
+        if (widget.options.map?.children) codeArr.push(`children: '${widget.options.map.children}'`)
+        if (codeArr.length) {
+          return `:props="{ ${codeArr.join(',')} }"`
+        } else return ''
+      }
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-cascader v-model="model.${widget.idAlias}" :options="${camel(apiVar?.replace(/^query/, '') ?? 'undefined')}Data" clearable filterable ${genPropsProp(widget)}  @change="onChange('${widget.idAlias}', $event)" />`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'date-picker') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-date-picker v-model="model.${widget.idAlias}" type="${widget.options.type ?? 'date'}" value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'datetime-picker') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-date-picker v-model="model.${widget.idAlias}" type="${widget.options.type ?? 'datetime'}" value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'time-picker') {
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<el-time-picker v-model="model.${widget.idAlias}" value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
+          genFormItemEnd(),
+        ],
+        templateCodeArr,
+      )
+    } else if (widget.type === 'upload') {
+      const genSingleFileSizeLimitProp = (widget: WidgetDesignData) => {
+        if (widget.options.singleFileSizeLimit) {
+          return `:single-file-size-limit="${widget.options.singleFileSizeLimit}"`
+        }
+        return ''
+      }
+      const genAmountLimitProp = (widget: WidgetDesignData) => {
+        if (widget.options.amountLimit) {
+          return `:amount-limit="${widget.options.amountLimit}"`
+        }
+        return ''
+      }
+      storeCodeSnippets(
+        [
+          genFormItemStart(widget),
+          `${genSpace(6)}<VsUpload v-model="model.${widget.idAlias}" action="${widget.options.action}" ${genSingleFileSizeLimitProp(widget)} ${genAmountLimitProp(widget)} />`,
+          genFormItemEnd(),
         ],
         templateCodeArr,
       )
@@ -1136,8 +1299,8 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     )
   }
 
-  const widgetList = getWidgetListNeedDefineApi(findSearch, findTable)
-  for (const item of widgetList) {
+  const resolvedApiInfo = resolveApiFromFormConfig(findSearch, findTable)
+  for (const item of resolvedApiInfo.widgetListNeedDefineApi) {
     const apiName = `query${transIdToPascal(item.idAlias)}List`
     codeArr.push(
       `export const ${apiName} = async () => {`,
@@ -1173,7 +1336,7 @@ function genStoreCodeOfView(options: ViewDesignDataOptions, components: MergeDes
     new Set([
       ...getApiNamesOfSearchConditionItems(findSearch),
       ...getApiNamesOfTableColumnItems(findTable),
-      ...getWidgetListNeedDefineApi(findSearch, findTable).map(
+      ...resolveApiFromFormConfig(findSearch, findTable).widgetListNeedDefineApi.map(
         e => `query${transIdToPascal(e.idAlias)}List`,
       ),
     ]),
@@ -1522,7 +1685,9 @@ function transPropsForSearch(item: SearchConditionItem) {
         codeArr.push(`${genSpace(8)}options: ${item.staticDataKey},`)
       } else if (item.optionDataType === 'definition' /** 定义 */) {
         if (item.dataSource === 'api' /** 接口定义 */) {
-          const apiName = item.apiConfig?.name ? item.apiConfig?.name.replace(/^query/, '') : ''
+          const apiName = item.apiConfig?.name
+            ? item.apiConfig?.name.replace(/^query/, '')
+            : 'Undefined'
           codeArr.push(`${genSpace(8)}options: async () => await get${apiName}Data()`)
         } else if (item.dataSource === 'custom' /** 自定义 */) {
           codeArr.push(`${genSpace(8)}options: [`)
@@ -1545,40 +1710,22 @@ function transPropsForSearch(item: SearchConditionItem) {
     }
     case 'Cascader': {
       if (item.itemLabel) {
-        codeArr.push(`${genSpace(8)}label: ${item.itemLabel},`)
+        codeArr.push(`${genSpace(8)}itemLabel: '${item.itemLabel}',`)
       }
       if (item.itemValue) {
-        codeArr.push(`${genSpace(8)}value: ${item.itemValue},`)
+        codeArr.push(`${genSpace(8)}itemValue: '${item.itemValue}',`)
       }
       if (item.itemChildren) {
-        codeArr.push(`${genSpace(8)}children: ${item.itemChildren},`)
+        codeArr.push(`${genSpace(8)}itemChildren: '${item.itemChildren}',`)
       }
       if (typeof item.multiple === 'boolean') {
         codeArr.push(`${genSpace(8)}multiple: ${item.multiple},`)
       }
-      if (item.optionDataType === 'static_data' /** 静态数据 */) {
-        codeArr.push(`${genSpace(8)}options: ${item.staticDataKey},`)
-      } else if (item.optionDataType === 'definition' /** 定义 */) {
-        if (item.dataSource === 'api' /** 接口定义 */) {
-          const apiName = item.apiConfig?.name ? item.apiConfig?.name.replace(/^query/, '') : ''
-          codeArr.push(`${genSpace(8)}options: async () => await get${pascal(apiName)}Data()`)
-        } else if (item.dataSource === 'custom' /** 自定义 */) {
-          codeArr.push(`${genSpace(8)}options: [`)
-          for (const optionItem of item.options ?? []) {
-            // {
-            //   label: '${optionItem.label}',
-            //   value: ${optionItem.valueType === 'number' ? +optionItem.value : `'${optionItem.value}'`}
-            // }
-            codeArr.push(`${genSpace(10)}{`)
-            codeArr.push(`${genSpace(12)}label: '${optionItem.label}',`)
-            codeArr.push(
-              `${genSpace(12)}value: ${optionItem.valueType === 'number' ? +optionItem.value : `'${optionItem.value}'`}`,
-            )
-            codeArr.push(`${genSpace(10)}}`)
-          }
-          codeArr.push(`${genSpace(8)}]`)
-        }
-      }
+
+      const apiName = item.apiConfig?.name
+        ? item.apiConfig?.name.replace(/^query/, '')
+        : 'Undefined'
+      codeArr.push(`${genSpace(8)}options: async () => await get${apiName}Data()`)
       break
     }
   }
@@ -1768,6 +1915,24 @@ function getTableColumnOperationsHasForm(findTable?: TableDesignData) {
   )
 }
 
+function getWidgetListHasStaticData(findTable?: TableDesignData) {
+  const widgetList: WidgetDesignData[] = []
+  const operationItems = [
+    ...getTableOperationsHasForm(findTable),
+    ...getTableColumnOperationsHasForm(findTable),
+  ]
+  for (const operationItem of operationItems) {
+    recurWidgetList(operationItem.formConfig?.data?.widgetList ?? [], widget => {
+      if (['radio', 'checkbox'].includes(widget.type)) {
+        widgetList.push(widget)
+      } else if (widget.type === 'select' && widget.options.dataSource === 'customize') {
+        widgetList.push(widget)
+      }
+    })
+  }
+  return widgetList
+}
+
 function getTableColumnItemsNeedStore(findTable?: TableDesignData) {
   return (
     getTableColumnItems(findTable)?.filter(
@@ -1794,16 +1959,30 @@ function getApiNamesOfTableColumnItems(findTable?: TableDesignData) {
   )
 }
 
-function getWidgetListNeedDefineApi(findSearch?: SearchDesignData, findTable?: TableDesignData) {
-  const widgetList: Record<string, any>[] = []
-  // 递归widgetList
-  // eslint-disable-next-line no-unused-vars
-  const recurWidgetList = (data: any, handler: (widget: Record<string, any>) => void) => {
-    handler(data)
-    data.widgetList?.forEach(widget => {
-      recurWidgetList(widget, handler)
-    })
+function getFormOperationDashNameByUseOtherForm(
+  useOtherFormId: string,
+  findTable?: TableDesignData,
+) {
+  let dashName: string | undefined
+  const tableOperationsHasForm = getTableOperationsHasForm(findTable)
+  const findFromtableOperationsHasForm = tableOperationsHasForm.find(e => e.id === useOtherFormId)
+  if (findFromtableOperationsHasForm) {
+    dashName = `table-${dash(findFromtableOperationsHasForm.value ?? 'undefined')}`
+  } else {
+    const tableColumnOperationsHasForm = getTableColumnOperationsHasForm(findTable)
+    const findFromtableColumnOperationsHasForm = tableColumnOperationsHasForm.find(
+      e => e.id === useOtherFormId,
+    )
+    if (findFromtableColumnOperationsHasForm) {
+      dashName = `row-${dash(findFromtableColumnOperationsHasForm.value ?? 'undefined')}`
+    }
   }
+  return dashName
+}
+
+function resolveApiFromFormConfig(findSearch?: SearchDesignData, findTable?: TableDesignData) {
+  const widgetListNeedDefineApi: Record<string, any>[] = []
+  const allApis: { var: string; url: string }[] = []
   const operationsHasForm = [
     ...getTableOperationsHasForm(findTable),
     ...getTableColumnOperationsHasForm(findTable),
@@ -1817,27 +1996,42 @@ function getWidgetListNeedDefineApi(findSearch?: SearchDesignData, findTable?: T
   }, [])
 
   for (const item of operationsHasForm) {
-    recurWidgetList(item.formConfig?.data ?? {}, widget => {
-      if (
-        ['select', 'cascader'].includes(widget.type) &&
-        widget.options?.systemApi &&
-        !apiConfigItems.some(
+    recurWidgetList(item.formConfig?.data?.widgetList ?? [], widget => {
+      if (['select', 'cascader'].includes(widget.type) && widget.options?.systemApi) {
+        const find = apiConfigItems.find(
           e => e.method === 'GET' && e.url === widget.options?.systemApi,
-        ) /** 判断表单中配置的接口是否已定义 */
-      ) {
-        widgetList.push(widget)
+        )
+        if (find /** 判断表单中配置的接口是否已定义 */) {
+          allApis.push({ var: find.name ?? 'undefined', url: find.url ?? '/undefined' })
+        } /** 未定义 */ else {
+          allApis.push({
+            var: `query${transIdToPascal(widget.idAlias)}List`,
+            url: widget.options?.systemApi ?? '/undefined',
+          })
+          widgetListNeedDefineApi.push(widget)
+        }
       }
     })
   }
-  return widgetList
-}
-
-function transIdToCamel(id: string) {
-  if (!id) return 'undefined'
-  return camel(title(id))
+  return {
+    widgetListNeedDefineApi,
+    allApis,
+  }
 }
 
 function transIdToPascal(id: string) {
   if (!id) return 'Undefined'
   return pascal(title(id))
+}
+
+// 递归widgetList
+function recurWidgetList(
+  data: WidgetDesignData[],
+  // eslint-disable-next-line no-unused-vars
+  handler: (widget: WidgetDesignData) => void,
+) {
+  data.forEach(widget => {
+    handler(widget)
+    recurWidgetList(widget.widgetList ?? [], handler)
+  })
 }

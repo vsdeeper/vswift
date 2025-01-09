@@ -60,6 +60,7 @@ declare module 'vue' {
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElTree: typeof import('element-plus/es')['ElTree']
     ElTreeV2: typeof import('element-plus/es')['ElTreeV2']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     IconCommunity: typeof import('./../src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./../src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./../src/components/icons/IconEcosystem.vue')['default']
@@ -81,12 +82,13 @@ declare module 'vue' {
     SSelect: typeof import('./../src/components/vs-search/components/s-select/s-select.vue')['default']
     STime: typeof import('./../src/components/vs-search/components/s-time/s-time.vue')['default']
     STreeSelect: typeof import('./../src/components/vs-search/components/s-tree-select/s-tree-select.vue')['default']
-    TableColumn: typeof import('./../src/components/vs-table/table-column.vue')['default']
+    TableColumn: typeof import('./../src/components/vs-table/TableColumn.vue')['default']
     TopBar: typeof import('./../src/layout/main-layout/components/TopBar.vue')['default']
     ViewWrapper: typeof import('./../src/components/view-wrapper/ViewWrapper.vue')['default']
     VsSearch: typeof import('./../src/components/vs-search/VsSearch.vue')['default']
     VsTable: typeof import('./../src/components/vs-table/VsTable.vue')['default']
     VsTreeSelect: typeof import('./../src/components/vs-tree-select/VsTreeSelect.vue')['default']
+    VsUpload: typeof import('./../src/components/vs-upload/VsUpload.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

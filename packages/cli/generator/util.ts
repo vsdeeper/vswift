@@ -188,7 +188,7 @@ export async function genCodeFiles(data: Record<string, any>) {
             await outputFile(filePath, formatted!)
             filePaths.push(filePath)
           } /** 子目录 */ else {
-            recurObject(obj[key], `${base}${key}`)
+            await recurObject(obj[key], `${base}${key}`)
           }
         }
       }

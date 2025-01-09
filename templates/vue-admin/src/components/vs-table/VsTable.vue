@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { VsTableOperateItem, VsTableProps } from '.'
-import TableColumn from './table-column.vue'
+import TableColumn from './TableColumn.vue'
 import { getSlots } from './util'
 import type { TableInstance } from 'element-plus'
 
