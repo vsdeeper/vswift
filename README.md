@@ -1,10 +1,6 @@
 # vswift
 
-A quick development tool based on the monorepo architecture, mainly includes packages such as @vswift/cli, @vswift/utils, and project template such as vue-admin.
-
-- [@vswift/cli](https://github.com/vsdeeper/vswift/tree/master/packages/cli) - Quick development scaffolding, including framework initialization, dynamic generation of pages and components.
-- [@vswift/utils](https://github.com/vsdeeper/vswift/tree/master/packages/utils) - Public methods, methods commonly used in business development.
-- [vue-admin](https://github.com/vsdeeper/vswift/tree/master/templates/vue-admin) - Admin template based on vue + vite.
+A quick development tool based on the monorepo architecture, mainly includes packages such as [visual-development](https://github.com/vsdeeper/visual-development), [vswift-form](https://github.com/vsdeeper/vswift-form), and [vue-admin](https://github.com/vsdeeper/vswift/tree/master/templates/vue-admin).
 
 ## Develop
 
@@ -19,6 +15,7 @@ pnpm install
 ```sh
 pnpm dev:cli
 ```
+
 The cli is the soul of the project. The command will monitor the modification of .ts files in the cli directory and compile in real time to generate the dist directory. If it is the first time to enter the project, it is necessary to execute `pnpm dev:cli` to generate dist first, because the package.json configuration entry file of cli must be a compiled js file. If it is not the first development and the dist directory of cli has been generated, you can also execute `pnpm dev -p cli` instead of `pnpm dev:cli`.
 
 ### Develop vue-admin template
@@ -43,6 +40,7 @@ pnpm dev --tpl vue-admin
 ```sh
 npm install -g @vswift/cli
 ```
+
 Run `vswift -v` command to check if `@vswift/cli` is installed successfully.
 
 ### Create your own initial project as needed
