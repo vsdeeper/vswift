@@ -122,8 +122,8 @@ importers:
         specifier: ^7.5.8
         version: 7.5.8
       visual-development:
-        specifier: 0.0.8
-        version: 0.0.8(date-fns@3.6.0)(typescript@5.5.4)
+        specifier: 0.0.9
+        version: 0.0.9(date-fns@3.6.0)(typescript@5.5.4)
       vswift-form:
         specifier: 0.0.14
         version: 0.0.14(@element-plus/icons-vue@2.3.1(vue@3.5.13(typescript@5.5.4)))(date-fns@3.6.0)(element-plus@2.7.2(vue@3.5.13(typescript@5.5.4)))(nanoid@5.0.7)(radash@12.1.0)(vue@3.5.13(typescript@5.5.4))
@@ -3411,8 +3411,8 @@ packages:
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
-  visual-development@0.0.8:
-    resolution: {integrity: sha512-o8xFsHFv7sFYjLv0B6f1nVmhLiNSa7Ezw/0ZQQV4Yk7z37/oqyZ1g4PQc/TD/jG7+B3OwkjOlIdDg3ZAsDal6g==}
+  visual-development@0.0.9:
+    resolution: {integrity: sha512-uZkoyM9kEF2LZGgcOek+uP8/6S1bfrwk5AgZYgM0uNEpYgiFzJzIz20gm4ilrSicjWigYX1XcwwcyZffhf7XYQ==}
 
   vite-plugin-css-injected-by-js@3.5.1:
     resolution: {integrity: sha512-9ioqwDuEBxW55gNoWFEDhfLTrVKXEEZgl5adhWmmqa88EQGKfTmexy4v1Rh0pAS6RhKQs2bUYQArprB32JpUZQ==}
@@ -6976,7 +6976,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  visual-development@0.0.8(date-fns@3.6.0)(typescript@5.5.4):
+  visual-development@0.0.9(date-fns@3.6.0)(typescript@5.5.4):
     dependencies:
       '@element-plus/icons-vue': 2.3.1(vue@3.5.13(typescript@5.5.4))
       ace-builds: 1.37.1
