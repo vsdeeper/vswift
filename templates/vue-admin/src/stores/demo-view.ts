@@ -1,19 +1,25 @@
 import { defineStore } from 'pinia'
-import { queryDeptList, queryPersonList, queryCascaderIdList } from '@/api/demo-view'
+import {
+  queryDeptIdList,
+  queryPersonList,
+  queryCascaderIdList,
+  querySelectdList,
+} from '@/api/demo-view'
 
 export const useDemoViewStore = defineStore('/demo-view', () => {
-  const deptListData = ref<Record<string, any>[]>()
+  const deptIdListData = ref<Record<string, any>[]>()
   const personListData = ref<Record<string, any>[]>()
   const cascaderIdListData = ref<Record<string, any>[]>()
+  const selectdListData = ref<Record<string, any>[]>()
 
-  async function getDeptListData() {
-    if (deptListData.value?.length) return deptListData.value
-    deptListData.value = await queryDeptList()
-    return deptListData.value
+  async function getDeptIdListData() {
+    if (deptIdListData.value?.length) return deptIdListData.value
+    deptIdListData.value = await queryDeptIdList()
+    return deptIdListData.value
   }
 
-  function setDeptListData(data?: Record<string, any>[]) {
-    deptListData.value = data
+  function setDeptIdListData(data?: Record<string, any>[]) {
+    deptIdListData.value = data
   }
 
   async function getPersonListData() {
@@ -36,15 +42,28 @@ export const useDemoViewStore = defineStore('/demo-view', () => {
     cascaderIdListData.value = data
   }
 
+  async function getSelectdListData() {
+    if (selectdListData.value?.length) return selectdListData.value
+    selectdListData.value = await querySelectdList()
+    return selectdListData.value
+  }
+
+  function setSelectdListData(data?: Record<string, any>[]) {
+    selectdListData.value = data
+  }
+
   return {
-    deptListData,
-    getDeptListData,
-    setDeptListData,
+    deptIdListData,
+    getDeptIdListData,
+    setDeptIdListData,
     personListData,
     getPersonListData,
     setPersonListData,
     cascaderIdListData,
     getCascaderIdListData,
     setCascaderIdListData,
+    selectdListData,
+    getSelectdListData,
+    setSelectdListData,
   }
 })

@@ -13,7 +13,7 @@ export const queryTableList = async (params: Record<string, any>) => {
   }
 }
 
-export const addItem = async (data: Record<string, any>) => {
+export const tableAdd = async (data: Record<string, any>) => {
   try {
     await http({
       method: 'POST',
@@ -22,11 +22,11 @@ export const addItem = async (data: Record<string, any>) => {
     })
     return true
   } catch (error) {
-    console.error('addItem ->', error)
+    console.error('tableAdd ->', error)
   }
 }
 
-export const deleteItems = async (data: Record<string, any>) => {
+export const tableBatchDeletion = async (data: Record<string, any>) => {
   try {
     await http({
       method: 'POST',
@@ -35,11 +35,11 @@ export const deleteItems = async (data: Record<string, any>) => {
     })
     return true
   } catch (error) {
-    console.error('deleteItems ->', error)
+    console.error('tableBatchDeletion ->', error)
   }
 }
 
-export const editItem = async (data: Record<string, any>) => {
+export const rowEdit = async (data: Record<string, any>) => {
   try {
     await http({
       method: 'POST',
@@ -48,11 +48,11 @@ export const editItem = async (data: Record<string, any>) => {
     })
     return true
   } catch (error) {
-    console.error('editItem ->', error)
+    console.error('rowEdit ->', error)
   }
 }
 
-export const deleteItem = async (data: Record<string, any>) => {
+export const rowDelete = async (data: Record<string, any>) => {
   try {
     await http({
       method: 'POST',
@@ -61,11 +61,11 @@ export const deleteItem = async (data: Record<string, any>) => {
     })
     return true
   } catch (error) {
-    console.error('deleteItem ->', error)
+    console.error('rowDelete ->', error)
   }
 }
 
-export const queryDeptList = async () => {
+export const queryDeptIdList = async () => {
   try {
     const { data: res } = await http({
       method: 'GET',
@@ -73,7 +73,7 @@ export const queryDeptList = async () => {
     })
     return res as Record<string, any>[]
   } catch (error) {
-    console.error('queryDeptList ->', error)
+    console.error('queryDeptIdList ->', error)
   }
 }
 
@@ -98,5 +98,17 @@ export const queryCascaderIdList = async () => {
     return res as Record<string, any>[]
   } catch (error) {
     console.error('queryCascaderIdList ->', error)
+  }
+}
+
+export const querySelectdList = async () => {
+  try {
+    const { data: res } = await http({
+      method: 'GET',
+      url: '/v1/api/selectd',
+    })
+    return res as Record<string, any>[]
+  } catch (error) {
+    console.error('querySelectdList ->', error)
   }
 }

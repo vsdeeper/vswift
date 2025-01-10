@@ -3,6 +3,7 @@ import consola from 'consola'
 import { outputFile } from 'fs-extra'
 import path from 'node:path'
 import prettier from 'prettier'
+import { camel, pascal, title } from 'radash'
 
 export function finalOutput(projectName: string) {
   console.log(
@@ -17,12 +18,41 @@ export function finalOutput(projectName: string) {
  * 生成空格
  * @param num
  */
-export function genSpace(num: number) {
+export function genSpace(num?: number) {
+  if (typeof num !== 'number') return ''
   let str = ''
   while (num-- > 0) {
     str += ' '
   }
   return str
+}
+
+/**
+ * 将 key 转换为 变量名称
+ * @param prefix
+ * @param key
+ * @param suffix
+ */
+export function transKeyToVar(prefix: string, key: string, ...suffix: string[]) {
+  return `${camel(title(prefix))}${pascal(title(key))}${suffix?.length ? suffix.map(e => pascal(title(e))).join('') : ''}`
+}
+
+/**
+ * forof 递归
+ * @param data
+ * @param handler
+ */
+export function forofRecursive<T = Record<string, any>>(
+  data: T[],
+  // eslint-disable-next-line no-unused-vars
+  handler: (item: T, parent?: T) => any,
+  options?: { children?: string; parent?: T },
+) {
+  const { children = 'children' } = options ?? {}
+  for (const item of data) {
+    handler(item, options?.parent)
+    forofRecursive(item[children] ?? [], handler, { parent: item })
+  }
 }
 
 /**

@@ -7,9 +7,11 @@ defineProps<{
   disabled?: boolean
 }>()
 
+const DataTableListModel = defineAsyncComponent(() => import('./DataTableListModel.vue'))
+
 const formRef = ref<FormInstance>()
 const model = defineModel<Record<string, any>>({ default: () => ({}) })
-const { deptListData, personListData, cascaderIdListData } = storeToRefs(useDemoViewStore())
+const { deptIdListData, personListData, cascaderIdListData } = storeToRefs(useDemoViewStore())
 
 const onChange = async (key: string, val: any) => {}
 
@@ -29,15 +31,17 @@ defineExpose({
 
 <template>
   <el-form ref="formRef" :model label-position="left" label-width="120px" :disabled>
-    <el-text type="danger" style="display: block; width: 100%; padding: 12px 0">
-      范德萨范德萨发
-    </el-text>
-    <el-divider direction="horizontal" border-style="solid" content-position="left">
-      分割线
-    </el-divider>
+    <el-form-item label="undefined" props="undefined">
+      <el-text type="danger" style="display: block; width: 100%; padding: 12px 0">
+        范德萨范德萨发
+      </el-text>
+    </el-form-item>
+    <el-form-item label="undefined" props="undefined">
+      <el-divider> 分割线 </el-divider>
+    </el-form-item>
     <el-form-item
       label="名称"
-      prop="name"
+      props="name"
       :rules="[
         { required: true, message: '必填项' },
         {
@@ -48,7 +52,7 @@ defineExpose({
     >
       <el-input v-model="model.name" type="text" placeholder="请输入" />
     </el-form-item>
-    <el-form-item label="数字输入框" prop="tgf" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="数字输入框" props="tgf" :rules="[{ required: true, message: '必填项' }]">
       <el-input-number
         v-model="model.tgf"
         placeholder="请输入"
@@ -57,14 +61,14 @@ defineExpose({
         :precision="2"
       />
     </el-form-item>
-    <el-form-item label="单选框" prop="radio" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="单选框" props="radio" :rules="[{ required: true, message: '必填项' }]">
       <el-radio-group v-model="model.radio" @change="onChange('radio', $event)">
         <el-radio v-for="item in RADIO_OPTIONS" :key="item.value" :value="item.value">
           {{ item.label }}
         </el-radio>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="多选框" prop="checkbox" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="多选框" props="checkbox" :rules="[{ required: true, message: '必填项' }]">
       <el-checkbox-group v-model="model.checkbox" @change="onChange('checkbox', $event)">
         <el-checkbox
           v-for="item in CHECKBOX_OPTIONS"
@@ -74,17 +78,17 @@ defineExpose({
         />
       </el-checkbox-group>
     </el-form-item>
-    <el-form-item label="部门" prop="deptId" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="部门" props="deptId" :rules="[{ required: true, message: '必填项' }]">
       <el-select v-model="model.deptId" clearable filterable @change="onChange('deptId', $event)">
         <el-option
-          v-for="item in deptListData"
+          v-for="item in deptIdListData"
           :key="item.id"
           :label="item.label"
           :value="item.id"
         />
       </el-select>
     </el-form-item>
-    <el-form-item label="测试" prop="person" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="测试" props="person" :rules="[{ required: true, message: '必填项' }]">
       <el-select v-model="model.person" clearable filterable @change="onChange('person', $event)">
         <el-option
           v-for="item in personListData"
@@ -96,7 +100,7 @@ defineExpose({
     </el-form-item>
     <el-form-item
       label="级联选择器"
-      prop="cascaderId"
+      props="cascaderId"
       :rules="[{ required: true, message: '必填项' }]"
     >
       <el-cascader
@@ -110,7 +114,7 @@ defineExpose({
     </el-form-item>
     <el-form-item
       label="日期选择器"
-      prop="daterange"
+      props="daterange"
       :rules="[{ required: true, message: '必填项' }]"
     >
       <el-date-picker
@@ -120,7 +124,7 @@ defineExpose({
         @change="onChange('daterange', $event)"
       />
     </el-form-item>
-    <el-form-item label="日期选择器" prop="date" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="日期选择器" props="date" :rules="[{ required: true, message: '必填项' }]">
       <el-date-picker
         v-model="model.date"
         type="date"
@@ -130,7 +134,7 @@ defineExpose({
     </el-form-item>
     <el-form-item
       label="日期时间选择器"
-      prop="datetimerange"
+      props="datetimerange"
       :rules="[{ required: true, message: '必填项' }]"
     >
       <el-date-picker
@@ -142,7 +146,7 @@ defineExpose({
     </el-form-item>
     <el-form-item
       label="时间选择器"
-      prop="timerange"
+      props="timerange"
       :rules="[{ required: true, message: '必填项' }]"
     >
       <el-time-picker
@@ -151,13 +155,16 @@ defineExpose({
         @change="onChange('timerange', $event)"
       />
     </el-form-item>
-    <el-form-item label="上传" prop="files" :rules="[{ required: true, message: '必填项' }]">
+    <el-form-item label="上传" props="files" :rules="[{ required: true, message: '必填项' }]">
       <VsUpload
         v-model="model.files"
         action="undefined"
         :single-file-size-limit="500"
         :amount-limit="9"
       />
+    </el-form-item>
+    <el-form-item label="数据表格" props="data_table_list">
+      <DataTableListModel v-model="model.data_table_list" form-item-prop="data_table_list" />
     </el-form-item>
   </el-form>
 </template>

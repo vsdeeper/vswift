@@ -6,7 +6,7 @@ import ora from 'ora'
 import os from 'os'
 import chalk from 'chalk'
 import { changeConfig, getTemplatePath, parseConfig } from '../../utils/index.js'
-import { finalOutput } from '../util.js'
+import { finalOutput } from '../utils.js'
 import consola from 'consola'
 
 export async function generateProject(fileName: string) {

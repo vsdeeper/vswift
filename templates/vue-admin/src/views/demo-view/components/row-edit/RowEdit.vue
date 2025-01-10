@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { sleep } from 'radash'
-import { editItem, queryDeptList, queryPersonList, queryCascaderIdList } from '@/api/demo-view'
+import {
+  rowEdit,
+  queryDeptIdList,
+  queryPersonList,
+  queryCascaderIdList,
+  querySelectdList,
+} from '@/api/demo-view'
 import { useDemoViewStore } from '@/stores/demo-view'
 import { toRenderData, toSubmitData } from '../../utils'
 
@@ -8,7 +14,8 @@ const emit = defineEmits<{
   (e: 'succeed'): void
 }>()
 
-const { setDeptListData, setPersonListData, setCascaderIdListData } = useDemoViewStore()
+const { setDeptIdListData, setPersonListData, setCascaderIdListData, setSelectdListData } =
+  useDemoViewStore()
 
 const FormDetail = defineAsyncComponent(
   () => import('../table-add/components/form-detail/FormDetail.vue'),
@@ -23,7 +30,7 @@ const onConfirm = async () => {
   const valid = await FormDetailRef.value?.validate()
   if (!valid) return
   loading.value = true
-  if (await editItem(toSubmitData(form.value))) {
+  if (await rowEdit(toSubmitData(form.value))) {
     ElMessage.success('编辑成功')
     emit('succeed')
   }
@@ -40,9 +47,10 @@ const onClose = async () => {
 const open = (row: Record<string, any>) => {
   show.value = true
   form.value = toRenderData(row)
-  queryDeptList().then(res => setDeptListData(res))
+  queryDeptIdList().then(res => setDeptIdListData(res))
   queryPersonList().then(res => setPersonListData(res))
   queryCascaderIdList().then(res => setCascaderIdListData(res))
+  querySelectdList().then(res => setSelectdListData(res))
 }
 
 defineExpose({
