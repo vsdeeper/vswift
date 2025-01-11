@@ -1,19 +1,21 @@
 import type { WidgetDesignData } from 'vswift-form'
 import type { ViewDesignDataOptions } from 'visual-development'
-import { camel, dash, last, pascal, title } from 'radash'
+import { camel, dash, last, pascal, snake, title } from 'radash'
 import {
   storeCodeSnippetOfDestructuringVar,
   storeCodeSnippets,
   transKeyToVar,
 } from '../../utils.js'
-import { getWidgetListHasStaticDataFromFormConfig } from './utils.js'
+import { getWidgetListHasStaticDataFromFormWidgetList } from './utils.js'
 import { genFormItemsCodeSnippets } from '../utils/gen-form-items.js'
 
-export const genDataTableComponent = (options: ViewDesignDataOptions, widget: WidgetDesignData) => {
+export const genDataTableModel = (options: ViewDesignDataOptions, widget: WidgetDesignData) => {
   const { name = '' } = options
   const base = `${name.startsWith('/') ? name : `/${name}`}`
   const storeName = `use${pascal(last(name.split('/'))!)}Store`
-  const widgetListHasStaticData = getWidgetListHasStaticDataFromFormConfig(widget.widgetList ?? [])
+  const widgetListHasStaticData = getWidgetListHasStaticDataFromFormWidgetList(
+    widget.widgetList ?? [],
+  )
 
   // 存储组件导入代码
   const importCodeArr: string[] = []
@@ -33,8 +35,8 @@ export const genDataTableComponent = (options: ViewDesignDataOptions, widget: Wi
     importCodeArr,
   )
   if (widgetListHasStaticData.length) {
-    const names = Array.from(
-      new Set(widgetListHasStaticData.map(e => `${e.idAlias?.toUpperCase()}_OPTIONS`)),
+    const names = widgetListHasStaticData.map(
+      e => `${snake(title(e.idAlias)).toUpperCase()}_OPTIONS`,
     )
     storeCodeSnippets(
       [`import { ${names.join(',')} } from '../../../../constants'`, ''],
@@ -55,8 +57,8 @@ export const genDataTableComponent = (options: ViewDesignDataOptions, widget: Wi
     ['const model = defineModel<Record<string, any>[]>({ default: () => [] })'],
     definitionCodeArr,
   )
-  const widgetListNeedDefineApi = widget.widgetList?.filter(e =>
-    ['select', 'cascader'].includes(e.type),
+  const widgetListNeedDefineApi = widget.widgetList?.filter(
+    e => e.type === 'cascader' || (e.type === 'select' && e.options.dataSource === 'systemApi'),
   )
   if (widgetListNeedDefineApi?.length) {
     for (const item of widgetListNeedDefineApi) {

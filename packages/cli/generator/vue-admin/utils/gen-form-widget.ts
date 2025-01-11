@@ -1,6 +1,6 @@
 import type { WidgetDesignData } from 'vswift-form'
 import { genSpace, transKeyToVar } from '../../utils.js'
-import { camel, pascal, title } from 'radash'
+import { camel, pascal, snake, title } from 'radash'
 
 export const genTextCodeSnippets = (
   widget: WidgetDesignData,
@@ -100,7 +100,7 @@ export const genSelectCodeSnippets = (
   )
   if (widget.options.dataSource === 'customize') {
     codeSnippets.push(
-      `${genSpace(space ?? 0 + 2)}<el-option v-for="item in ${widget.idAlias?.toUpperCase()}_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />`,
+      `${genSpace(space ?? 0 + 2)}<el-option v-for="item in ${snake(title(widget.idAlias)).toUpperCase()}_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />`,
     )
   } else {
     codeSnippets.push(

@@ -1,4 +1,4 @@
-import { camel, dash, last, pascal, title } from 'radash'
+import { camel, dash, last, pascal, snake, title } from 'radash'
 import {
   storeCodeSnippets,
   addImportCode,
@@ -22,7 +22,7 @@ import type {
   ViewDesignDataOptions,
 } from 'visual-development'
 import type { WidgetDesignData } from 'vswift-form'
-import { genDataTableComponent } from './gen-data-table-component.js'
+import { genDataTableModel } from './gen-data-table-model.js'
 
 // 解析视图view对象结构
 export async function resolveViewObject(
@@ -60,7 +60,7 @@ export async function resolveViewObject(
           ) {
             viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
               `/${pascal(title(widget.idAlias ?? 'undefined'))}Model.vue`
-            ] = genDataTableComponent(options, widget)
+            ] = genDataTableModel(options, widget)
           }
         })
       }
@@ -82,7 +82,7 @@ export async function resolveViewObject(
           ) {
             viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
               `/${pascal(title(widget.idAlias ?? 'undefined'))}Model.vue`
-            ] = genDataTableComponent(options, widget)
+            ] = genDataTableModel(options, widget)
           }
         })
       }
@@ -551,14 +551,14 @@ function genConstantsCode(options: ViewDesignDataOptions, components: MergeDesig
       )
       .join(',')
   }
-  const mergeSaticDataConfig = [...saticDataConfig]
+  const _saticDataConfig = [...saticDataConfig]
   for (const widget of widgetListHasStaticData) {
-    const key = `${widget.idAlias?.toUpperCase()}_OPTIONS`
-    if (!mergeSaticDataConfig.some(e => e.key === key)) {
-      mergeSaticDataConfig.push({ key, value: widget.options.options })
+    const key = `${snake(title(widget.idAlias)).toUpperCase()}_OPTIONS`
+    if (!saticDataConfig.some(e => e.key === widget.key)) {
+      _saticDataConfig.push({ key, value: widget.options.options })
     }
   }
-  return `${mergeSaticDataConfig.map(e => `export const ${e.key} = [${genValueOptionsCode(e.value ?? [])}]`).join('\n\n')}`
+  return `${_saticDataConfig.map(e => `export const ${e.key} = [${genValueOptionsCode(e.value ?? [])}]`).join('\n\n')}`
 }
 
 // 生成utils.ts代码
@@ -967,7 +967,9 @@ function genFormDetailComponentCode(
   const findSearch = components.find(e => e.type === 'Search') as SearchDesignData | undefined
   const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
   const resolvedApiInfo = resolveApiFromFormConfig(findSearch, findTable)
-  const widgetListHasStaticData = getWidgetListHasStaticDataFromTable(findTable)
+  const widgetListHasStaticData = getWidgetListHasStaticDataFromFormWidgetList(
+    operationItem.formConfig?.data?.widgetList ?? [],
+  )
   const widgetList = formConfig?.data?.widgetList ?? []
 
   // 存储组件导入代码
@@ -987,7 +989,7 @@ function genFormDetailComponentCode(
   )
   if (widgetListHasStaticData.length) {
     const names = Array.from(
-      new Set(widgetListHasStaticData.map(e => `${e.idAlias?.toUpperCase()}_OPTIONS`)),
+      new Set(widgetListHasStaticData.map(e => `${snake(title(e.idAlias)).toUpperCase()}_OPTIONS`)),
     )
     storeCodeSnippets(
       [`import { ${names.join(',')} } from '../../../../constants'`, ''],
@@ -1548,26 +1550,9 @@ function transPropsForSearch(item: SearchConditionItem) {
       }
       if (item.optionDataType === 'static_data' /** 静态数据 */) {
         codeArr.push(`${genSpace(8)}options: ${item.staticDataKey},`)
-      } else if (item.optionDataType === 'definition' /** 定义 */) {
-        if (item.dataSource === 'api' /** 接口定义 */) {
-          const apiName = transKeyToVar('', item.key ?? 'undefined', 'list')
-          codeArr.push(`${genSpace(8)}options: async () => await get${apiName}Data()`)
-        } else if (item.dataSource === 'custom' /** 自定义 */) {
-          codeArr.push(`${genSpace(8)}options: [`)
-          for (const optionItem of item.options ?? []) {
-            // {
-            //   label: '${optionItem.label}',
-            //   value: ${optionItem.valueType === 'number' ? +optionItem.value : `'${optionItem.value}'`}
-            // }
-            codeArr.push(`${genSpace(10)}{`)
-            codeArr.push(`${genSpace(12)}label: '${optionItem.label}',`)
-            codeArr.push(
-              `${genSpace(12)}value: ${optionItem.valueType === 'number' ? +optionItem.value : `'${optionItem.value}'`}`,
-            )
-            codeArr.push(`${genSpace(10)}}`)
-          }
-          codeArr.push(`${genSpace(8)}]`)
-        }
+      } else if (item.optionDataType === 'dynamic_data' /** 动态数据 */) {
+        const apiName = transKeyToVar('', item.key ?? 'undefined', 'list')
+        codeArr.push(`${genSpace(8)}options: async () => await get${apiName}Data()`)
       }
       break
     }
@@ -1633,8 +1618,7 @@ function getSearchConditionItemsNeedStore(findSearch?: SearchDesignData) {
     getSearchConditionItems(findSearch)?.filter(
       e =>
         ['Select', 'Cascader'].includes(e.type!) &&
-        e.optionDataType === 'definition' &&
-        e.dataSource === 'api' &&
+        e.optionDataType === 'dynamic_data' &&
         e.apiConfig?.method &&
         e.apiConfig?.url,
     ) ?? []
@@ -1644,7 +1628,7 @@ function getSearchConditionItemsNeedStore(findSearch?: SearchDesignData) {
 function getApiNamesOfSearchConditionItems(findSearch?: SearchDesignData) {
   return (
     getSearchConditionItems(findSearch)
-      ?.filter(e => e.dataSource === 'api' && e.apiConfig?.method && e.apiConfig?.url)
+      ?.filter(e => e.optionDataType === 'dynamic_data' && e.apiConfig?.method && e.apiConfig?.url)
       ?.map(e => transKeyToVar('query', e.key ?? 'undefined', 'list')) ?? []
   )
 }
@@ -1652,7 +1636,7 @@ function getApiNamesOfSearchConditionItems(findSearch?: SearchDesignData) {
 function getApiConfigOfSearchConditionItems(findSearch?: SearchDesignData) {
   return (
     getSearchConditionItems(findSearch)
-      ?.filter(e => e.dataSource === 'api' && e.apiConfig?.method && e.apiConfig?.url)
+      ?.filter(e => e.optionDataType === 'dynamic_data' && e.apiConfig?.method && e.apiConfig?.url)
       ?.map(e => ({
         ...e.apiConfig,
         name: transKeyToVar('query', e.key ?? 'undefined', 'list'),
@@ -1794,19 +1778,15 @@ function getWidgetListHasStaticDataFromTable(findTable?: TableDesignData) {
   return widgetList
 }
 
-export function getWidgetListHasStaticDataFromFormConfig(widgetList: WidgetDesignData[]) {
+export function getWidgetListHasStaticDataFromFormWidgetList(widgetList?: WidgetDesignData[]) {
   const _widgetList: WidgetDesignData[] = []
-  forofRecursive<WidgetDesignData>(
-    widgetList,
-    widget => {
-      if (['radio', 'checkbox'].includes(widget.type)) {
-        _widgetList.push(widget)
-      } else if (widget.type === 'select' && widget.options.dataSource === 'customize') {
-        _widgetList.push(widget)
-      }
-    },
-    { children: 'widgetList' },
-  )
+  for (const widget of widgetList ?? []) {
+    if (['radio', 'checkbox'].includes(widget.type)) {
+      _widgetList.push(widget)
+    } else if (widget.type === 'select' && widget.options.dataSource === 'customize') {
+      _widgetList.push(widget)
+    }
+  }
   return _widgetList
 }
 
