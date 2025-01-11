@@ -9,6 +9,7 @@ import {
   genInputCodeSnippets,
   genInputNumberCodeSnippets,
   genRadioCodeSnippets,
+  genRecursiveAreaCodeSnippets,
   genSelectCodeSnippets,
   genTextCodeSnippets,
   genTimePickerCodeSnippets,
@@ -18,7 +19,12 @@ import { genFormItemStartTag, genFormItemEndTag } from './gen-form-item.js'
 
 export const genFormItemsCodeSnippets = (
   widgetList: WidgetDesignData[],
-  options?: { space?: number; model?: string; recursive?: boolean },
+  options?: {
+    space?: number
+    model?: string
+    recursive?: boolean
+    suffix?: string
+  },
 ) => {
   const { space } = options ?? {}
   const codeSnippets: string[][] = []
@@ -99,6 +105,12 @@ export const genFormItemsCodeSnippets = (
       codeSnippets.push([
         genFormItemStartTag(widget, options),
         ...genDataTableCodeSnippets(widget, options),
+        genFormItemEndTag(space),
+      ])
+    } else if (widget.type === 'recursive-area') {
+      codeSnippets.push([
+        genFormItemStartTag(widget, options),
+        ...genRecursiveAreaCodeSnippets(widget, options),
         genFormItemEndTag(space),
       ])
     }

@@ -9,7 +9,7 @@ import {
 import { getWidgetListHasStaticDataFromFormWidgetList } from './utils.js'
 import { genFormItemsCodeSnippets } from '../utils/gen-form-items.js'
 
-export const genDataTableModel = (options: ViewDesignDataOptions, widget: WidgetDesignData) => {
+export const genRecursiveAreaModel = (options: ViewDesignDataOptions, widget: WidgetDesignData) => {
   const { name = '' } = options
   const base = `${name.startsWith('/') ? name : `/${name}`}`
   const storeName = `use${pascal(last(name.split('/'))!)}Store`
@@ -51,6 +51,19 @@ export const genDataTableModel = (options: ViewDesignDataOptions, widget: Widget
     definitionCodeArr,
   )
   /** defineProps end */
+
+  /** defineAsyncComponent start */
+  for (const item of widget.widgetList ?? []) {
+    if (['data-table', 'recursive-area'].includes(item.type)) {
+      const suffix = `Of${pascal(title(widget.idAlias))}`
+      const name = `${pascal(title(item.idAlias ?? 'undefined'))}${suffix}Model`
+      storeCodeSnippets(
+        [`const ${name} = defineAsyncComponent(() => import('./${name}.vue'))`],
+        definitionCodeArr,
+      )
+    }
+  }
+  /** defineAsyncComponent end */
 
   /** const start */
   storeCodeSnippets(
@@ -102,50 +115,55 @@ export const genDataTableModel = (options: ViewDesignDataOptions, widget: Widget
   /** template start */
   const className = `${dash(title(widget.idAlias).toLowerCase())}-model`
   storeCodeSnippets([`<div class="${className}">`], templateCodeArr)
-  storeCodeSnippets([`<el-table :data="model" border stripe>`], templateCodeArr)
   const formItemsCodeSnippets = genFormItemsCodeSnippets(widget.widgetList ?? [], {
-    model: 'row',
+    model: 'item',
     recursive: true,
-  })
-  widget.widgetList?.map((item, index) => {
-    storeCodeSnippets(
-      [
-        `<el-table-column prop="${item.idAlias}" label="${item.options.label}">`,
-        `<template #default="{ row, $index: index }">`,
-      ],
-      templateCodeArr,
-    )
-    storeCodeSnippets(formItemsCodeSnippets[index], templateCodeArr)
-    storeCodeSnippets([`</template>`, `</el-table-column>`], templateCodeArr)
+    suffix: `Of${pascal(title(widget.idAlias))}`,
   })
   storeCodeSnippets(
     [
-      `<el-table-column label="操作" width="80px" fixed="right">`,
-      `<template #default="{ $index: index }">`,
+      `<el-card v-for="(item, index) in model" :key="'card' + index" shadow="hover">`,
+      `<template #header>`,
+      `<div>{{ index + 1 }}-${widget.options.label}</div>`,
       `<el-button type="danger" size="small" :icon="SemiSelect" circle @click="onDelete(index)" />`,
       `</template>`,
-      `</el-table-column>`,
     ],
     templateCodeArr,
   )
-  storeCodeSnippets([`</el-table>`], templateCodeArr)
+  for (const items of formItemsCodeSnippets) {
+    storeCodeSnippets(items, templateCodeArr)
+  }
   storeCodeSnippets(
-    [`<el-button type="primary" @click="onAdd">`, '+ 新增', `</el-button>`],
+    [`</el-card>`, `<el-button type="primary" @click="onAdd">+ 新增</el-button>`, '</div>'],
     templateCodeArr,
   )
-  storeCodeSnippets([`</div>`], templateCodeArr)
   /** template end */
 
   /** style start */
   storeCodeSnippets(
     [
       `.${className} {`,
-      'width: 100%;',
-      "& > button[class*='-button'] {",
-      'width: 100%;',
-      'margin-top: 12px;',
-      '}',
-      '}',
+      `width: 100%;`,
+      `& > div[class*="-card"] {`,
+      `& + div[class*="-card"] {`,
+      `margin-top: 8px;`,
+      `}`,
+      `:deep(div[class*='-card__header']) {`,
+      `display: flex;`,
+      `align-items: center;`,
+      `justify-content: space-between;`,
+      `line-height: 1;`,
+      `padding: 12px;`,
+      `}`,
+      `div[class*='-form-item'] {`,
+      `margin-bottom: 18px;`,
+      `}`,
+      `}`,
+      `& > button[class*='-button'] {`,
+      `width: 100%;`,
+      `margin-top: 12px;`,
+      `}`,
+      `}`,
     ],
     styleCodeArr,
   )

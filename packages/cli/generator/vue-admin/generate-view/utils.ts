@@ -23,6 +23,7 @@ import type {
 } from 'visual-development'
 import type { WidgetDesignData } from 'vswift-form'
 import { genDataTableModel } from './gen-data-table-model.js'
+import { genRecursiveAreaModel } from './gen-recursive-area-model.js'
 
 // 解析视图view对象结构
 export async function resolveViewObject(
@@ -53,16 +54,29 @@ export async function resolveViewObject(
         viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
           '/FormDetail.vue': genFormDetailComponentCode(options, item, components),
         }
-
-        forofRecursive<WidgetDesignData>(item.formConfig.data?.widgetList ?? [], widget => {
-          if (
-            ['data-table', 'recursive-area'].includes(widget.type) /** 需要封装表单详情子组件 */
-          ) {
-            viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
-              `/${pascal(title(widget.idAlias ?? 'undefined'))}Model.vue`
-            ] = genDataTableModel(options, widget)
-          }
-        })
+        forofRecursive<WidgetDesignData>(
+          item.formConfig.data?.widgetList ?? [],
+          (widget, parent) => {
+            if (widget.type === 'data-table') {
+              let suffix = ''
+              if (parent?.type === 'recursive-area') {
+                suffix = `Of${pascal(title(parent.idAlias))}`
+              }
+              viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
+                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+              ] = genDataTableModel(options, widget)
+            } else if (widget.type === 'recursive-area') {
+              let suffix = ''
+              if (parent?.type === 'recursive-area') {
+                suffix = `Of${pascal(title(parent.idAlias))}`
+              }
+              viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
+                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+              ] = genRecursiveAreaModel(options, widget)
+            }
+          },
+          { children: 'widgetList' },
+        )
       }
     }
     for (const item of getTableColumnOperationsHasForm(findTable)) {
@@ -75,16 +89,29 @@ export async function resolveViewObject(
         viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
           '/FormDetail.vue': genFormDetailComponentCode(options, item, components),
         }
-
-        forofRecursive<WidgetDesignData>(item.formConfig.data?.widgetList ?? [], widget => {
-          if (
-            ['data-table', 'recursive-area'].includes(widget.type) /** 需要封装表单详情子组件 */
-          ) {
-            viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
-              `/${pascal(title(widget.idAlias ?? 'undefined'))}Model.vue`
-            ] = genDataTableModel(options, widget)
-          }
-        })
+        forofRecursive<WidgetDesignData>(
+          item.formConfig.data?.widgetList ?? [],
+          (widget, parent) => {
+            if (widget.type === 'data-table') {
+              let suffix = ''
+              if (parent?.type === 'recursive-area') {
+                suffix = `Of${pascal(title(parent.idAlias))}`
+              }
+              viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
+                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+              ] = genDataTableModel(options, widget)
+            } else if (widget.type === 'recursive-area') {
+              let suffix = ''
+              if (parent?.type === 'recursive-area') {
+                suffix = `Of${pascal(title(parent.idAlias))}`
+              }
+              viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
+                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+              ] = genRecursiveAreaModel(options, widget)
+            }
+          },
+          { children: 'widgetList' },
+        )
       }
     }
   }
@@ -992,7 +1019,7 @@ function genFormDetailComponentCode(
       new Set(widgetListHasStaticData.map(e => `${snake(title(e.idAlias)).toUpperCase()}_OPTIONS`)),
     )
     storeCodeSnippets(
-      [`import { ${names.join(',')} } from '../../../../constants'`, ''],
+      [`import { ${names.join(',')} } from '@/views${base}/constants'`, ''],
       importCodeArr,
     )
   }
@@ -1003,7 +1030,7 @@ function genFormDetailComponentCode(
   /** defineProps end */
 
   /** const start */
-  forofRecursive<WidgetDesignData>(formConfig?.data?.widgetList ?? [], widget => {
+  for (const widget of formConfig?.data?.widgetList ?? []) {
     if (['data-table', 'recursive-area'].includes(widget.type)) {
       const name = `${pascal(title(widget.idAlias ?? 'undefined'))}Model`
       storeCodeSnippets(
@@ -1011,7 +1038,7 @@ function genFormDetailComponentCode(
         definitionCodeArr,
       )
     }
-  })
+  }
 
   storeCodeSnippets(
     [

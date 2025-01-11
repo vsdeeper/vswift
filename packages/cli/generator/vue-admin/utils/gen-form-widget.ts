@@ -194,9 +194,9 @@ export const genUploadCodeSnippets = (
 
 export const genDataTableCodeSnippets = (
   widget: WidgetDesignData,
-  options?: { space?: number; model?: string; formItemProp?: string },
+  options?: { space?: number; model?: string; formItemProp?: string; suffix?: string },
 ) => {
-  const { space, model = 'model', formItemProp } = options ?? {}
+  const { space, model = 'model', formItemProp, suffix = '' } = options ?? {}
   const codeSnippets: string[] = []
   const genFormItemProp = (id: string) => {
     if (formItemProp) {
@@ -205,7 +205,25 @@ export const genDataTableCodeSnippets = (
     return `form-item-prop="${id}"`
   }
   codeSnippets.push(
-    `${genSpace(space)}<${pascal(title(widget.idAlias))}Model v-model="${model}.${widget.idAlias}" ${genFormItemProp(widget.idAlias ?? 'undefined')} />`,
+    `${genSpace(space)}<${pascal(title(widget.idAlias))}${suffix}Model v-model="${model}.${widget.idAlias}" ${genFormItemProp(widget.idAlias ?? 'undefined')} />`,
+  )
+  return codeSnippets
+}
+
+export const genRecursiveAreaCodeSnippets = (
+  widget: WidgetDesignData,
+  options?: { space?: number; model?: string; formItemProp?: string; suffix?: string },
+) => {
+  const { space, model = 'model', formItemProp, suffix = '' } = options ?? {}
+  const codeSnippets: string[] = []
+  const genFormItemProp = (id: string) => {
+    if (formItemProp) {
+      return `:form-item-prop="${formItemProp}.${id}"`
+    }
+    return `form-item-prop="${id}"`
+  }
+  codeSnippets.push(
+    `${genSpace(space)}<${pascal(title(widget.idAlias))}${suffix}Model v-model="${model}.${widget.idAlias}" ${genFormItemProp(widget.idAlias ?? 'undefined')} />`,
   )
   return codeSnippets
 }

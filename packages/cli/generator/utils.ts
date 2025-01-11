@@ -51,7 +51,10 @@ export function forofRecursive<T = Record<string, any>>(
   const { children = 'children' } = options ?? {}
   for (const item of data) {
     handler(item, options?.parent)
-    forofRecursive(item[children] ?? [], handler, { parent: item })
+    forofRecursive(item[children] ?? [], handler, {
+      ...options,
+      parent: item,
+    })
   }
 }
 

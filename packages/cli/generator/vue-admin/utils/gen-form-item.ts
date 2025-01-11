@@ -23,7 +23,7 @@ export const genFormItemStartTag = (
   const { space, recursive } = options ?? {}
   const genFormItemProp = (id: string) => {
     if (recursive) {
-      return ':prop="genFormItemProp(`${$index}.' + `${id}` + '`)"'
+      return ':prop="genFormItemProp(`${index}.' + `${id}` + '`)"'
     }
     return `props="${id}"`
   }
