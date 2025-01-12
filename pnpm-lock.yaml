@@ -122,11 +122,11 @@ importers:
         specifier: ^7.5.8
         version: 7.5.8
       visual-development:
-        specifier: 0.0.10
-        version: 0.0.10(date-fns@3.6.0)(typescript@5.5.4)
+        specifier: 0.0.11
+        version: 0.0.11(date-fns@3.6.0)(typescript@5.5.4)
       vswift-form:
-        specifier: 0.0.15
-        version: 0.0.15(@element-plus/icons-vue@2.3.1(vue@3.5.13(typescript@5.5.4)))(date-fns@3.6.0)(element-plus@2.7.2(vue@3.5.13(typescript@5.5.4)))(nanoid@5.0.7)(radash@12.1.0)(vue@3.5.13(typescript@5.5.4))
+        specifier: 0.0.16
+        version: 0.0.16(@element-plus/icons-vue@2.3.1(vue@3.5.13(typescript@5.5.4)))(date-fns@3.6.0)(element-plus@2.7.2(vue@3.5.13(typescript@5.5.4)))(nanoid@5.0.7)(radash@12.1.0)(vue@3.5.13(typescript@5.5.4))
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.5.4)
@@ -3411,8 +3411,8 @@ packages:
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
-  visual-development@0.0.10:
-    resolution: {integrity: sha512-IrNFkJXJanlLlyYB3do4xOt5m3BbsL5w1dt+ZdH7uFK+kBbV8cy+lq8RhZjh/RvLS+N7x2A1yA1GmSHddJYF9g==}
+  visual-development@0.0.11:
+    resolution: {integrity: sha512-uOxOA1CZ6vR4xNNLP8bqyfLnJTMmvv0vN2yQWcbKmC6VQQQDqJS87Ld0pIJFPaWgU5BOxiHHtPzn3nu9xJB1TA==}
 
   vite-plugin-css-injected-by-js@3.5.1:
     resolution: {integrity: sha512-9ioqwDuEBxW55gNoWFEDhfLTrVKXEEZgl5adhWmmqa88EQGKfTmexy4v1Rh0pAS6RhKQs2bUYQArprB32JpUZQ==}
@@ -3449,6 +3449,16 @@ packages:
 
   vswift-form@0.0.15:
     resolution: {integrity: sha512-obrxf/BGufOIaEAbdy5CDwPm3Aot4UmFtsTc4wk/2V5FlRP+8eluN9WrhO352xnjO5cZCaVFH/dxXHHvEZ9dog==}
+    peerDependencies:
+      '@element-plus/icons-vue': ^2.3.0
+      date-fns: ^3.6.0
+      element-plus: ^2.7.0
+      nanoid: ^5.0.0
+      radash: ^12.1.0
+      vue: ^3.4.0
+
+  vswift-form@0.0.16:
+    resolution: {integrity: sha512-2bcCtGVIimt5zt7JVSMOwr6ov43KyA+gq7QO9TIBiS2DQ6LUTwiJuZn1ID7Zy7ol7RziYAzYXKL+ERfdD1Lytg==}
     peerDependencies:
       '@element-plus/icons-vue': ^2.3.0
       date-fns: ^3.6.0
@@ -6976,7 +6986,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  visual-development@0.0.10(date-fns@3.6.0)(typescript@5.5.4):
+  visual-development@0.0.11(date-fns@3.6.0)(typescript@5.5.4):
     dependencies:
       '@element-plus/icons-vue': 2.3.1(vue@3.5.13(typescript@5.5.4))
       ace-builds: 1.37.1
@@ -7009,6 +7019,19 @@ snapshots:
       sass: 1.77.6
 
   vswift-form@0.0.15(@element-plus/icons-vue@2.3.1(vue@3.5.13(typescript@5.5.4)))(date-fns@3.6.0)(element-plus@2.7.2(vue@3.5.13(typescript@5.5.4)))(nanoid@5.0.7)(radash@12.1.0)(vue@3.5.13(typescript@5.5.4)):
+    dependencies:
+      '@element-plus/icons-vue': 2.3.1(vue@3.5.13(typescript@5.5.4))
+      '@vswift/utils': 1.1.2
+      ace-builds: 1.37.1
+      date-fns: 3.6.0
+      element-plus: 2.7.2(vue@3.5.13(typescript@5.5.4))
+      nanoid: 5.0.7
+      radash: 12.1.0
+      vue: 3.5.13(typescript@5.5.4)
+      vue3-ace-editor: 2.2.4(ace-builds@1.37.1)(vue@3.5.13(typescript@5.5.4))
+      vuedraggable: 4.1.0(vue@3.5.13(typescript@5.5.4))
+
+  vswift-form@0.0.16(@element-plus/icons-vue@2.3.1(vue@3.5.13(typescript@5.5.4)))(date-fns@3.6.0)(element-plus@2.7.2(vue@3.5.13(typescript@5.5.4)))(nanoid@5.0.7)(radash@12.1.0)(vue@3.5.13(typescript@5.5.4)):
     dependencies:
       '@element-plus/icons-vue': 2.3.1(vue@3.5.13(typescript@5.5.4))
       '@vswift/utils': 1.1.2
