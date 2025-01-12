@@ -1,33 +1,36 @@
-import { readFileSync, writeFileSync } from 'fs'
-import { getConfigPath, getConfig, deleteConfig, changeConfig } from '../utils/index.js'
+import { readFile, writeFile } from 'node:fs/promises'
+import { getConfig, deleteConfig, changeConfig, getConfigPath } from '../utils/config-operations.js'
 
-export async function config(key: string, val?: string) {
-  const configPath = getConfigPath(import.meta.url)
-  const configStr = readFileSync(configPath).toString('utf-8')
-  switch (key) {
+export async function config(action: string, ...args: any[]) {
+  const configPath = await getConfigPath(import.meta.url)
+  const configStr = await readFile(configPath, { encoding: 'utf-8' })
+  switch (action) {
     case 'list': {
       const configArr = configStr.split('\n').filter(e => !!e)
       console.log(configArr.join('\n'))
       break
     }
     case 'get': {
-      console.log(getConfig(val!, configStr))
+      const [name] = args
+      console.log(getConfig(name, configStr))
+      break
+    }
+    case 'set': {
+      const [name, val] = args
+      const newConfigStr = changeConfig(name, val, configStr)
+      if (newConfigStr !== configStr) {
+        await writeFile(configPath, newConfigStr)
+      }
       break
     }
     case 'clear': {
-      writeFileSync(configPath, '')
+      await writeFile(configPath, '')
       break
     }
     case 'delete': {
-      const newConfigStr = deleteConfig(val!, configStr)
-      writeFileSync(configPath, newConfigStr ?? '')
-      break
-    }
-    case 'downloadDir': {
-      const newConfigStr = changeConfig(key, val!, configStr)
-      if (newConfigStr !== configStr) {
-        writeFileSync(configPath, newConfigStr)
-      }
+      const [name] = args
+      const newConfigStr = deleteConfig(name, configStr)
+      await writeFile(configPath, newConfigStr ?? '')
       break
     }
   }

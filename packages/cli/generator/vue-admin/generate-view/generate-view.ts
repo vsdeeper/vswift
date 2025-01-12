@@ -1,25 +1,27 @@
-import { readFileSync } from 'fs'
-import { pathExistsSync } from 'fs-extra/esm'
 import consola from 'consola'
 import chalk from 'chalk'
-import { parseConfig } from '../../../utils/index.js'
-import { genCodeFiles } from '../../utils.js'
-import { resolveApiObjectOfView, resolveStoreObjectOfView, resolveViewObject } from './utils.js'
 import ora from 'ora'
 import os from 'os'
 import type { ViewDesignData } from 'visual-development'
+import { pathExists } from 'fs-extra/esm'
+import { readFile } from 'node:fs/promises'
+import { parseConfig } from '../../../utils/config-operations.js'
+import { genCodeFiles } from '../../utils.js'
+import { resolveApiObjectOfView, resolveStoreObjectOfView, resolveViewObject } from './utils.js'
 
 /**
  * 生成SFC格式
  */
 export async function generateView(name: string) {
-  const config = parseConfig()
-  const configFilePath = `${config.downloadDir}/${name + '.json'}`
-  if (!pathExistsSync(configFilePath)) {
+  const config = await parseConfig()
+  const configFilePath = `${config.configFileDir}/${name + '.json'}`
+  if (!(await pathExists(configFilePath))) {
     consola.error(`Configuration file ${chalk.green(configFilePath)} not found`)
     return
   }
-  const configData: ViewDesignData = JSON.parse(readFileSync(configFilePath).toString('utf-8'))
+  const configData: ViewDesignData = JSON.parse(
+    await readFile(configFilePath, { encoding: 'utf-8' }),
+  )
   const { options, components = [] } = configData
 
   const spinner = ora({ spinner: 'line' })

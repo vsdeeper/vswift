@@ -1,13 +1,15 @@
 import chalk from 'chalk'
 import consola from 'consola'
+import { $ } from 'execa'
 import { outputFile } from 'fs-extra'
+import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import prettier from 'prettier'
 import { camel, pascal, title } from 'radash'
 
 export function finalOutput(projectName: string) {
   console.log(
-    `\n  Next, you can start the project like this: \n\n` +
+    `\n  Next, you can start the project follow these steps: \n\n` +
       chalk.gray(
         `  ${`$ cd ${projectName}`}\n` + `  ${'$ pnpm install'}\n` + `  ${'$ pnpm dev'}\n`,
       ),
@@ -231,4 +233,45 @@ export async function genCodeFiles(data: Record<string, any>) {
   } catch (error) {
     consola.error('genCodeFiles ->', error)
   }
+}
+
+export async function gitInit(projectName: string) {
+  await $({ shell: true })`cd ${projectName} && git init`
+}
+
+export async function gitAddOrigin(projectName: string, url: string) {
+  await $({ shell: true })`cd ${projectName} && git remote add origin ${url}`
+}
+
+export async function setupGithooks(projectName: string) {
+  await $({
+    shell: true,
+  })`cd ${projectName} && pnpm exec husky init`
+  await $({
+    shell: true,
+  })`cd ${projectName} && echo "pnpm lint-staged" > .husky/pre-commit && echo "pnpm --no-install commitlint --edit" > .husky/commit-msg`
+}
+
+export async function createGitignore(path: string) {
+  const rules = [
+    '# Logs',
+    'logs',
+    '*.log',
+    'pnpm-debug.log*',
+    '',
+    'node_modules',
+    '.DS_Store',
+    'dist',
+    'coverage',
+    '*.local',
+    '',
+    '/cypress/videos/',
+    '/cypress/screenshots/',
+    '# Editor directories and files',
+    '.vscode/*',
+    '!.vscode/extensions.json',
+    '',
+    '*.tsbuildinfo',
+  ]
+  await writeFile(path, rules.join('\n'))
 }
