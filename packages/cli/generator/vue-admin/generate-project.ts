@@ -6,7 +6,7 @@ import chalk from 'chalk'
 import { readFile, writeFile } from 'node:fs/promises'
 import { copyTemplate, getTemplatePath } from '../../utils/utils.js'
 import { changeConfig, parseConfig } from '../../utils/config-operations.js'
-import { createGitignore, finalOutput, gitAddOrigin, gitInit, setupGithooks } from '../utils.js'
+import { createGitignore, finalOutput, gitAddOrigin, gitInit } from '../utils.js'
 import type { ProjectDesignData } from 'visual-development'
 
 export async function generateProject(fileName: string) {
@@ -23,7 +23,6 @@ export async function generateProject(fileName: string) {
   }
 
   const spinner = ora({ spinner: 'line' })
-  spinner.start('Generating...' + os.EOL)
   const configData: ProjectDesignData = JSON.parse(
     await readFile(configFilePath, { encoding: 'utf-8' }),
   )
@@ -32,32 +31,41 @@ export async function generateProject(fileName: string) {
   const dest = path.resolve(process.cwd(), `${projectName}`)
 
   // 下载template
+  spinner.start('Downloading template...' + os.EOL)
   await copyTemplate(await getTemplatePath('vue-admin', import.meta.url, '../../'), dest)
+  spinner.succeed('Download template done')
 
-  // 生成env环境变量
+  // 创建env环境变量
+  spinner.start('Creating .env files...' + os.EOL)
   await generateEnv(dest, options)
+  spinner.succeed('Create .env files done')
 
   // 添加.npmrc
   if (options.npmrc) {
+    spinner.start('Creating .npmrc file...' + os.EOL)
     await writeFile(path.resolve(dest, '.npmrc'), options.npmrc)
+    spinner.succeed('Create .npmrc file done')
   }
 
   // Git init
+  spinner.start('Git init...' + os.EOL)
   await gitInit(projectName)
+  spinner.succeed('Git init done')
 
   // 设置 git remote origin
   if (options.gitUrl) {
+    spinner.start('Adding git remote origin...' + os.EOL)
     await gitAddOrigin(projectName, options.gitUrl)
+    spinner.succeed('Add git remote origin done')
   }
-
-  // 设置 git hooks
-  await setupGithooks(projectName)
 
   // 添加.gitignore文件
   const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
   if (!(await pathExists(gitignoreFilePath))) {
     // git init 会导致 .gitignore 丢失，手动写入.gitignore
-    createGitignore(gitignoreFilePath)
+    spinner.start('Creating .gitignore file...' + os.EOL)
+    await createGitignore(gitignoreFilePath)
+    spinner.succeed('Create .gitignore file done')
   }
 
   spinner.succeed(

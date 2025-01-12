@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "preinstall": "only-allow pnpm",
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" -- --mode prod",
     "build:test": "run-p type-check \"build-only {@}\" -- --mode test",
@@ -12,6 +13,18 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier src/ --write"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,vue}": [
+      "eslint",
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "prettier --write"
+    ],
+    "*.html": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

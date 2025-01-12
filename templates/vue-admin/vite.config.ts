@@ -16,8 +16,8 @@ export default defineConfig(() => {
   // 启动优化，element-plus预加载
   const matchElementPlusPath = globSync('node_modules/element-plus/es/components/*/style')
   const optimizeDepsElementPlusIncludes = [
-    ...matchElementPlusPath.map((path) => `${path.replace('node_modules/', '')}/index`),
-    ...matchElementPlusPath.map((path) => `${path.replace('node_modules/', '')}/css`)
+    ...matchElementPlusPath.map(path => `${path.replace('node_modules/', '')}/index`),
+    ...matchElementPlusPath.map(path => `${path.replace('node_modules/', '')}/css`),
   ]
   return {
     // base 的设置映射 import.meta.env.BASE_URL 的值
@@ -31,48 +31,49 @@ export default defineConfig(() => {
         dts: './types/auto-imports.d.ts',
         resolvers: [
           ElementPlusResolver({
-            importStyle: 'sass'
+            importStyle: 'sass',
           }),
           // 自动导入图标组件
           IconsResolver({
-            prefix: 'Icon'
-          })
-        ]
+            prefix: 'Icon',
+          }),
+        ],
       }),
       Components({
         dirs: ['src/components', 'src/layout'],
         dts: './types/components.d.ts',
         resolvers: [
           ElementPlusResolver({
-            importStyle: 'sass'
+            importStyle: 'sass',
           }),
           // 自动注册图标组件
           IconsResolver({
-            enabledCollections: ['ep']
-          })
-        ]
+            enabledCollections: ['ep'],
+          }),
+        ],
       }),
       Icons({
-        autoInstall: true
+        autoInstall: true,
       }),
       ElementPlus({
         // 解决 Table-v2 AutoResizer with manual import: failed to resolve css file
-        ignoreComponents: ['AutoResizer']
-      })
+        ignoreComponents: ['AutoResizer'],
+      }),
     ],
     css: {
       preprocessorOptions: {
         scss: {
+          api: 'modern-compiler',
           // element-plus自定义命名空间设置
-          additionalData: `@use "@/styles/element/index.scss" as *;`
-        }
-      }
+          additionalData: `@use "@/styles/element/index.scss" as *;`,
+        },
+      },
     },
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
-      }
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
-    optimizeDeps: { include: [...optimizeDepsElementPlusIncludes] }
+    optimizeDeps: { include: [...optimizeDepsElementPlusIncludes] },
   }
 })

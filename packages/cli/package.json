@@ -1,6 +1,6 @@
 {
   "name": "@vswift/cli",
-  "version": "0.0.5",
+  "version": "0.0.13",
   "type": "module",
   "main": "dist/main.js",
   "files": [

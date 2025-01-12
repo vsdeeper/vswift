@@ -9,9 +9,13 @@ import { camel, pascal, title } from 'radash'
 
 export function finalOutput(projectName: string) {
   console.log(
-    `\n  Next, you can start the project follow these steps: \n\n` +
+    `\n  Next, you can start the project follow these steps: \n` +
+      chalk.gray(`  ${`$ cd ${projectName}`}\n` + '  $ pnpm install\n' + '  $ pnpm dev\n') +
+      `\n  Setup git hooks, you can follow these steps: \n` +
       chalk.gray(
-        `  ${`$ cd ${projectName}`}\n` + `  ${'$ pnpm install'}\n` + `  ${'$ pnpm dev'}\n`,
+        '  $ pnpm exec husky init\n' +
+          '  $ echo "pnpm lint-staged" > .husky/pre-commit\n' +
+          '  $ echo "pnpm --no-install commitlint --edit" > .husky/commit-msg',
       ),
   )
 }
@@ -241,6 +245,12 @@ export async function gitInit(projectName: string) {
 
 export async function gitAddOrigin(projectName: string, url: string) {
   await $({ shell: true })`cd ${projectName} && git remote add origin ${url}`
+}
+
+export async function packageInstall(projectName: string) {
+  await $({
+    shell: true,
+  })`cd ${projectName} && pnpm install`
 }
 
 export async function setupGithooks(projectName: string) {

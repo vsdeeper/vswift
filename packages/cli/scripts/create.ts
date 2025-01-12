@@ -5,7 +5,7 @@ import ora from 'ora'
 import chalk from 'chalk'
 import os from 'os'
 import { copyTemplate, getTemplatePath } from '../utils/utils.js'
-import { createGitignore, finalOutput, gitInit, setupGithooks } from '../generator/utils.js'
+import { createGitignore, finalOutput, gitInit } from '../generator/utils.js'
 
 export async function create() {
   const { projectName, templateName } = await inquirer.prompt([
@@ -23,25 +23,30 @@ export async function create() {
     },
   ])
 
-  const spinner = ora({ spinner: 'line' })
-  spinner.start('Generating...' + os.EOL)
+  if (templateName === 'vue-uniapp') {
+    throw new Error('vue-uniapp template not yet supported.')
+  }
 
+  const spinner = ora({ spinner: 'line' })
   const dest = path.resolve(process.cwd(), `${projectName}`)
 
   // 下载template
+  spinner.start('Downloading template...' + os.EOL)
   await copyTemplate(await getTemplatePath(templateName, import.meta.url), dest)
+  spinner.succeed('Download template done')
 
   // git init
+  spinner.start('Git init...' + os.EOL)
   await gitInit(projectName)
-
-  // 设置git hooks
-  await setupGithooks(projectName)
+  spinner.succeed('Git init done')
 
   // 添加.gitignore
   const gitignoreFilePath = path.resolve(process.cwd(), `${projectName}/.gitignore`)
   if (!(await pathExists(gitignoreFilePath))) {
+    spinner.start('Creating .gitignore file...' + os.EOL)
     // 手动写入.gitignore
     await createGitignore(gitignoreFilePath)
+    spinner.succeed('Create .gitignore file done')
   }
 
   spinner.succeed(
