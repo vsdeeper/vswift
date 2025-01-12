@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import consola from 'consola'
 import { $ } from 'execa'
-import { outputFile } from 'fs-extra'
+import { outputFile, pathExists } from 'fs-extra'
 import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import prettier from 'prettier'
@@ -208,8 +208,12 @@ export async function genCodeFiles(data: Record<string, any>) {
   try {
     const filePaths: string[] = []
     const { base } = data
+    let _path = 'src'
+    if (!(await pathExists(_path))) {
+      _path = 'templates/vue-admin/src'
+    }
     const formatOptions = await prettier.resolveConfig(
-      path.resolve(process.cwd(), 'templates/vue-admin/src/main.ts'),
+      path.resolve(process.cwd(), `${_path}/main.ts`),
     )
     const transParser = (filePath: string) => {
       if (filePath.endsWith('.ts')) return 'typescript'
@@ -219,7 +223,7 @@ export async function genCodeFiles(data: Record<string, any>) {
       for (const key in obj) {
         if (key.startsWith('/') /** 说明是路径 */) {
           if (typeof obj[key] === 'string' /** 源代码 */) {
-            const filePath = path.resolve(process.cwd(), `templates/vue-admin/src/${base}${key}`)
+            const filePath = path.resolve(process.cwd(), `${_path}/${base}${key}`)
             const formatted = await prettier.format(obj[key], {
               ...formatOptions,
               parser: transParser(filePath),
