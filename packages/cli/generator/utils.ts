@@ -11,7 +11,7 @@ export function finalOutput(projectName: string) {
   console.log(
     `\n  Next, you can start the project follow these steps: \n` +
       chalk.gray(`  ${`$ cd ${projectName}`}\n` + '  $ pnpm install\n' + '  $ pnpm dev\n') +
-      `\n  Setup git hooks, you can follow these steps: \n` +
+      `\n  Setup git hooks, you can follow these steps if you use pnpm: \n` +
       chalk.gray(
         '  $ pnpm exec husky init\n' +
           '  $ echo "pnpm lint-staged" > .husky/pre-commit\n' +

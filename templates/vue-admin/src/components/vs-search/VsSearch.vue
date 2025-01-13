@@ -20,6 +20,7 @@ const hiddenColLen = ref(0)
 const appSettingMainWidth = inject<Ref<'boxed' | 'full'>>('appSettingMainWidth', ref('full'))
 
 onMounted(() => {
+  console.log(111, SComponent)
   handleWindowResize()
   window.addEventListener('resize', handleWindowResize)
 })
@@ -75,7 +76,7 @@ defineExpose({
               <slot :name="item.id" :data="form">
                 <component
                   v-if="item.type"
-                  :is="SComponent[pascal(item.type) as SComponentKey]"
+                  :is="SComponent[item.type as SComponentKey]"
                   v-model="form[item.id]"
                   :placeholder="item.label"
                   :props="item.props"
@@ -134,6 +135,11 @@ defineExpose({
   }
   :deep(div[class*='-date-editor ']) {
     flex: 1;
+  }
+  div[class*='-input-number'] {
+    :deep(input[class*='-input__inner']) {
+      text-align: left;
+    }
   }
   .nodata {
     display: block;

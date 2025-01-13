@@ -84,16 +84,16 @@ async function generateEnv(dest: string, options: Record<string, any>) {
   const envTestConfig = await readFile(envTestConfigPath, { encoding: 'utf-8' })
   const envProdConfig = await readFile(envProdConfigPath, { encoding: 'utf-8' })
 
-  const newEnvConfig1 = changeConfig('VITE_API_DOMAIN', options.apiDomain.dev || '/', envConfig)
+  const newEnvConfig1 = changeConfig('VITE_API_DOMAIN', options.apiDomain.dev || '', envConfig)
   const newEnvConfig2 = changeConfig('VITE_API_BASE_PATH', options.apiBasePath || '', newEnvConfig1)
   const newEnvTestConfig = changeConfig(
     'VITE_API_DOMAIN',
-    options.apiDomain.test || '/',
+    options.apiDomain.test || '',
     envTestConfig,
   )
   const newEnvProdConfig = changeConfig(
     'VITE_API_DOMAIN',
-    options.apiDomain.prod || '/',
+    options.apiDomain.prod || '',
     envProdConfig,
   )
 

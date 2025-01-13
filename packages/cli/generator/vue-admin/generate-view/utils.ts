@@ -746,7 +746,7 @@ function genTableOperationComponentCode(
   /** template start */
   storeCodeSnippets(
     [
-      `${genSpace(2)}<el-dialog v-model="show" title="${operationItem.label}" @close="onClose">`,
+      `${genSpace(2)}<el-dialog class="adaptive-dialog" v-model="show" title="${operationItem.label}" @close="onClose">`,
       `${genSpace(4)}<FormDetail ref="FormDetailRef" v-model="form" />`,
       `${genSpace(4)}<template #footer>`,
       `${genSpace(6)}<el-button @click="show = false">取消</el-button>`,
@@ -945,7 +945,7 @@ function genTableItemOperationComponentCode(
   }
   storeCodeSnippets(
     [
-      `${genSpace(2)}<el-dialog v-model="show" title="${label}" ${genOnCloseProp()}>`,
+      `${genSpace(2)}<el-dialog class="adaptive-dialog" v-model="show" title="${label}" ${genOnCloseProp()}>`,
       `${genSpace(4)}<FormDetail ref="FormDetailRef" v-model="form" ${genDisabledProp()} />`,
     ],
     templateCodeArr,
@@ -1135,12 +1135,18 @@ function genApiCodeOfView(components: MergeDesignData[]) {
   /** export api start */
   const toArg = (method: Method) => `${method === 'GET' ? 'params' : 'data'}`
   const apiConfig = getApiConfigOfTable(findTable)
+  const toUrl = (url?: string) => {
+    if (url?.startsWith('/mock/example')) {
+      return `${url}.json?t=${+new Date()}`
+    }
+    return url
+  }
   codeArr.push(
     `export const queryTableList = async (${toArg(apiConfig?.method ?? 'GET')}: Record<string, any>) => {`,
     `${genSpace(2)}try {`,
     `${genSpace(4)}const { data: res } = await http({`,
     `${genSpace(6)}method: '${apiConfig?.method ?? 'GET'}',`,
-    `${genSpace(6)}url: '${apiConfig?.url}',`,
+    `${genSpace(6)}url: '${toUrl(apiConfig?.url)}',`,
   )
   codeArr.push(`${genSpace(6)}${toArg(apiConfig?.method ?? 'GET')}`)
   codeArr.push(
@@ -1161,7 +1167,7 @@ function genApiCodeOfView(components: MergeDesignData[]) {
       `${genSpace(2)}try {`,
       `${genSpace(4)}await http({`,
       `${genSpace(6)}method: '${item.method}',`,
-      `${genSpace(6)}url: '${item.url}',`,
+      `${genSpace(6)}url: '${toUrl(item.url)}',`,
     )
     codeArr.push(`${genSpace(6)}${toArg(item.method ?? 'GET')}`)
     codeArr.push(
@@ -1192,7 +1198,7 @@ function genApiCodeOfView(components: MergeDesignData[]) {
       `${genSpace(2)}try {`,
       `${genSpace(4)}const { data: res } = await http({`,
       `${genSpace(6)}method: '${item.method ?? 'GET'}',`,
-      `${genSpace(6)}url: '${item.url}',`,
+      `${genSpace(6)}url: '${toUrl(item.url)}',`,
     )
     if (args.length) {
       codeArr.push(`${genSpace(6)}${toArg(item.method ?? 'GET')}: { ${args.join(',')} }`)
@@ -1216,7 +1222,7 @@ function genApiCodeOfView(components: MergeDesignData[]) {
       `${genSpace(2)}try {`,
       `${genSpace(4)}const { data: res } = await http({`,
       `${genSpace(6)}method: 'GET',`,
-      `${genSpace(6)}url: '${item.options.systemApi}',`,
+      `${genSpace(6)}url: '${toUrl(item.options.systemApi)}',`,
       `${genSpace(4)}})`,
       `${genSpace(4)}return res as Record<string, any>[]`,
       `${genSpace(2)}} catch (error) {`,
@@ -1418,7 +1424,7 @@ function genSearchConfig(searchConfig: SearchDesignData) {
 }
 
 // 生成 Table 配置
-function genTableConfig(tableConfig: Record<string, any>) {
+function genTableConfig(tableConfig: TableDesignData) {
   const codeArr: string[] = []
   codeArr.push(`${genSpace(2)}loading: false,`)
   const { options } = tableConfig
@@ -1473,8 +1479,8 @@ function genTableConfig(tableConfig: Record<string, any>) {
       if (item.type) codeArr.push(`${genSpace(8)}type: '${item.type}',`)
       codeArr.push(`${genSpace(6)}label: '${item.label}',`, `${genSpace(6)}value: '${item.value}',`)
       if (item.code) codeArr.push(`${genSpace(6)}code: '${item.code}',`)
-      if (typeof item.showPopconfirm === 'boolean')
-        codeArr.push(`${genSpace(6)}showPopconfirm: ${item.showPopconfirm},`)
+      if (typeof item.enableConfirmation === 'boolean')
+        codeArr.push(`${genSpace(6)}showPopconfirm: ${item.enableConfirmation},`)
       if (item.code)
         codeArr.push(`${genSpace(6)}show: (code) => permissionCodes.value.includes(code!)`)
       codeArr.push(`${genSpace(4)}},`)

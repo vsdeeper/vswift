@@ -9,7 +9,7 @@ module.exports = defineConfig({
     browser: true
   },
   extends: ['eslint:recommended', 'plugin:prettier/recommended'],
-  parser: 'vue-eslint-parser',
+  // parser: 'vue-eslint-parser',
   parserOptions: {
     ecmaVersion: 'latest',
     parser: '@typescript-eslint/parser',

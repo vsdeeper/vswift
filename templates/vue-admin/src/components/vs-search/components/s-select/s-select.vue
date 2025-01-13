@@ -17,7 +17,7 @@ watch(
       options.value = await _props.props!.options!()
     }
   },
-  { once: true },
+  { immediate: true },
 )
 </script>
 

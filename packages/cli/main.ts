@@ -108,8 +108,8 @@ generateCommand
   })
 
 generateCommand
-  .command('view <name>')
-  .description('generate view with the specified configuration file')
+  .command('view <name1[,name2[,name3[...]]]>')
+  .description('generate view with the specified configuration file or files')
   .action(async name => {
     try {
       await generateView(name)

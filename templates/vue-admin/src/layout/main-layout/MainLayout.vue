@@ -59,12 +59,12 @@ const ww = ref(0)
 provide('breadcrumbData', breadcrumbData)
 provide(
   'appSettingMainWidth',
-  computed(() => appSettingData.value.main.width)
+  computed(() => appSettingData.value.main.width),
 )
 
 watch(
   () => router.currentRoute.value,
-  (route) => {
+  route => {
     if (ww.value <= 768 && !collapse.value) {
       collapse.value = true
     }
@@ -72,12 +72,12 @@ watch(
     handleBreadcrumb(route)
     handleNavRecord(route.path)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
   () => appSettingData.value?.menu.layout,
-  (val) => {
+  val => {
     if (val === 'vertical') {
       TopBarRef.value?.setShowLogo(false)
       TopBarRef.value?.setShowTogglebutton(true)
@@ -86,7 +86,14 @@ watch(
       TopBarRef.value?.setShowTogglebutton(ww.value <= 768)
     }
   },
-  { immediate: true }
+  { immediate: true },
+)
+
+watch(
+  () => appSettingData.value.menu.collapse,
+  val => {
+    collapse.value = !!val
+  },
 )
 
 onMounted(() => {
@@ -121,17 +128,17 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
     let base = ''
     const paths = route.path
       .split('/')
-      .filter((e) => !!e)
-      .map((e) => {
+      .filter(e => !!e)
+      .map(e => {
         return (base = `${base}/${e}`)
       })
-    paths.forEach((path) => {
+    paths.forEach(path => {
       const routes = router.getRoutes()
-      const find = routes.find((e) => e.path === path)
+      const find = routes.find(e => e.path === path)
       if (find) {
         breadcrumbData.value.push({
           path: find.path,
-          name: find.meta.title as string
+          name: find.meta.title as string,
         })
       }
     })
@@ -139,19 +146,19 @@ function handleBreadcrumb(route: RouteLocationNormalizedLoaded) {
 }
 
 async function handleNavRecord(path: string) {
-  if (navRecordData.value.some((v) => v.path === path)) {
+  if (navRecordData.value.some(v => v.path === path)) {
     return
   }
   const menuData = await useMenuDataStore().getMenuData()
   const findMenuItem: VsMenuDataItem | undefined = findNodeObjectFromTreeData(
     path,
     menuData ?? [],
-    { id: 'path' }
+    { id: 'path' },
   )
   if (findMenuItem && findMenuItem.visible === 1) {
     navRecordData.value.push({
       path,
-      name: findMenuItem.menuName
+      name: findMenuItem.menuName,
     })
   }
 }
@@ -159,7 +166,7 @@ async function handleNavRecord(path: string) {
 function findNodeObjectFromTreeData(
   target: string | number,
   treeData: Record<string, any>[],
-  options?: { id?: string; children?: string }
+  options?: { id?: string; children?: string },
 ) {
   try {
     const { id = 'id', children = 'children' } = options ?? {}
@@ -218,7 +225,7 @@ function onSetting() {
       <el-header
         class="my-header"
         :style="{
-          '--my-header-width': myHeaderWidth
+          '--my-header-width': myHeaderWidth,
         }"
       >
         <TopBar
@@ -226,7 +233,7 @@ function onSetting() {
           :class="[
             appSettingData?.main.width === 'boxed' && appSettingData.menu.layout === 'horizontal'
               ? 'boxed'
-              : undefined
+              : undefined,
           ]"
           v-model="collapse"
         />
@@ -239,7 +246,7 @@ function onSetting() {
           :class="[
             appSettingData?.main.width === 'boxed' && appSettingData.menu.layout === 'horizontal'
               ? 'boxed'
-              : undefined
+              : undefined,
           ]"
           mode="horizontal"
           :default-active="activePath"
@@ -249,7 +256,7 @@ function onSetting() {
         class="my-main"
         :style="{
           '--my-main-padding-left': myMainPaddingLeft,
-          '--my-main-padding-top': myMainPaddingTop
+          '--my-main-padding-top': myMainPaddingTop,
         }"
       >
         <el-container class="router-view-wrapper">
@@ -260,29 +267,29 @@ function onSetting() {
               v-model:active-path="activePath"
             />
             <router-view v-slot="{ Component }">
-              <transition name="slide-fade">
+              <transition name="slide-right" mode="out-in" appear>
                 <component :is="Component" />
               </transition>
             </router-view>
           </section>
         </el-container>
-      </el-main>
-      <el-footer
-        class="my-footer"
-        :style="{
-          '--my-footer-margin-left': myFooterMarginLeft
-        }"
-      >
-        Made by
-        <el-link
-          type="primary"
-          :underline="false"
-          href="https://github.com/vsdeeper"
-          target="_blank"
+        <el-footer
+          class="my-footer"
+          :style="{
+            '--my-footer-margin-left': myFooterMarginLeft,
+          }"
         >
-          Vsdeeper
-        </el-link>
-      </el-footer>
+          Made by
+          <el-link
+            type="primary"
+            :underline="false"
+            href="https://github.com/vsdeeper"
+            target="_blank"
+          >
+            Vsdeeper
+          </el-link>
+        </el-footer>
+      </el-main>
     </el-container>
   </el-container>
   <el-button class="setting-button" type="primary" size="large" circle @click="onSetting">
@@ -302,6 +309,7 @@ function onSetting() {
     top: 0;
     z-index: 4;
     height: 100%;
+    overflow: hidden;
     box-shadow: var(--vs-box-shadow);
     transition-duration: 0.2s;
     background-color: var(--vs-bg-color-overlay);
@@ -350,6 +358,7 @@ function onSetting() {
     flex-direction: column;
     padding-left: var(--my-main-padding-left);
     padding-top: var(--my-main-padding-top);
+    padding-bottom: 0;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: unset;
     .router-view-wrapper {
@@ -358,6 +367,7 @@ function onSetting() {
       .router-view {
         flex: 1;
         width: 100%;
+        overflow-x: hidden;
         &.boxed {
           max-width: 1200px;
         }
@@ -368,7 +378,6 @@ function onSetting() {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: var(--my-footer-margin-left);
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--vs-bg-color-page);
     font-size: 12px;
@@ -385,16 +394,16 @@ function onSetting() {
   bottom: 30px;
   z-index: 2000;
 }
-.slide-fade-enter-active {
+.slide-right-enter-active {
   transition: all 0.3s ease-out 0.3s;
 }
 
-.slide-fade-leave-active {
+.slide-right-leave-active {
   transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
+.slide-right-enter-from,
+.slide-right-leave-to {
   transform: translateX(20px);
   opacity: 0;
 }

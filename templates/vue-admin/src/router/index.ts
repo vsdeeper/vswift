@@ -20,27 +20,27 @@ const router = createRouter({
       name: 'MainLayout',
       redirect: '/dashboard',
       component: MainLayout,
-      children: []
+      children: [],
     },
     {
       path: '/login',
       name: 'login',
       meta: {
-        title: '登录'
+        title: '登录',
       },
-      component: () => import('../views/login/Login.vue')
+      component: () => import('../views/login/Login.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
       name: '404',
-      component: () => import('../views/404/404.vue')
-    }
-  ]
+      component: () => import('../views/404/404.vue'),
+    },
+  ],
 })
 
 // 添加路由导航守卫，解决用户手动刷新页面时路由params参数丢失
 let isRefresh = true
-router.beforeEach(async (to) => {
+router.beforeEach(async to => {
   if (isRefresh) {
     isRefresh = false
 
@@ -67,7 +67,7 @@ router.beforeEach(async (to) => {
           ...findToRoute,
           params: resolveParams(pathname, findToRoute?.path),
           query: resolveQuery(decodeURIComponent(location.href)),
-          replace: true
+          replace: true,
         }
       : to
   }

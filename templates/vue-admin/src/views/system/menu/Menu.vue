@@ -1,3 +1,5 @@
-<script setup lang="ts"></script>
-
-<template>菜单管理</template>
+<template>
+  <ViewWrapper>
+    <el-empty description="暂无数据" />
+  </ViewWrapper>
+</template>

@@ -34,7 +34,7 @@ function onVisualDevelopment() {
       <MenuItem :menu-data />
     </el-menu>
     <el-button
-      v-if="isDev"
+      v-if="isDev && !collapse"
       class="vd-btn"
       type="info"
       size="small"
@@ -62,7 +62,7 @@ function onVisualDevelopment() {
   position: relative;
   flex: 1;
   height: calc(100% - 60px);
-  padding: 0 16px 16px;
+  padding: 0 0 16px;
   box-sizing: border-box;
   &.is-dev {
     padding-bottom: 50px;
@@ -90,7 +90,9 @@ function onVisualDevelopment() {
   ul[class*='-menu--vertical'] {
     border-right-width: 0;
     height: 100%;
-    overflow: auto;
+    padding: 0 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
     :deep(li[class*='-menu-item']) {
       line-height: 1;
       margin-bottom: 4px;

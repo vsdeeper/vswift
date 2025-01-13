@@ -222,8 +222,9 @@ function onPagingChange(val: PagingParams) {
         {{ format(row.createdAt, 'yyyy-MM-dd HH:mm:ss') }}
       </template>
     </VsTable>
+
+    <AddItem ref="AddItemRef" />
+    <EditItem ref="EditItemRef" />
+    <CheckItem ref="CheckItemRef" />
   </ViewWrapper>
-  <AddItem ref="AddItemRef" />
-  <EditItem ref="EditItemRef" />
-  <CheckItem ref="CheckItemRef" />
 </template>

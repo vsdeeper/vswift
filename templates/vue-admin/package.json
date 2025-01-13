@@ -1,10 +1,9 @@
 {
-  "name": "vue-next-admin",
+  "name": "vue-admin",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "preinstall": "only-allow pnpm",
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" -- --mode prod",
     "build:test": "run-p type-check \"build-only {@}\" -- --mode test",
@@ -29,7 +28,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "@vueuse/core": "^10.11.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.4",
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "element-plus": "^2.7.0",

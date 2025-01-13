@@ -49,8 +49,8 @@
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
     "@types/semver": "^7.5.8",
-    "vswift-form": "0.0.16",
-    "visual-development": "0.0.12",
+    "vswift-form": "0.0.17",
+    "visual-development": "0.0.14",
     "vue": "^3.5.13"
   }
 }

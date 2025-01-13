@@ -86,6 +86,15 @@
           ]
         }
       ]
+    },
+    {
+      "menuID": 999,
+      "menuName": "Example",
+      "menuType": 1,
+      "permKey": "demoView",
+      "path": "/demoView",
+      "icon": "Eleme",
+      "visible": 1
     }
   ],
   "msg": "success"
