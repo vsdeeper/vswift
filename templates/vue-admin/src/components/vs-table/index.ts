@@ -13,6 +13,7 @@ export interface VsTableColumnItem {
   label: string
   prop?: string
   width?: string | number
+  minWidth?: string | number
   columnProps?: Partial<TableColumnCtx<any>>
   children?: VsTableColumnItem[]
 }

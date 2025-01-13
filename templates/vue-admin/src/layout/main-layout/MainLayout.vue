@@ -360,7 +360,6 @@ function onSetting() {
     padding-top: var(--my-main-padding-top);
     padding-bottom: 0;
     transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: unset;
     .router-view-wrapper {
       display: flex;
       justify-content: center;

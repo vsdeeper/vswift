@@ -91,8 +91,8 @@
       "menuID": 999,
       "menuName": "Example",
       "menuType": 1,
-      "permKey": "demoView",
-      "path": "/demoView",
+      "permKey": "example",
+      "path": "/example",
       "icon": "Eleme",
       "visible": 1
     }

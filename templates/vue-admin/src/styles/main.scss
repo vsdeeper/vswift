@@ -31,3 +31,16 @@ div[class*='-divider'].nodata {
     color: var(--vs-text-color-secondary);
   }
 }
+
+div[class*='-form'].auto-layout {
+  :deep(.vs-input-number),
+  :deep(.vs-date-editor),
+  :deep(.vs-cascader) {
+    width: 100%;
+  }
+  :deep(.vs-input-number) {
+    .vs-input__inner {
+      text-align: left;
+    }
+  }
+}

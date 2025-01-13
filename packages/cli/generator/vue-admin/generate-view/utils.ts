@@ -1658,8 +1658,8 @@ function transPropsForSearch(item: SearchConditionItem) {
   return codeArr
 }
 
-function transColumnsForTable(items: Record<string, any>[]) {
-  const looper = (data: Record<string, any>[], space: number) => {
+function transColumnsForTable(items: TableColumnItem[]) {
+  const looper = (data: TableColumnItem[], space: number) => {
     const codeArr: string[] = []
     codeArr.push(`${genSpace(space)}columns: [`)
     for (const item of data) {
@@ -1669,6 +1669,7 @@ function transColumnsForTable(items: Record<string, any>[]) {
         `${genSpace(space + 4)}prop: '${item.prop}',`,
       )
       if (item.width) codeArr.push(`${genSpace(space + 4)}width: ${item.width},`)
+      if (item.minWidth) codeArr.push(`${genSpace(space + 4)}minWidth: ${item.minWidth},`)
       if (item.tableColumnItems?.length) codeArr.push(...looper(item.tableColumnItems, space + 4))
       codeArr.push(`${genSpace(space + 2)}},`)
     }

@@ -13,6 +13,7 @@ defineProps<{
     :prop="col.prop"
     :label="col.label"
     :width="col.width"
+    :min-width="col.minWidth"
     v-bind="col.columnProps"
   >
     <template v-if="col.prop" #header="scope">
@@ -26,7 +27,7 @@ defineProps<{
       <template v-for="slot in getSlots(col.children)" #[slot]="scope">
         <slot :name="slot" v-bind="scope" />
       </template>
-      <template v-for="slot in getSlots(col.children).map((e) => `${e}-header`)" #[slot]="scope">
+      <template v-for="slot in getSlots(col.children).map(e => `${e}-header`)" #[slot]="scope">
         <slot :name="slot" v-bind="scope" />
       </template>
     </TableColumn>
@@ -36,6 +37,7 @@ defineProps<{
     :prop="col.prop"
     :label="col.label"
     :width="col.width"
+    :min-width="col.minWidth"
     v-bind="col.columnProps"
   >
     <template v-if="col.prop" #default="scope">

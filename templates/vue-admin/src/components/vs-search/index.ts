@@ -17,6 +17,5 @@ export interface VsSearchProps {
   options?: VsSearchOptions
   labelWidth?: string | number
   showDividerLine?: boolean
-  [key: string]: any
 }
 export { VsSearch }

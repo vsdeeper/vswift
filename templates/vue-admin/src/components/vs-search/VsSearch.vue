@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { VsSearchProps } from '.'
 import { SComponent, type SComponentKey } from './components'
-import { pascal } from 'radash'
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 
-withDefaults(defineProps<VsSearchProps>(), {
+const props = withDefaults(defineProps<VsSearchProps>(), {
   showDividerLine: true,
 })
 
@@ -20,7 +19,6 @@ const hiddenColLen = ref(0)
 const appSettingMainWidth = inject<Ref<'boxed' | 'full'>>('appSettingMainWidth', ref('full'))
 
 onMounted(() => {
-  console.log(111, SComponent)
   handleWindowResize()
   window.addEventListener('resize', handleWindowResize)
 })
@@ -39,7 +37,15 @@ function handleWindowResize() {
 }
 
 function onInquire() {
-  emit('inquire', form.value)
+  const params = JSON.parse(JSON.stringify(form.value))
+  for (const item of props.options ?? []) {
+    if ((item.type === 'Select' && item.props?.multiple) || item.type === 'Cascader') {
+      if (Array.isArray(params[item.id])) {
+        params[item.id] = params[item.id].join(',')
+      }
+    }
+  }
+  emit('inquire', params)
 }
 
 function onRest() {
