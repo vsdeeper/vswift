@@ -6,6 +6,7 @@ import {
   genSpace,
   forofRecursive,
   transKeyToVar,
+  forinRecursive,
 } from '../../utils.js'
 import { genFormItemsCodeSnippets } from '../utils/gen-form-items.js'
 import type {
@@ -19,6 +20,7 @@ import type {
   TableDesignData,
   TableDesignDataOptions,
   TableOperationsItem,
+  TableOperationsItemFormConfig,
   ViewDesignDataOptions,
 } from 'visual-development'
 import type { WidgetDesignData } from 'vswift-form'
@@ -44,6 +46,7 @@ export async function resolveViewObject(
   if (findTable) {
     viewObject['/utils.ts'] = genUtilsCode()
     viewObject['/components'] = {}
+
     for (const item of getTableOperationsHasForm(findTable)) {
       const dashName = `table-${item.value}`
       viewObject['/components'][`/${dashName}`] = {}
@@ -79,6 +82,7 @@ export async function resolveViewObject(
         )
       }
     }
+
     for (const item of getTableColumnOperationsHasForm(findTable)) {
       const dashName = `row-${item.value}`
       viewObject['/components'][`/${dashName}`] = {}
@@ -690,11 +694,31 @@ function genTableOperationComponentCode(
     definitionCodeArr,
   )
 
+  const genInitForm = (formConfig?: TableOperationsItemFormConfig) => {
+    if (!formConfig) return {}
+    const data = {}
+    const widgetList = formConfig.data?.widgetList ?? []
+    forofRecursive<WidgetDesignData>(widgetList, (widget, parent) => {
+      if (['data-table', 'recursive-area'].includes(widget.type)) {
+        if (parent) {
+          forinRecursive(data, (key, parent1) => {
+            if (key === widget.idAlias) {
+              parent1 && (parent1[key] = [])
+              return
+            }
+          })
+        } else {
+          data[widget.idAlias ?? 'undefined'] = []
+        }
+      }
+    })
+    return JSON.stringify(data)
+  }
   storeCodeSnippets(
     [
       'const show = ref(false)',
       'const loading = ref(false)',
-      'const genInitForm = () => ({})',
+      `const genInitForm = () => (${genInitForm(formConfig)})`,
       'const form = ref<Record<string, any>>(genInitForm())',
       '',
     ],
@@ -1127,17 +1151,41 @@ function genApiCodeOfView(components: MergeDesignData[]) {
   // 提取数据
   const findSearch = components.find(e => e.type === 'Search') as SearchDesignData | undefined
   const findTable = components.find(e => e.type === 'Table') as TableDesignData | undefined
+  const apiConfig = getApiConfigOfTable(findTable)
+  const apiConfigItemsOfOperation = [
+    ...getApiConfigOfTableOperations(findTable),
+    ...getApiConfigOfTableColumnOperations(findTable),
+  ]
+  const apiConfigItemOfQuery = [
+    ...getApiConfigOfSearchConditionItems(findSearch),
+    ...getApiConfigOfTableColumnItems(findTable),
+  ].reduce((acc: ApiConfigModel[], cur) => {
+    if (!acc.some(e => e.name === cur.name)) acc.push(cur)
+    return acc
+  }, [])
+  const widgetListNeedDefineApi = resolveApiFromFormConfig(
+    findSearch,
+    findTable,
+  ).widgetListNeedDefineApi
+  const isMock = (url?: string) => url?.startsWith('/mock/example')
 
   /** import start */
-  codeArr.push(`import { http } from '@/utils/http'`, '')
+  codeArr.push(`import { http } from '@/utils/http'`)
+  if (isMock(apiConfig?.url)) {
+    codeArr.push(`import { sleep } from 'radash'`)
+  } else if ([...apiConfigItemsOfOperation, ...apiConfigItemOfQuery].some(e => isMock(e.url))) {
+    codeArr.push(`import { sleep } from 'radash'`)
+  } else if (widgetListNeedDefineApi.some(e => isMock(e.options.systemApi))) {
+    codeArr.push(`import { sleep } from 'radash'`)
+  }
+  codeArr.push('')
   /** import end */
 
   /** export api start */
   const toArg = (method: Method) => `${method === 'GET' ? 'params' : 'data'}`
-  const apiConfig = getApiConfigOfTable(findTable)
   const toUrl = (url?: string) => {
-    if (url?.startsWith('/mock/example')) {
-      return `${url}.json?t=${+new Date()}`
+    if (isMock(url)) {
+      return `${url}.json?t=`
     }
     return url
   }
@@ -1146,11 +1194,13 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     `${genSpace(2)}try {`,
     `${genSpace(4)}const { data: res } = await http({`,
     `${genSpace(6)}method: '${apiConfig?.method ?? 'GET'}',`,
-    `${genSpace(6)}url: '${toUrl(apiConfig?.url)}',`,
+    `${genSpace(6)}url: '${toUrl(apiConfig?.url)}'+ +new Date(),`,
   )
-  codeArr.push(`${genSpace(6)}${toArg(apiConfig?.method ?? 'GET')}`)
+  codeArr.push(`${genSpace(6)}${toArg(apiConfig?.method ?? 'GET')}`, `${genSpace(4)}})`)
+  if (isMock(apiConfig?.url)) {
+    codeArr.push('await sleep(1000)')
+  }
   codeArr.push(
-    `${genSpace(4)}})`,
     `${genSpace(4)}return res as Record<string, any>`,
     `${genSpace(2)}} catch (error) {`,
     `${genSpace(4)}console.error('queryTableList ->', error)`,
@@ -1158,20 +1208,19 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     `}`,
     '',
   )
-  for (const item of [
-    ...getApiConfigOfTableOperations(findTable),
-    ...getApiConfigOfTableColumnOperations(findTable),
-  ]) {
+  for (const item of apiConfigItemsOfOperation) {
     codeArr.push(
       `export const ${item.name} = async (${toArg(item.method ?? 'GET')}: Record<string, any>) => {`,
       `${genSpace(2)}try {`,
       `${genSpace(4)}await http({`,
       `${genSpace(6)}method: '${item.method}',`,
-      `${genSpace(6)}url: '${toUrl(item.url)}',`,
+      `${genSpace(6)}url: '${toUrl(item.url)}'+ +new Date(),`,
     )
-    codeArr.push(`${genSpace(6)}${toArg(item.method ?? 'GET')}`)
+    codeArr.push(`${genSpace(6)}${toArg(item.method ?? 'GET')}`, `${genSpace(4)}})`)
+    if (isMock(item.url)) {
+      codeArr.push('await sleep(1000)')
+    }
     codeArr.push(
-      `${genSpace(4)}})`,
       `${genSpace(4)}return true`,
       `${genSpace(2)}} catch (error) {`,
       `${genSpace(4)}console.error('${item.name} ->', error)`,
@@ -1181,15 +1230,7 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     )
   }
 
-  const mergeApiConfigItems = [
-    ...getApiConfigOfSearchConditionItems(findSearch),
-    ...getApiConfigOfTableColumnItems(findTable),
-  ].reduce((acc: ApiConfigModel[], cur) => {
-    if (!acc.some(e => e.name === cur.name)) acc.push(cur)
-    return acc
-  }, [])
-
-  for (const item of mergeApiConfigItems) {
+  for (const item of apiConfigItemOfQuery) {
     const args: string[] = item.params?.length
       ? item.params.map(e => `${e.key}: ${e.valueType === 'number' ? +e.value! : e.value}`)
       : []
@@ -1198,13 +1239,16 @@ function genApiCodeOfView(components: MergeDesignData[]) {
       `${genSpace(2)}try {`,
       `${genSpace(4)}const { data: res } = await http({`,
       `${genSpace(6)}method: '${item.method ?? 'GET'}',`,
-      `${genSpace(6)}url: '${toUrl(item.url)}',`,
+      `${genSpace(6)}url: '${toUrl(item.url)}'+ +new Date(),`,
     )
     if (args.length) {
       codeArr.push(`${genSpace(6)}${toArg(item.method ?? 'GET')}: { ${args.join(',')} }`)
     }
+    codeArr.push(`${genSpace(4)}})`)
+    if (isMock(item.url)) {
+      codeArr.push('await sleep(1000)')
+    }
     codeArr.push(
-      `${genSpace(4)}})`,
       `${genSpace(4)}return res as Record<string, any>[]`,
       `${genSpace(2)}} catch (error) {`,
       `${genSpace(4)}console.error('${item.name} ->', error)`,
@@ -1214,16 +1258,20 @@ function genApiCodeOfView(components: MergeDesignData[]) {
     )
   }
 
-  const resolvedApiInfo = resolveApiFromFormConfig(findSearch, findTable)
-  for (const item of resolvedApiInfo.widgetListNeedDefineApi) {
+  for (const item of widgetListNeedDefineApi) {
     const apiName = transKeyToVar('query', item.idAlias ?? 'undefined', 'list')
     codeArr.push(
       `export const ${apiName} = async () => {`,
       `${genSpace(2)}try {`,
       `${genSpace(4)}const { data: res } = await http({`,
       `${genSpace(6)}method: 'GET',`,
-      `${genSpace(6)}url: '${toUrl(item.options.systemApi)}',`,
+      `${genSpace(6)}url: '${toUrl(item.options.systemApi)}'+ +new Date(),`,
       `${genSpace(4)}})`,
+    )
+    if (isMock(item.options.systemApi)) {
+      codeArr.push('await sleep(1000)')
+    }
+    codeArr.push(
       `${genSpace(4)}return res as Record<string, any>[]`,
       `${genSpace(2)}} catch (error) {`,
       `${genSpace(4)}console.error('${apiName} ->', error)`,

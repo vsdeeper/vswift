@@ -22,7 +22,7 @@ interface GenerateInfoItem {
  */
 export async function generateView(names: string) {
   const spinner = ora({ spinner: 'line' })
-  spinner.start('Generating...' + os.EOL)
+  // spinner.start('Generating...' + os.EOL)
   const storeGenerateInfo: GenerateInfoItem[] = []
   const nameArr = names.split(',')
   for (const name of nameArr) {

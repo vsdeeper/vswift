@@ -2,6 +2,8 @@ import type { WidgetDesignData } from 'vswift-form'
 import type { ViewDesignDataOptions } from 'visual-development'
 import { camel, dash, last, pascal, snake, title } from 'radash'
 import {
+  forinRecursive,
+  forofRecursive,
   storeCodeSnippetOfDestructuringVar,
   storeCodeSnippets,
   transKeyToVar,
@@ -100,7 +102,29 @@ export const genRecursiveAreaModel = (options: ViewDesignDataOptions, widget: Wi
     [`const onDelete = (index: number) => {`, `model.value.splice(index, 1)`, `}`, ''],
     definitionCodeArr,
   )
-  storeCodeSnippets([`const onAdd = () => {`, `model.value.push({})`, `}`, ''], definitionCodeArr)
+  const genInitObj = (widgetList?: WidgetDesignData[]) => {
+    if (!widgetList?.length) return {}
+    const obj = {}
+    forofRecursive<WidgetDesignData>(widgetList, (widget, parent) => {
+      if (['data-table', 'recursive-area'].includes(widget.type)) {
+        if (parent) {
+          forinRecursive(obj, (key, parent1) => {
+            if (key === widget.idAlias) {
+              parent1 && (parent1[key] = [])
+              return
+            }
+          })
+        } else {
+          obj[widget.idAlias ?? 'undefined'] = []
+        }
+      }
+    })
+    return JSON.stringify(obj)
+  }
+  storeCodeSnippets(
+    [`const onAdd = () => {`, `model.value.push(${genInitObj(widget.widgetList)})`, `}`, ''],
+    definitionCodeArr,
+  )
   storeCodeSnippets(
     [
       `const genFormItemProp = (prop: string) => {`,
@@ -118,6 +142,7 @@ export const genRecursiveAreaModel = (options: ViewDesignDataOptions, widget: Wi
   const formItemsCodeSnippets = genFormItemsCodeSnippets(widget.widgetList ?? [], {
     model: 'item',
     recursive: true,
+    where: 'recursive-area',
     suffix: `Of${pascal(title(widget.idAlias))}`,
   })
   storeCodeSnippets(
@@ -134,7 +159,12 @@ export const genRecursiveAreaModel = (options: ViewDesignDataOptions, widget: Wi
     storeCodeSnippets(items, templateCodeArr)
   }
   storeCodeSnippets(
-    [`</el-card>`, `<el-button type="primary" @click="onAdd">+ 新增</el-button>`, '</div>'],
+    [
+      `</el-card>`,
+      `<el-divider v-if="!model?.length" class="nodata">暂无数据</el-divider>`,
+      `<el-button type="primary" @click="onAdd">+ 新增</el-button>`,
+      '</div>',
+    ],
     templateCodeArr,
   )
   /** template end */

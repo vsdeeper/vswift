@@ -14,6 +14,8 @@ const props = defineProps<{
   action: string
   singleFileSizeLimit?: number
   amountLimit?: number
+  listType?: 'text' | 'picture' | 'picture-card'
+  previewTeleported?: boolean
 }>()
 
 const uploadRef = ref<UploadInstance>()
@@ -88,29 +90,29 @@ defineExpose({
 <template>
   <el-upload
     ref="uploadRef"
-    class="vs-upload"
-    :class="{ [options.listType || 'text']: true }"
+    class="vswift-upload"
+    :class="{ [listType || 'text']: true }"
     v-bind="{
+      action,
       onPreview,
       onSuccess,
       onError,
       beforeUpload,
-      ...options,
     }"
     v-model:file-list="model"
   >
     <template #default>
-      <el-icon v-if="options.listType === 'picture-card'"><Plus /></el-icon>
+      <el-icon v-if="listType === 'picture-card'"><Plus /></el-icon>
       <el-button v-else type="primary">选择文件</el-button>
-      <div v-if="typeof options.amountLimit === 'number'" class="limit-tip">
-        {{ model.length }}/{{ options.amountLimit }}
+      <div v-if="typeof amountLimit === 'number'" class="limit-tip">
+        {{ model.length }}/{{ amountLimit }}
       </div>
     </template>
     <template v-if="slots.trigger" #trigger>
       <slot name="trigger"></slot>
     </template>
     <template #tip>
-      <slot name="tip" :options>
+      <slot name="tip" :amount-limit single-file-size-limit>
         <div class="vs-upload__tip">
           {{ tipArr.join('，') }}
         </div>
@@ -120,16 +122,16 @@ defineExpose({
       <slot name="file"></slot>
     </template>
   </el-upload>
-  <el-image v-if="showImagePreview" v-bind="options.imagePreviewProps" :preview-src-list />
+  <el-image v-if="showImagePreview" :preview-teleported :preview-src-list />
 </template>
 
 <style lang="scss" scoped>
-.vs-upload {
+.vswift-upload {
   width: 100%;
   padding: 12px;
   border: 1px solid var(--vs-border-color);
   border-radius: var(--vs-border-radius-base);
-  :deep(.vs-upload) {
+  & > :deep(div[class*='-upload']) {
     display: flex;
     justify-content: space-between;
     align-items: start;

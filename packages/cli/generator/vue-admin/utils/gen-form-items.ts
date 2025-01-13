@@ -24,23 +24,16 @@ export const genFormItemsCodeSnippets = (
     model?: string
     recursive?: boolean
     suffix?: string
+    where?: 'data-table' | 'recursive-area'
   },
 ) => {
   const { space } = options ?? {}
   const codeSnippets: string[][] = []
   for (const widget of widgetList) {
     if (widget.type === 'text') {
-      codeSnippets.push([
-        genFormItemStartTag(widget, options),
-        ...genTextCodeSnippets(widget, options),
-        genFormItemEndTag(space),
-      ])
+      codeSnippets.push([...genTextCodeSnippets(widget, options)])
     } else if (widget.type === 'divider') {
-      codeSnippets.push([
-        genFormItemStartTag(widget, options),
-        ...genDividerCodeSnippets(widget, options),
-        genFormItemEndTag(space),
-      ])
+      codeSnippets.push([...genDividerCodeSnippets(widget, options)])
     } else if (widget.type === 'input') {
       codeSnippets.push([
         genFormItemStartTag(widget, options),

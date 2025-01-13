@@ -47,6 +47,7 @@ export function transKeyToVar(prefix: string, key: string, ...suffix: string[]) 
  * forof 递归
  * @param data
  * @param handler
+ * @param options
  */
 export function forofRecursive<T = Record<string, any>>(
   data: T[],
@@ -60,6 +61,27 @@ export function forofRecursive<T = Record<string, any>>(
     forofRecursive(item[children] ?? [], handler, {
       ...options,
       parent: item,
+    })
+  }
+}
+
+/**
+ * forin 递归
+ * @param data
+ * @param handler
+ * @param options
+ */
+export function forinRecursive(
+  data: Record<string, any>,
+  // eslint-disable-next-line no-unused-vars
+  handler: (key: string, parent?: Record<string, any>) => any,
+  options?: { children?: string; parent?: Record<string, any> },
+) {
+  for (const key in data) {
+    handler(key, options?.parent)
+    forinRecursive(data[key] ?? {}, handler, {
+      ...options,
+      parent: data[key],
     })
   }
 }

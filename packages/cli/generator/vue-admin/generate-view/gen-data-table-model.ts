@@ -106,11 +106,15 @@ export const genDataTableModel = (options: ViewDesignDataOptions, widget: Widget
   const formItemsCodeSnippets = genFormItemsCodeSnippets(widget.widgetList ?? [], {
     model: 'row',
     recursive: true,
+    where: 'data-table',
   })
   widget.widgetList?.map((item, index) => {
     storeCodeSnippets(
       [
-        `<el-table-column prop="${item.idAlias}" label="${item.options.label}">`,
+        `<el-table-column prop="${item.idAlias}">`,
+        `<template #header>`,
+        `<el-text type="danger" style="margin-right: 4px;">*</el-text>${item.options.label}`,
+        `</template>`,
         `<template #default="{ row, $index: index }">`,
       ],
       templateCodeArr,
@@ -120,7 +124,7 @@ export const genDataTableModel = (options: ViewDesignDataOptions, widget: Widget
   })
   storeCodeSnippets(
     [
-      `<el-table-column label="操作" width="80px" fixed="right">`,
+      `<el-table-column label="操作" width="70px" fixed="right">`,
       `<template #default="{ $index: index }">`,
       `<el-button type="danger" size="small" :icon="SemiSelect" circle @click="onDelete(index)" />`,
       `</template>`,

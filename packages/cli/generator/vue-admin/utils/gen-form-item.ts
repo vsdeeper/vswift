@@ -18,16 +18,20 @@ export const genFormItemRulesProp = (widget: WidgetDesignData) => {
 
 export const genFormItemStartTag = (
   widget: WidgetDesignData,
-  options?: { space?: number; recursive?: boolean },
+  options?: { space?: number; recursive?: boolean; where?: 'data-table' | 'recursive-area' },
 ) => {
-  const { space, recursive } = options ?? {}
+  const { space, recursive, where } = options ?? {}
+  const genLabel = (where?: 'data-table' | 'recursive-area') => {
+    if (where === 'data-table') return ''
+    else return `label="${widget.options.label}"`
+  }
   const genFormItemProp = (id: string) => {
     if (recursive) {
       return ':prop="genFormItemProp(`${index}.' + `${id}` + '`)"'
     }
-    return `props="${id}"`
+    return `prop="${id}"`
   }
-  return `${genSpace(space)}<el-form-item label="${widget.options.label}" ${genFormItemProp(widget.idAlias ?? 'undefined')} ${genFormItemRulesProp(widget)}>`
+  return `${genSpace(space)}<el-form-item ${genLabel(where)} ${genFormItemProp(widget.idAlias ?? 'undefined')} ${genFormItemRulesProp(widget)}>`
 }
 
 export const genFormItemEndTag = (space?: number) => {

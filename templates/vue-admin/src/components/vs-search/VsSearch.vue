@@ -53,7 +53,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="vs-search" :class="{ more: showMore }">
+  <div class="vswift-search" :class="{ more: showMore }">
     <template v-if="options?.length">
       <el-form :model="form" :label-width="labelWidth ?? '100px'">
         <el-row>
@@ -112,7 +112,7 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-.vs-search {
+.vswift-search {
   & > form[class*='-form'] {
     & + div[class*='-divider--horizontal'] {
       margin: 12px 0;
@@ -137,6 +137,7 @@ defineExpose({
     flex: 1;
   }
   div[class*='-input-number'] {
+    width: 100%;
     :deep(input[class*='-input__inner']) {
       text-align: left;
     }

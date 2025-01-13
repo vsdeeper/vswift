@@ -25,3 +25,9 @@ body {
   --vs-dialog-max-width: 850px;
   max-width: var(--vs-dialog-max-width);
 }
+
+div[class*='-divider'].nodata {
+  div[class*='-divider__text'] {
+    color: var(--vs-text-color-secondary);
+  }
+}

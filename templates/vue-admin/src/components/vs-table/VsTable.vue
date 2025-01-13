@@ -187,7 +187,7 @@ defineExpose({
 </script>
 
 <template>
-  <div v-loading="loading" class="vs-table">
+  <div v-loading="loading" class="vswift-table">
     <div v-if="operateOptions?.length" :class="['table-operate', tableOperateAlign]">
       <template
         v-for="(item, index) in operateOptions"
@@ -286,7 +286,7 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-.vs-table {
+.vswift-table {
   .table-operate {
     display: flex;
     margin: 10px 0;

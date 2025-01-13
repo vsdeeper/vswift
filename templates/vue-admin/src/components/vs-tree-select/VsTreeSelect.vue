@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<VsTreeSelectProps>(), {
   itemChildren: 'children',
   returnObject: true,
   filterValue: undefined,
-  appendToBody: true
+  appendToBody: true,
 })
 
 const emit = defineEmits<{
@@ -46,12 +46,12 @@ const filterInputRef = ref<InputInstance>()
 const allSelected = computed(
   () =>
     getRenderCheckedNodes(renderCheckedNodes.value, props.filterValue).length ===
-    getAllKeys().length
+    getAllKeys().length,
 )
 
 watch(
   [() => props.modelValue, () => props.options, () => props.sourceOptions],
-  (res) => {
+  res => {
     const [val, options, sourceOptions] = res
     if (!options?.length) return
     if (Array.isArray(val)) {
@@ -71,7 +71,7 @@ watch(
     // 虚拟渲染时，手动展开所有选项，防止异步数据延迟
     if (props.virtualized) expandAllForTreeV2(renderOptions.value)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const confirm = () => {
@@ -80,21 +80,21 @@ const confirm = () => {
     emit(
       'update:modelValue',
       props.multiple
-        ? checkedNodes.map((e) => ({
+        ? checkedNodes.map(e => ({
             [props.itemValue]: e[props.itemValue],
-            [props.itemLabel]: e[props.itemLabel]
+            [props.itemLabel]: e[props.itemLabel],
           }))
-        : checkedNodes.map((e) => ({
+        : checkedNodes.map(e => ({
             [props.itemValue]: e[props.itemValue],
-            [props.itemLabel]: e[props.itemLabel]
-          }))[0]
+            [props.itemLabel]: e[props.itemLabel],
+          }))[0],
     )
   } else {
     emit(
       'update:modelValue',
       props.multiple
-        ? checkedNodes.map((e) => e[props.itemValue])
-        : checkedNodes.map((e) => e[props.itemValue])[0]
+        ? checkedNodes.map(e => e[props.itemValue])
+        : checkedNodes.map(e => e[props.itemValue])[0],
     )
   }
   show.value = false
@@ -149,16 +149,16 @@ const operate = (type: string, data?: unknown) => {
     }
     case 'delete.dialog': {
       const findIndex1 = renderCheckedNodes.value!.findIndex(
-        (node) => node[props.itemValue] === (data as TreeNodeData)[props.itemValue]
+        node => node[props.itemValue] === (data as TreeNodeData)[props.itemValue],
       )
       findIndex1 > -1 && renderCheckedNodes.value!.splice(findIndex1, 1)
 
       const checkedNodes = getTreeRef()?.getCheckedNodes() || []
       const findIndex2 = checkedNodes.findIndex(
-        (node) => node[props.itemValue] === (data as TreeNodeData)[props.itemValue]
+        node => node[props.itemValue] === (data as TreeNodeData)[props.itemValue],
       )
       findIndex2 > -1 && checkedNodes.splice(findIndex2, 1)
-      getTreeRef()?.setCheckedKeys(checkedNodes.map((node) => node[props.itemValue]))
+      getTreeRef()?.setCheckedKeys(checkedNodes.map(node => node[props.itemValue]))
       break
     }
     case 'delete.field': {
@@ -166,11 +166,11 @@ const operate = (type: string, data?: unknown) => {
       if (Array.isArray(value.value)) {
         if (isArraryObject(value.value)) {
           const findIndex = (value.value as Record<string, any>[])!.findIndex(
-            (e) => e[props.itemValue] === (data as Record<string, any>)[props.itemValue]
+            e => e[props.itemValue] === (data as Record<string, any>)[props.itemValue],
           )
           findIndex > -1 && (value.value as Record<string, any>[])!.splice(findIndex, 1)
         } else {
-          const findIndex = (value.value as TreeKey[])!.findIndex((e) => e === (data as TreeKey))
+          const findIndex = (value.value as TreeKey[])!.findIndex(e => e === (data as TreeKey))
           findIndex > -1 && (value.value as TreeKey[])!.splice(findIndex, 1)
         }
       } else {
@@ -205,17 +205,17 @@ const onCheck = (item: TreeNodeData) => {
 
 watch(
   filterText,
-  throttle({ interval: 500 }, (val) => {
+  throttle({ interval: 500 }, val => {
     getTreeRef()?.filter(val)
-  })
+  }),
 )
 
 watch(
   filterTextSelected,
-  throttle({ interval: 500 }, (val) => {
+  throttle({ interval: 500 }, val => {
     const checkedNodes = getCheckedNodes()
-    renderCheckedNodes.value = checkedNodes.filter((node) => node[props.itemLabel].includes(val))
-  })
+    renderCheckedNodes.value = checkedNodes.filter(node => node[props.itemLabel].includes(val))
+  }),
 )
 
 function getCheckedNodes() {
@@ -232,7 +232,7 @@ function getTreeKeysByValue(data?: VsTreeSelectValue) {
     if (!data.length) return []
     if (isArraryObject(data)) {
       return (data as VsTreeSelectValueItem[]).map(
-        (e: VsTreeSelectValueItem) => (e as Record<string, any>)[props.itemValue] as TreeKey
+        (e: VsTreeSelectValueItem) => (e as Record<string, any>)[props.itemValue] as TreeKey,
       )
     } else return data as TreeKey[]
   } else {
@@ -257,14 +257,14 @@ function getLabel(item: VsTreeSelectValueItem, data: Record<string, any>[]) {
     const finds = findArraryValueFromTreeData(item[props.itemValue], data, {
       id: props.itemValue,
       label: props.itemLabel,
-      returnType: 'labels'
+      returnType: 'labels',
     })
     return finds?.length ? finds.join('/') : '未知'
   } else {
     const finds = findArraryValueFromTreeData(item, data, {
       id: props.itemValue,
       label: props.itemLabel,
-      returnType: 'labels'
+      returnType: 'labels',
     })
     return finds ? finds.join('/') : '未知'
   }
@@ -277,7 +277,7 @@ function expandAllForTreeV2(data: Record<string, any>[]) {
         ...pre,
         ...(cur[props.itemChildren]?.length
           ? [cur[props.itemValue], ...looper(cur[props.itemChildren])]
-          : [])
+          : []),
       ]
     }, [])
   }
@@ -286,17 +286,17 @@ function expandAllForTreeV2(data: Record<string, any>[]) {
 
 function getRenderCheckedNodes(
   renderCheckedNodes?: TreeNodeData[],
-  filterValue?: (data: Record<string, any>[]) => Record<string, any>[]
+  filterValue?: (data: Record<string, any>[]) => Record<string, any>[],
 ) {
   if (!renderCheckedNodes) return []
-  if (!filterValue) return renderCheckedNodes.filter((e) => !e.disabled)
-  return filterValue(renderCheckedNodes.filter((e) => !e.disabled))
+  if (!filterValue) return renderCheckedNodes.filter(e => !e.disabled)
+  return filterValue(renderCheckedNodes.filter(e => !e.disabled))
 }
 
 function getAllKeys() {
   const { options, itemValue, filterValue } = props
   const validData = filterValue ? filterValue(toFlattenData(options)) : toFlattenData(options)
-  return validData.map((e) => e[itemValue]) as TreeKey[]
+  return validData.map(e => e[itemValue]) as TreeKey[]
 }
 
 function toFlattenData(data: Record<string, any>[]) {
@@ -305,19 +305,19 @@ function toFlattenData(data: Record<string, any>[]) {
     return [
       ...prev,
       ...(cur.disabled ? [] : [cur]),
-      ...(cur[itemChildren]?.length ? toFlattenData(cur[itemChildren]) : [])
+      ...(cur[itemChildren]?.length ? toFlattenData(cur[itemChildren]) : []),
     ]
   }, [])
 }
 
 defineExpose({
-  getTreeRef
+  getTreeRef,
 })
 </script>
 
 <template>
   <div
-    class="vs-tree-select"
+    class="vswift-tree-select"
     :class="{ disabled: _disabled, 'collapse-tags': collapseTags }"
     @click="operate('click.field')"
   >
@@ -392,7 +392,7 @@ defineExpose({
   </div>
   <el-dialog
     v-model="show"
-    class="vs-tree-select-dialog"
+    class="vswift-tree-select-dialog"
     :class="{ virtualized }"
     :title="title"
     :append-to-body="appendToBody"
@@ -422,7 +422,7 @@ defineExpose({
           :props="{
             label: itemLabel,
             value: itemValue,
-            children: itemChildren
+            children: itemChildren,
           }"
           show-checkbox
           :check-strictly="checkStrictly"
@@ -443,7 +443,7 @@ defineExpose({
           :filter-node-method="filterMethod"
           :props="{
             label: itemLabel,
-            children: itemChildren
+            children: itemChildren,
           }"
           @check="onCheck"
         />
@@ -495,7 +495,7 @@ defineExpose({
 </template>
 
 <style lang="scss">
-.vs-tree-select-dialog {
+.vswift-tree-select-dialog {
   min-width: 560px;
   max-width: 710px;
   .toggle-all-selection {
@@ -599,7 +599,7 @@ span[class*='-tag '].link-tag {
 </style>
 
 <style lang="scss" scoped>
-.vs-tree-select {
+.vswift-tree-select {
   --border-color: #dcdfe6;
   --border-radius: 4px;
   --disabled-bg-color: #f5f7fa;

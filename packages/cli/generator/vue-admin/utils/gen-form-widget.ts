@@ -37,7 +37,7 @@ export const genInputCodeSnippets = (
   const { space, model = 'model' } = options ?? {}
   const codeSnippets: string[] = []
   codeSnippets.push(
-    `${genSpace(space)}<el-input v-model="${model}.${widget.idAlias}" type="${widget.options.type ?? 'text'}" placeholder="请输入" />`,
+    `${genSpace(space)}<el-input v-model="${model}.${widget.idAlias}" type="${widget.options.type ?? 'text'}"  clearable placeholder="请输入" />`,
   )
   return codeSnippets
 }
@@ -54,7 +54,7 @@ export const genInputNumberCodeSnippets = (
     } else return ''
   }
   codeSnippets.push(
-    `${genSpace(space)}<el-input-number v-model="${model}.${widget.idAlias}" placeholder="请输入" :min="${widget.options.min ?? 0}" :max="${widget.options.max ?? 'Number.MAX_SAFE_INTEGER'}" ${genPrecisionProp(widget)} />`,
+    `${genSpace(space)}<el-input-number v-model="${model}.${widget.idAlias}" placeholder="请输入" controls-position="right" :min="${widget.options.min ?? 0}" :max="${widget.options.max ?? 'Number.MAX_SAFE_INTEGER'}" ${genPrecisionProp(widget)} />`,
   )
   return codeSnippets
 }
@@ -138,8 +138,15 @@ export const genDatePickerCodeSnippets = (
 ) => {
   const { space, model = 'model' } = options ?? {}
   const codeSnippets: string[] = []
+  const genPlaceholderProp = (type: string) => {
+    if (type === 'date') return `placeholder="请选择日期"`
+    else if (type === 'daterange') return `start-placeholder="开始日期" end-placeholder="结束日期"`
+    else if (type === 'month') return `placeholder="请选择月份"`
+    else if (type === 'monthrange') return `start-placeholder="开始月份" end-placeholder="结束月份"`
+    return ''
+  }
   codeSnippets.push(
-    `${genSpace(space)}<el-date-picker v-model="${model}.${widget.idAlias}" type="${widget.options.type ?? 'date'}" value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
+    `${genSpace(space)}<el-date-picker v-model="${model}.${widget.idAlias}" type="${widget.options.type ?? 'date'}" ${genPlaceholderProp(widget.options.type ?? 'date')} value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
   )
   return codeSnippets
 }
@@ -150,8 +157,14 @@ export const genDatetimePickerCodeSnippets = (
 ) => {
   const { space, model = 'model' } = options ?? {}
   const codeSnippets: string[] = []
+  const genPlaceholderProp = (type: string) => {
+    if (type === 'datetime') return `placeholder="请选择日期时间"`
+    else if (type === 'datetimerange')
+      return `start-placeholder="开始日期时间" end-placeholder="结束日期时间"`
+    return ''
+  }
   codeSnippets.push(
-    `${genSpace(space)}<el-date-picker v-model="${model}.${widget.idAlias}" type="${widget.options.type ?? 'datetime'}" value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
+    `${genSpace(space)}<el-date-picker v-model="${model}.${widget.idAlias}" type="${widget.options.type ?? 'datetime'}" ${genPlaceholderProp(widget.options.type ?? 'datetime')} value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
   )
   return codeSnippets
 }
@@ -162,8 +175,22 @@ export const genTimePickerCodeSnippets = (
 ) => {
   const { space, model = 'model' } = options ?? {}
   const codeSnippets: string[] = []
+  const genisRangeProp = (isRange?: boolean) => {
+    if (typeof isRange === 'boolean') {
+      return isRange ? `is-range` : ''
+    }
+    return ''
+  }
+  const genPlaceholderProp = (isRange?: boolean) => {
+    if (typeof isRange === 'boolean') {
+      return isRange
+        ? `start-placeholder="开始时间" end-placeholder="结束时间"`
+        : `placeholder="请选择时间"`
+    }
+    return `placeholder="请选择时间"`
+  }
   codeSnippets.push(
-    `${genSpace(space)}<el-time-picker v-model="${model}.${widget.idAlias}" value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
+    `${genSpace(space)}<el-time-picker v-model="${model}.${widget.idAlias}" ${genisRangeProp(widget.options.isRange)} ${genPlaceholderProp(widget.options.isRange)} value-format="x" @change="onChange('${widget.idAlias}', $event)" />`,
   )
   return codeSnippets
 }
@@ -187,7 +214,7 @@ export const genUploadCodeSnippets = (
     return ''
   }
   codeSnippets.push(
-    `${genSpace(space)}<VsUpload v-model="${model}.${widget.idAlias}" action="${widget.options.action}" ${genSingleFileSizeLimitProp(widget)} ${genAmountLimitProp(widget)} />`,
+    `${genSpace(space)}<VsUpload v-model="${model}.${widget.idAlias}" action="${widget.options.action || '#'}" ${genSingleFileSizeLimitProp(widget)} ${genAmountLimitProp(widget)} />`,
   )
   return codeSnippets
 }
