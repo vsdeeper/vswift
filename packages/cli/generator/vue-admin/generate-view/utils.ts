@@ -7,6 +7,8 @@ import {
   forofRecursive,
   transKeyToVar,
   forinRecursive,
+  genModelCompName,
+  genConstName,
 } from '../../utils.js'
 import { genFormItemsCodeSnippets } from '../utils/gen-form-items.js'
 import type {
@@ -23,7 +25,7 @@ import type {
   TableOperationsItemFormConfig,
   ViewDesignDataOptions,
 } from 'visual-development'
-import type { WidgetDesignData } from 'vswift-form'
+import type { FormPropsSettings, WidgetDesignData } from 'vswift-form'
 import { genDataTableModel } from './gen-data-table-model.js'
 import { genRecursiveAreaModel } from './gen-recursive-area-model.js'
 
@@ -47,6 +49,7 @@ export async function resolveViewObject(
     viewObject['/utils.ts'] = genUtilsCode()
     viewObject['/components'] = {}
 
+    // 有表单的表格操作
     for (const item of getTableOperationsHasForm(findTable)) {
       const dashName = `table-${item.value}`
       viewObject['/components'][`/${dashName}`] = {}
@@ -57,24 +60,17 @@ export async function resolveViewObject(
         viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
           '/FormDetail.vue': genFormDetailComponentCode(options, item, components),
         }
+        // 递归生成子组件
         forofRecursive<WidgetDesignData>(
           item.formConfig.data?.widgetList ?? [],
           (widget, parent) => {
             if (widget.type === 'data-table') {
-              let suffix = ''
-              if (parent?.type === 'recursive-area') {
-                suffix = `Of${pascal(title(parent.idAlias))}`
-              }
               viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
-                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+                `/${genModelCompName(widget.idAlias ?? 'undefined', parent)}.vue`
               ] = genDataTableModel(options, widget)
             } else if (widget.type === 'recursive-area') {
-              let suffix = ''
-              if (parent?.type === 'recursive-area') {
-                suffix = `Of${pascal(title(parent.idAlias))}`
-              }
               viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
-                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+                `/${genModelCompName(widget.idAlias ?? 'undefined', parent)}.vue`
               ] = genRecursiveAreaModel(options, widget)
             }
           },
@@ -83,6 +79,7 @@ export async function resolveViewObject(
       }
     }
 
+    // 有表单的表列操作
     for (const item of getTableColumnOperationsHasForm(findTable)) {
       const dashName = `row-${item.value}`
       viewObject['/components'][`/${dashName}`] = {}
@@ -93,24 +90,17 @@ export async function resolveViewObject(
         viewObject['/components'][`/${dashName}`]['/components']['/form-detail'] = {
           '/FormDetail.vue': genFormDetailComponentCode(options, item, components),
         }
+        // 递归生成子组件
         forofRecursive<WidgetDesignData>(
           item.formConfig.data?.widgetList ?? [],
           (widget, parent) => {
             if (widget.type === 'data-table') {
-              let suffix = ''
-              if (parent?.type === 'recursive-area') {
-                suffix = `Of${pascal(title(parent.idAlias))}`
-              }
               viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
-                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+                `/${genModelCompName(widget.idAlias ?? 'undefined', parent)}.vue`
               ] = genDataTableModel(options, widget)
             } else if (widget.type === 'recursive-area') {
-              let suffix = ''
-              if (parent?.type === 'recursive-area') {
-                suffix = `Of${pascal(title(parent.idAlias))}`
-              }
               viewObject['/components'][`/${dashName}`]['/components']['/form-detail'][
-                `/${pascal(title(widget.idAlias ?? 'undefined'))}${suffix}Model.vue`
+                `/${genModelCompName(widget.idAlias ?? 'undefined', parent)}.vue`
               ] = genRecursiveAreaModel(options, widget)
             }
           },
@@ -422,16 +412,29 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
           `${genSpace(8)}ElMessage.error('请选择要${item.label}的项')`,
           `${genSpace(8)}return`,
           `${genSpace(6)}}`,
-          `${genSpace(6)}await ElMessageBox.confirm('确定${item.label}吗？', '提示', { type: 'warning' })`,
-          `${genSpace(6)}const ${param.key} = selected.map((e) => e.${param.value})`,
-          `${genSpace(6)}if (await ${transKeyToVar('table', item.value ?? 'undefined')}({ ${param.key} })) {`,
-          `${genSpace(8)}ElMessage.success('${item.label}成功')`,
-          `${genSpace(8)}getTableList()`,
-          `${genSpace(6)}}`,
-          `${genSpace(4)}}`,
+          `${genSpace(6)}await ElMessageBox.confirm('确定${item.label}吗？', '提示', {`,
         ],
         onOperateCodeArr,
       )
+      storeCodeSnippets(
+        [
+          `type: 'warning',`,
+          `beforeClose: async (action, instance, done) => {`,
+          `  if (action === 'confirm') {`,
+          `    instance.confirmButtonLoading = true`,
+          `    const ${param.key} = selected.map((e) => e.${param.value})`,
+          `    if (await ${transKeyToVar('table', item.value ?? 'undefined')}({ ${param.key} })) {`,
+          `      ElMessage.success('${item.label}成功')`,
+          `      done()`,
+          `    }`,
+          `    instance.confirmButtonLoading = false`,
+          `  } else done()`,
+          `},`,
+        ],
+        onOperateCodeArr,
+      )
+      storeCodeSnippets(['})'], onOperateCodeArr)
+      storeCodeSnippets(['getTableList()', 'break', '}'], onOperateCodeArr)
     } else if (item.formConfig /** 有表单配置 */) {
       storeCodeSnippets(
         [
@@ -583,9 +586,11 @@ function genConstantsCode(options: ViewDesignDataOptions, components: MergeDesig
       .join(',')
   }
   const _saticDataConfig = [...saticDataConfig]
+  // 表单中的静态数据动态解析生成
+  // 如果key已存在则不会添加
   for (const widget of widgetListHasStaticData) {
-    const key = `${snake(title(widget.idAlias)).toUpperCase()}_OPTIONS`
-    if (!saticDataConfig.some(e => e.key === widget.key)) {
+    const key = genConstName(widget.idAlias ?? 'undefined')
+    if (!_saticDataConfig.some(e => e.key === key)) {
       _saticDataConfig.push({ key, value: widget.options.options })
     }
   }
@@ -1040,7 +1045,7 @@ function genFormDetailComponentCode(
   )
   if (widgetListHasStaticData.length) {
     const names = Array.from(
-      new Set(widgetListHasStaticData.map(e => `${snake(title(e.idAlias)).toUpperCase()}_OPTIONS`)),
+      new Set(widgetListHasStaticData.map(e => genConstName(e.idAlias ?? 'undefined'))),
     )
     storeCodeSnippets(
       [`import { ${names.join(',')} } from '@/views${base}/constants'`, ''],
@@ -1121,9 +1126,20 @@ function genFormDetailComponentCode(
   /** const end */
 
   /** template start */
+  const genLabelPositionProp = (form?: FormPropsSettings) => {
+    return form?.labelPosition ? `label-position="${form.labelPosition}"` : `label-position="left"`
+  }
+  const genLabelWidthProp = (form?: FormPropsSettings) => {
+    return form?.labelWidth ? `label-width="${form.labelWidth}px"` : `label-width="120px"`
+  }
+  const genRequireAsteriskPositionProp = (form?: FormPropsSettings) => {
+    return form?.requireAsteriskPosition
+      ? `require-asterisk-position="${form.requireAsteriskPosition}"`
+      : `require-asterisk-position="right"`
+  }
   storeCodeSnippets(
     [
-      `${genSpace(2)}<el-form ref="formRef" :model label-position="${form?.labelPosition ?? 'left'}" label-width="${form?.labelWidth ?? 120}px" :disabled>`,
+      `${genSpace(2)}<el-form ref="formRef" :model ${genLabelPositionProp(form)} ${genLabelWidthProp(form)} ${genRequireAsteriskPositionProp(form)} :disabled>`,
     ],
     templateCodeArr,
   )

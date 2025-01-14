@@ -4,6 +4,7 @@ import { camel, dash, last, pascal, snake, title } from 'radash'
 import {
   forinRecursive,
   forofRecursive,
+  genConstName,
   storeCodeSnippetOfDestructuringVar,
   storeCodeSnippets,
   transKeyToVar,
@@ -37,9 +38,7 @@ export const genRecursiveAreaModel = (options: ViewDesignDataOptions, widget: Wi
   }
   storeCodeSnippets([`import { SemiSelect } from '@element-plus/icons-vue'`], importCodeArr)
   if (widgetListHasStaticData.length) {
-    const names = widgetListHasStaticData.map(
-      e => `${snake(title(e.idAlias)).toUpperCase()}_OPTIONS`,
-    )
+    const names = widgetListHasStaticData.map(e => genConstName(e.idAlias ?? 'undefined'))
     storeCodeSnippets(
       [`import { ${names.join(',')} } from '@/views${base}/constants'`, ''],
       importCodeArr,

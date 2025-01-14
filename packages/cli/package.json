@@ -1,6 +1,6 @@
 {
   "name": "@vswift/cli",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "main": "dist/main.js",
   "files": [
@@ -49,8 +49,8 @@
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
     "@types/semver": "^7.5.8",
-    "vswift-form": "0.0.19",
-    "visual-development": "0.0.16",
+    "vswift-form": "0.0.21",
+    "visual-development": "0.0.17",
     "vue": "^3.5.13"
   }
 }

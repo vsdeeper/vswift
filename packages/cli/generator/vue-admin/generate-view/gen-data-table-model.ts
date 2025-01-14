@@ -2,6 +2,7 @@ import type { WidgetDesignData } from 'vswift-form'
 import type { ViewDesignDataOptions } from 'visual-development'
 import { camel, dash, last, pascal, snake, title } from 'radash'
 import {
+  genConstName,
   storeCodeSnippetOfDestructuringVar,
   storeCodeSnippets,
   transKeyToVar,
@@ -35,9 +36,7 @@ export const genDataTableModel = (options: ViewDesignDataOptions, widget: Widget
   }
   storeCodeSnippets([`import { SemiSelect } from '@element-plus/icons-vue'`], importCodeArr)
   if (widgetListHasStaticData.length) {
-    const names = widgetListHasStaticData.map(
-      e => `${snake(title(e.idAlias)).toUpperCase()}_OPTIONS`,
-    )
+    const names = widgetListHasStaticData.map(e => genConstName(e.idAlias ?? 'undefined'))
     storeCodeSnippets(
       [`import { ${names.join(',')} } from '@/views${base}/constants'`, ''],
       importCodeArr,
@@ -108,12 +107,15 @@ export const genDataTableModel = (options: ViewDesignDataOptions, widget: Widget
     recursive: true,
     where: 'data-table',
   })
+  const genRequireAsterisk = (required?: boolean) => {
+    return !!required ? `<el-text type="danger" style="margin-left: 4px;">*</el-text>` : ''
+  }
   widget.widgetList?.map((item, index) => {
     storeCodeSnippets(
       [
         `<el-table-column prop="${item.idAlias}">`,
         `<template #header>`,
-        `<el-text type="danger" style="margin-right: 4px;">*</el-text>${item.options.label}`,
+        `${item.options.label}${genRequireAsterisk(item.options.required)}`,
         `</template>`,
         `<template #default="{ row, $index: index }">`,
       ],

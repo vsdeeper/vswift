@@ -5,7 +5,8 @@ import { outputFile, pathExists } from 'fs-extra'
 import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import prettier from 'prettier'
-import { camel, pascal, title } from 'radash'
+import { camel, pascal, snake, title } from 'radash'
+import type { WidgetDesignData } from 'vswift-form'
 
 export function finalOutput(projectName: string) {
   console.log(
@@ -34,13 +35,34 @@ export function genSpace(num?: number) {
 }
 
 /**
- * 将 key 转换为 变量名称
+ * 将 key 转换为小驼峰变量名称
  * @param prefix
  * @param key
  * @param suffix
  */
 export function transKeyToVar(prefix: string, key: string, ...suffix: string[]) {
   return `${camel(title(prefix))}${pascal(title(key))}${suffix?.length ? suffix.map(e => pascal(title(e))).join('') : ''}`
+}
+
+/**
+ * 生成constants.ts中const常量名称
+ * @param id
+ */
+export function genConstName(id: string) {
+  return `${snake(title(id)).toUpperCase()}_OPTIONS`
+}
+
+/**
+ * 生成model组件名称
+ * @param id
+ * @param parent
+ */
+export function genModelCompName(id: string, parent?: WidgetDesignData) {
+  let suffix = ''
+  if (parent?.type === 'recursive-area') {
+    suffix = `Of${pascal(title(parent.idAlias))}`
+  }
+  return `${pascal(title(id))}${suffix}Model`
 }
 
 /**

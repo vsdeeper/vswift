@@ -1,5 +1,5 @@
 import type { WidgetDesignData } from 'vswift-form'
-import { genSpace, transKeyToVar } from '../../utils.js'
+import { genConstName, genSpace, transKeyToVar } from '../../utils.js'
 import { camel, pascal, snake, title } from 'radash'
 
 export const genTextCodeSnippets = (
@@ -67,7 +67,7 @@ export const genRadioCodeSnippets = (
   const codeSnippets: string[] = []
   codeSnippets.push(
     `${genSpace(space)}<el-radio-group v-model="${model}.${widget.idAlias}" @change="onChange('${widget.idAlias}', $event)">`,
-    `${genSpace(space ?? 0 + 2)}<el-radio v-for="item in ${widget.idAlias?.toUpperCase()}_OPTIONS" :key="item.value" :value="item.value">`,
+    `${genSpace(space ?? 0 + 2)}<el-radio v-for="item in ${genConstName(widget.idAlias ?? 'undefined')}" :key="item.value" :value="item.value">`,
     `${genSpace(space ?? 0 + 4)}{{ item.label }}`,
     `${genSpace(space ?? 0 + 2)}</el-radio>`,
     `${genSpace(space)}</el-radio-group>`,
@@ -83,7 +83,7 @@ export const genCheckboxCodeSnippets = (
   const codeSnippets: string[] = []
   codeSnippets.push(
     `${genSpace(space)}<el-checkbox-group v-model="${model}.${widget.idAlias}" @change="onChange('${widget.idAlias}', $event)">`,
-    `${genSpace(space ?? 0 + 2)}<el-checkbox v-for="item in ${widget.idAlias?.toUpperCase()}_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />`,
+    `${genSpace(space ?? 0 + 2)}<el-checkbox v-for="item in ${genConstName(widget.idAlias ?? 'undefined')}" :key="item.value" :label="item.label" :value="item.value" />`,
     `${genSpace(space)}</el-checkbox-group>`,
   )
   return codeSnippets
@@ -100,7 +100,7 @@ export const genSelectCodeSnippets = (
   )
   if (widget.options.dataSource === 'customize') {
     codeSnippets.push(
-      `${genSpace(space ?? 0 + 2)}<el-option v-for="item in ${snake(title(widget.idAlias)).toUpperCase()}_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />`,
+      `${genSpace(space ?? 0 + 2)}<el-option v-for="item in ${genConstName(widget.idAlias ?? 'undefined')}" :key="item.value" :label="item.label" :value="item.value" />`,
     )
   } else {
     codeSnippets.push(
