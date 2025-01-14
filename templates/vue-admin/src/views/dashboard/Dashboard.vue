@@ -45,7 +45,7 @@ onMounted(async () => {
             </el-link>
             了解我的可视化开发思想和实践。
           </li>
-          <li>🤔 我最近有换工作计划，目标城市是深圳或者武汉，看好我联系我 😄</li>
+          <li>🤔 我最近有换工作计划，看好我联系我 😄</li>
           <li>📫 Email: vsdeeper@qq.com , WeChat: cscomo 💬</li>
         </ul>
         <el-divider direction="horizontal" content-position="left">技术栈</el-divider>
