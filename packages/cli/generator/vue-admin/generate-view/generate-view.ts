@@ -22,7 +22,8 @@ interface GenerateInfoItem {
  */
 export async function generateView(names: string) {
   const spinner = ora({ spinner: 'line' })
-  // spinner.start('Generating...' + os.EOL)
+  spinner.start('Generating...' + os.EOL)
+
   const storeGenerateInfo: GenerateInfoItem[] = []
   const nameArr = names.split(',')
   for (const name of nameArr) {
@@ -30,9 +31,9 @@ export async function generateView(names: string) {
     const config = await parseConfig()
     const configFilePath = `${config.configFileDir}/${name + '.json'}`
     if (!(await pathExists(configFilePath))) {
-      consola.error(`Configuration file ${chalk.green(configFilePath)} not found`)
-      return
+      throw new Error(`Configuration file ${chalk.green(configFilePath)} not found`)
     }
+
     const configData: ViewDesignData = JSON.parse(
       await readFile(configFilePath, { encoding: 'utf-8' }),
     )

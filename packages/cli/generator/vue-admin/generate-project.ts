@@ -6,8 +6,15 @@ import chalk from 'chalk'
 import { readFile, writeFile } from 'node:fs/promises'
 import { copyTemplate, getTemplatePath } from '../../utils/utils.js'
 import { changeConfig, parseConfig } from '../../utils/config-operations.js'
-import { createGitignore, finalOutput, gitAddOrigin, gitInit } from '../utils.js'
+import {
+  createGitignore,
+  finalOutput,
+  addGitRemoteOrigin,
+  gitInit,
+  hasGitRemoteOrigin,
+} from '../utils.js'
 import type { ProjectDesignData } from 'visual-development'
+import inquirer from 'inquirer'
 
 export async function generateProject(fileName: string) {
   const config = await parseConfig()
@@ -29,6 +36,23 @@ export async function generateProject(fileName: string) {
   const { options } = configData
   const projectName = configData!.options.name || 'vswift-project'
   const dest = path.resolve(process.cwd(), `${projectName}`)
+
+  let isContinueGenerate = true
+  if (await pathExists(dest)) {
+    const { isContinue } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'isContinue',
+        message: `${chalk.green(projectName)} already exists, do you want to overwrite it?`,
+      },
+    ])
+    isContinueGenerate = isContinue
+  }
+
+  if (!isContinueGenerate) {
+    spinner.fail('You have canceled')
+    return
+  }
 
   // 下载template
   spinner.start('Downloading template...' + os.EOL)
@@ -53,10 +77,12 @@ export async function generateProject(fileName: string) {
   spinner.succeed('Git init done')
 
   // 设置 git remote origin
-  if (options.gitUrl) {
-    spinner.start('Adding git remote origin...' + os.EOL)
-    await gitAddOrigin(projectName, options.gitUrl)
-    spinner.succeed('Add git remote origin done')
+  if (!(await hasGitRemoteOrigin(projectName))) {
+    if (options.gitUrl) {
+      spinner.start('Adding git remote origin...' + os.EOL)
+      await addGitRemoteOrigin(projectName, options.gitUrl)
+      spinner.succeed('Add git remote origin done')
+    }
   }
 
   // 添加.gitignore文件

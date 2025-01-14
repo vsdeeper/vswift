@@ -266,7 +266,7 @@ export async function genCodeFiles(data: Record<string, any>) {
     const recurObject = async (obj: Record<string, any>, base: string) => {
       for (const key in obj) {
         if (key.startsWith('/') /** 说明是路径 */) {
-          if (typeof obj[key] === 'string' /** 源代码 */) {
+          if (typeof obj[key] === 'string' /** 有源代码 */) {
             const filePath = path.resolve(process.cwd(), `${_path}/${base}${key}`)
             const formatted = await prettier.format(obj[key], {
               ...formatOptions,
@@ -291,7 +291,18 @@ export async function gitInit(projectName: string) {
   await $({ shell: true })`cd ${projectName} && git init`
 }
 
-export async function gitAddOrigin(projectName: string, url: string) {
+export async function hasGitRemoteOrigin(projectName: string) {
+  try {
+    await $({
+      shell: true,
+    })`cd ${projectName} && git remote get-url origin`
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+export async function addGitRemoteOrigin(projectName: string, url: string) {
   await $({ shell: true })`cd ${projectName} && git remote add origin ${url}`
 }
 
