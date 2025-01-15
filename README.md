@@ -1,6 +1,6 @@
 # vswift
 
-A quick development tool based on the monorepo architecture, mainly includes packages such as [visual-development](https://github.com/vsdeeper/visual-development), [vswift-form](https://github.com/vsdeeper/vswift-form), and [vue-admin](https://github.com/vsdeeper/vswift/tree/master/templates/vue-admin).
+A quick development tool based on the monorepo architecture, mainly includes [visual-development](https://github.com/vsdeeper/visual-development), [vswift-form](https://github.com/vsdeeper/vswift-form), and [vue-admin](https://github.com/vsdeeper/vswift/tree/master/templates/vue-admin).
 
 ## Develop
 
@@ -43,24 +43,42 @@ npm install -g @vswift/cli
 
 Run `vswift -v` command to check if `@vswift/cli` is installed successfully.
 
-### Create your own initial project as needed
+### Create initial project
 
 ```sh
 vswift create
 ```
 
-### Generate code
+### Generate as needed
+
+You need to configure the project and view data on the visual development platform first, and then export the json data. The following has a introduction to visual development platform.
+
+#### Visual development platform
+
+The visual development platform completes the data configuration of projects and views and provides them to vswift for use. View the project [here](https://github.com/vsdeeper/visual-development), preview [here](https://vsdeeper.github.io/visual-development/).
+
+#### Configure directory
+
+Configure the json file directory exported from the visual development platform, that is, the browser download directory.
 
 ```sh
-vswift gen <-p, --path> <json file path>
+vswift config set configFileDir "<dir>"
 ```
 
-Used in conjunction with [visual-development](https://github.com/vsdeeper/visual-development) to convert configuration data into code.
+Example: `$ vswift config set configFileDir "C:\Users\Administrator\Downloads"`
 
-## Visual development
+#### Generate project as needed
 
-Visual development through visual configuration, follow these steps:
+```sh
+vswift generate project <name>
+```
 
-- Run `vsiwft create` to get the initial framework of the project you need, currently only supports vue-admin.
-- Complete the visual configuration of the project [here](https://vsdeeper.github.io/visual-development/), or you can clone the [visual-development](https://github.com/vsdeeper/visual-development) and deploy it anywhere.
-- The visual development platform generates json data through visual configuration, run `vswift gen <-p, --path> <json file path>` to convert configuration data into project code.
+Note: `name` does not need the .json suffix.
+
+#### Generate view as needed
+
+```sh
+vswift generate view <name>
+```
+
+Note: `name` does not need the .json suffix.
