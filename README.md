@@ -66,6 +66,7 @@ vswift config set configFileDir "<dir>"
 ```
 
 Example: `$ vswift config set configFileDir "C:\Users\Administrator\Downloads"`
+Run `vswift config list` to see if the setting is successful.
 
 #### Generate project as needed
 
