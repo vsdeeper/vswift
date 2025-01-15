@@ -79,7 +79,7 @@ Note: `name` does not need the .json suffix.
 #### Generate view as needed
 
 ```sh
-vswift generate view <name>
+vswift generate view <name1[,name2[,name3[...]]]>
 ```
 
-Note: `name` does not need the .json suffix.
+Note: `name` does not need the .json suffix, `,` separate multiple names to generate multiple views at the same time.
