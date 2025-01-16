@@ -10,13 +10,23 @@ A quick development tool based on the monorepo architecture, mainly includes [vi
 pnpm install
 ```
 
-### Develop scaffold
+### Dev-cli
 
 ```sh
 pnpm dev:cli
 ```
 
-The cli is the soul of the project. The command will monitor the modification of .ts files in the cli directory and compile in real time to generate the dist directory. If it is the first time to enter the project, it is necessary to execute `pnpm dev:cli` to generate dist first, because the package.json configuration entry file of cli must be a compiled js file. If it is not the first development and the dist directory of cli has been generated, you can also execute `pnpm dev -p cli` instead of `pnpm dev:cli`.
+Dev-cli is the development scaffolding inside vswift, it will not be published to npm. It is responsible for packaging and publishing other packages and running templates. During runtime, it will monitor the modification of .ts files in dev-cli directory and compile them to the dist directory. If you want to develop vswift, you must first run it.
+
+### Cli
+
+```sh
+pnpm dev --pkg cli
+```
+
+--tpl can be abbreviated to -p .
+
+Cli is the directory of the npm package @vswift/cli. It will monitor the .ts changes in the cli directory and compile them to the dist directory. It is necessary to run it during debugging in the development phase.
 
 ### Develop vue-admin template
 
@@ -25,6 +35,8 @@ pnpm dev --tpl vue-admin
 ```
 
 --tpl can be abbreviated to -t .
+
+Run the vue-admin template to facilitate debugging during template development.
 
 ## Publish
 
