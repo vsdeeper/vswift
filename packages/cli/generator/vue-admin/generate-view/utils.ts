@@ -247,20 +247,19 @@ function genViewComponentCode(options: ViewDesignDataOptions, components: MergeD
   }
   /** useAppSettingStore end  */
 
-  /** useUserInfoStore start */
+  /** useMenuDataStore start */
   if (
     getTableOperationsHasPermissionCode(findTable)?.length ||
-    getTableColumnOperationsHasPermissionCode(findTable)?.length /** 有 useUserInfoStore 定义 */
+    getTableColumnOperationsHasPermissionCode(findTable)?.length /** 有 useMenuDataStore 定义 */
   ) {
-    storeCodeSnippets(['// 用户信息store'], varCodeArr)
     storeCodeSnippetOfDestructuringVar(
       'permissionCodes',
-      'storeToRefs(useUserInfoStore())',
+      'storeToRefs(useMenuDataStore())',
       varCodeArr,
     )
     storeCodeSnippets([''], varCodeArr)
   }
-  /** useUserInfoStore end */
+  /** useMenuDataStore end */
 
   /** useViewStore start */
   const useStoreConst = Array.from(
@@ -1383,9 +1382,9 @@ function genStoresGlobalImports(
   }
   if (
     tableOperationsHasPermissionCode?.length ||
-    tableColumnOperationsHasPermissionCode?.length /** 表格操作或表列操作配置了权限标识符，需要从用户store中获取权限码数据 */
+    tableColumnOperationsHasPermissionCode?.length /** 表格操作或表列操作配置了权限标识符，需要从MenuDataStore中获取权限码数据 */
   ) {
-    codeArr.push('useUserInfoStore')
+    codeArr.push('useMenuDataStore')
   }
   if (
     searchConditionItems?.some(e => !!e.apiConfig?.useGlobalApi) ||

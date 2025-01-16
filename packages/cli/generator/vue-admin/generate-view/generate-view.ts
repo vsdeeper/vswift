@@ -1,4 +1,4 @@
-import consola from 'consola'
+import path from 'path'
 import chalk from 'chalk'
 import ora from 'ora'
 import os from 'os'
@@ -8,7 +8,6 @@ import { readFile } from 'node:fs/promises'
 import { parseConfig } from '../../../utils/config-operations.js'
 import { genCodeFiles } from '../../utils.js'
 import { resolveApiObjectOfView, resolveStoreObjectOfView, resolveViewObject } from './utils.js'
-import { map } from 'radash'
 
 interface GenerateInfoItem {
   name?: string
@@ -29,7 +28,7 @@ export async function generateView(names: string) {
   for (const name of nameArr) {
     const generateInfoObj: GenerateInfoItem = { name }
     const config = await parseConfig()
-    const configFilePath = `${config.configFileDir}/${name + '.json'}`
+    const configFilePath = path.join(config.configFileDir, `${name}.json`)
     if (!(await pathExists(configFilePath))) {
       throw new Error(`Configuration file ${chalk.green(configFilePath)} not found`)
     }
