@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <template v-for="item in menuData" :key="item.menuId">
-    <template v-if="item.visible === 1 && item.children?.length">
+    <template v-if="item.visible === 1 && item.menuType === 1">
       <el-sub-menu :index="item.path!">
         <template #title>
           <el-icon v-if="item.icon" size="16px"><component :is="item.icon" /></el-icon>

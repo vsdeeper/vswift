@@ -1,5 +1,5 @@
 import type { LocationQueryRaw, RouteParamsRaw, RouteRecordNormalized, Router } from 'vue-router'
-import { dash, pascal } from 'radash'
+import { dash, pascal, title, trim } from 'radash'
 
 /**
  * 解析路由参数
@@ -30,7 +30,7 @@ export function resolveQuery(href: string) {
     const hrefs = href.split('?')
     const searchs = hrefs.length > 1 && hrefs[1].split('&')
     searchs &&
-      searchs.forEach((e) => {
+      searchs.forEach(e => {
         const _e = e.split('=')
         query[_e[0]] = _e[1]
       })
@@ -43,12 +43,12 @@ export function resolveQuery(href: string) {
 export function generateRoutes(router: Router, menuData: VsMenuDataItem[]) {
   try {
     const matchViewPaths = import.meta.glob('../views/**/*.vue')
-    menuData.forEach((item) => {
+    menuData.forEach(item => {
       if (item.children?.length) {
-        addRoute(matchViewPaths, router, 'MainLayout', item, true)
+        addRoute(matchViewPaths, router, 'MainLayout', item)
         generateRoutes(router, item.children)
       } else {
-        addRoute(matchViewPaths, router, 'MainLayout', item, false)
+        addRoute(matchViewPaths, router, 'MainLayout', item)
       }
     })
   } catch (error) {
@@ -62,29 +62,28 @@ export function addRoute(
   router: Router,
   parentName: string,
   menuDataItem: VsMenuDataItem,
-  hasChildren: boolean
 ) {
   try {
-    if (hasChildren) {
+    if (menuDataItem.menuType === 1 /** 模块 */) {
       router.addRoute(parentName, {
-        name: menuDataItem.permKey,
+        name: menuKeyToRouteName(menuDataItem.menuKey),
         path: menuDataItem.path!,
         meta: { title: menuDataItem.menuName },
-        redirect: menuDataItem.children![0].path,
-        children: []
+        redirect: menuDataItem.children?.length ? menuDataItem.children[0].path : undefined,
+        children: [],
       })
-    } else {
+    } else if (menuDataItem.menuType === 2 /** 菜单 */) {
       const viewPathArr = menuDataItem
         .path!.split('/')
-        .map((e) => dash(e))
+        .map(e => dash(e))
         .filter((e: string) => !!e && !e.startsWith(':'))
       const lastName = viewPathArr.pop()!
       const viewPath = viewPathArr.length ? viewPathArr.join('/') + '/' : ''
       router.addRoute(parentName, {
-        name: menuDataItem.permKey,
+        name: menuKeyToRouteName(menuDataItem.menuKey),
         path: menuDataItem.path!,
         component: matchViewPaths[`../views/${viewPath}${dash(lastName)}/${pascal(lastName)}.vue`],
-        meta: { title: menuDataItem.menuName }
+        meta: { title: menuDataItem.menuName },
       })
     }
   } catch (error) {
@@ -100,9 +99,9 @@ export function findRouteByLocationPath(pathname: string, routes: RouteRecordNor
       pathname = '/' + pathname.split(BASE_URL)[1]
     }
     if (pathname === '' /** 根目录路径，重定向 */) {
-      findToRoute = routes.find((e) => e.path === '/')
+      findToRoute = routes.find(e => e.path === '/')
     } else {
-      findToRoute = routes.find((e) => {
+      findToRoute = routes.find(e => {
         if (e.path === '/' || e.path === '/:pathMatch(.*)*') return false
         if (e.path.includes('/:') /** path携带params参数，去除参数路径 */) {
           const pathFromRoute = e.path.split('/:')[0]
@@ -124,4 +123,12 @@ export function findRouteByLocationPath(pathname: string, routes: RouteRecordNor
     console.error('routeHasParamsOrQuery ->', error)
   }
   return findToRoute
+}
+
+function menuKeyToRouteName(key: string) {
+  const _key = key
+    .split(':')
+    .map(e => title(e))
+    .join(' ')
+  return pascal(_key)
 }

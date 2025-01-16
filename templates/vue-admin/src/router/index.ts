@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { MainLayout } from '@/layout'
-import { findRouteByLocationPath, generateRoutes, resolveParams, resolveQuery } from './util'
+import { findRouteByLocationPath, generateRoutes, resolveParams, resolveQuery } from './utils'
 import { queryMenuData, queryUserInfo } from '@/api/global'
 import { useMenuDataStore, useUserInfoStore } from '@/stores/global'
 

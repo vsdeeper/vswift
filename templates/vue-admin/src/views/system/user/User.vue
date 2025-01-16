@@ -6,7 +6,7 @@ import type {
   SSelectProps,
   SInputProps,
 } from '@/components'
-import { useAppSettingStore, useUserInfoStore } from '@/stores/global'
+import { useAppSettingStore, useMenuDataStore } from '@/stores/global'
 import { EMPLOYEE_STATUS_OPTIONS } from '@/utils/constants'
 import { copyItem, deleteItems, queryUserList } from '@/api/system/user'
 import { findArraryValueFromTreeData, getLabelByValue } from '@/utils'
@@ -21,7 +21,7 @@ const AddItemRef = ref<AddItemInstance>()
 const EditItemRef = ref<EditItemInstance>()
 const CheckItemRef = ref<CheckItemInstance>()
 
-const { permissionCodes } = storeToRefs(useUserInfoStore())
+const { permissionCodes } = storeToRefs(useMenuDataStore())
 const { getPageSize } = useAppSettingStore()
 const params = ref<PagingParams>({
   pageIndex: 1,
@@ -41,7 +41,7 @@ const search = ref<VsSearchProps>({
       type: 'Select',
       label: '员工状态',
       props: {
-        optionData: EMPLOYEE_STATUS_OPTIONS,
+        options: EMPLOYEE_STATUS_OPTIONS,
       } as SSelectProps,
     },
     {
@@ -64,14 +64,14 @@ const table = ref<Partial<VsTableProps>>({
       label: '新增',
       value: 'add',
       code: 'add',
-      show: code => permissionCodes.value.includes(code!),
+      show: code => !!permissionCodes.value?.includes(code!),
     },
     {
       label: '批量删除',
       value: 'batch_delete',
       code: 'delete',
       type: 'danger',
-      show: code => permissionCodes.value.includes(code!),
+      show: code => !!permissionCodes.value?.includes(code!),
     },
   ],
   rowOperateOptions: [
@@ -79,20 +79,20 @@ const table = ref<Partial<VsTableProps>>({
       label: '查看',
       value: 'check',
       code: 'check',
-      show: code => permissionCodes.value.includes(code!),
+      show: code => !!permissionCodes.value?.includes(code!),
     },
     {
       label: '编辑',
       value: 'edit',
       code: 'edit',
-      show: code => permissionCodes.value.includes(code!),
+      show: code => !!permissionCodes.value?.includes(code!),
     },
     {
       label: '复制',
       value: 'copy',
       code: 'copy',
       showPopconfirm: true,
-      show: code => permissionCodes.value.includes(code!),
+      show: code => !!permissionCodes.value?.includes(code!),
     },
     {
       label: '删除',
@@ -100,7 +100,7 @@ const table = ref<Partial<VsTableProps>>({
       value: 'delete',
       code: 'delete',
       showPopconfirm: true,
-      show: code => permissionCodes.value.includes(code!),
+      show: code => !!permissionCodes.value?.includes(code!),
     },
   ],
   columns: [

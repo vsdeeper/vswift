@@ -3,10 +3,23 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import localforage from 'localforage'
 import { getColorPrefers } from '@/utils'
 import { APP_SETTING_STORAGE_KEY } from './utils/constants'
-import { useAppSettingStore, type AppSetting } from './stores/global'
+import { useAppSettingStore, useMenuDataStore, type AppSetting } from './stores/global'
 import { storeToRefs } from 'pinia'
+import { camel, last, title } from 'radash'
 
+const route = useRoute()
 const { appSettingData } = storeToRefs(useAppSettingStore())
+const { setPermissionCodes } = useMenuDataStore()
+const { menuData } = storeToRefs(useMenuDataStore())
+const recursive = (target: string, data: VsMenuDataItem[]) => {
+  for (const item of data) {
+    if (item.menuKey === target && item.menuType === 2) {
+      setPermissionCodes(item.children?.map(e => last(e.menuKey.split(':'))!))
+      break
+    }
+    recursive(target, item.children ?? [])
+  }
+}
 
 onMounted(async () => {
   // 获取本地存储应用设置
@@ -14,6 +27,18 @@ onMounted(async () => {
   const { setAppSettingData, appSettingConst } = useAppSettingStore()
   storeAppSetting ? setAppSettingData(storeAppSetting) : setAppSettingData(appSettingConst)
 })
+
+watch(
+  () => route.path,
+  path => {
+    const pathArr = path
+      .split('/')
+      .filter(e => !!e)
+      .map(e => camel(title(e)))
+    const menuKey = pathArr.join(':')
+    recursive(menuKey, menuData.value ?? [])
+  },
+)
 
 watch(
   () => appSettingData.value?.theme.mode,

@@ -16,7 +16,7 @@ declare global {
    * @property {number} VsMenuDataItem.menuId - 菜单id
    * @property {string} VsMenuDataItem.menuName - 菜单名称
    * @property {number} VsMenuDataItem.menuType - 菜单类型，菜单挂在模块下，权限点挂在菜单下，可选值 1-模块，2-菜单，3-权限点
-   * @property {string} VsMenuDataItem.permKey - 权限标识，带上上一级的权限标识，用 : 隔开，例：模块 a 的权限标识符取名 apermKey，则模块 a 下面的菜单 b 权限标识符可取名 apermKey:bpermKey
+   * @property {string} VsMenuDataItem.menuKey - 菜单唯一key，带上上一级的menuKey，用 : 隔开，例：模块 a 的权限标识符取名 aKey，则模块 a 下面的菜单 b 的menuKey可取名 aKey，则模块:bKey
    * @property {string} VsMenuDataItem.path - 路由路径，例：/aRoutePath/bRoutePath
    * @property {string} VsMenuDataItem.icon - 菜单图标
    * @property {number} VsMenuDataItem.isExternalLink - 是否外链，可选值 1-是，2-否
@@ -24,11 +24,11 @@ declare global {
    * @property {arrary} VsMenuDataItem.children - 子菜单
    */
   interface VsMenuDataItem {
-    menuId?: number
-    menuName?: string
-    menuType?: 1 | 2 | 3
-    permKey?: string
-    path?: string
+    menuId: number
+    menuName: string
+    menuType: 1 | 2 | 3
+    menuKey: string
+    path: string
     icon?: string
     isExternalLink?: 1 | 2
     visible?: 1 | 2

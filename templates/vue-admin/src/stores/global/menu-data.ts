@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 const useMenuDataStore = defineStore('global/menu-data', () => {
   const menuData = ref<VsMenuDataItem[]>()
+  const permissionCodes = ref<string[]>()
 
   async function getMenuData() {
     if (menuData.value) return menuData.value
@@ -13,10 +14,16 @@ const useMenuDataStore = defineStore('global/menu-data', () => {
     menuData.value = data
   }
 
+  function setPermissionCodes(data?: string[]) {
+    permissionCodes.value = data
+  }
+
   return {
     menuData,
     getMenuData,
-    setMenuData
+    setMenuData,
+    permissionCodes,
+    setPermissionCodes,
   }
 })
 
