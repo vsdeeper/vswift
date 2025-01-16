@@ -50,7 +50,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/semver": "^7.5.8",
     "vswift-form": "0.0.21",
-    "visual-development": "0.0.17",
+    "visual-development": "0.0.18",
     "vue": "^3.5.13"
   }
 }
