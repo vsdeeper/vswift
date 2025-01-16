@@ -8,9 +8,7 @@ Quick development scaffolding.
 npm install -g @vswift/cli
 ```
 
-Run `vswift -v` command to check if `@vswift/cli` is installed successfully.
-
-Run `vswift -h` to see how to use it.
+Run `vswift -v` command to check if `@vswift/cli` is installed successfully, run `vswift -h` to see how to use it.
 
 # Create initial project
 
