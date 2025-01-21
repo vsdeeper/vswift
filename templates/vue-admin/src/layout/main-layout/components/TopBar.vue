@@ -112,8 +112,13 @@ function genFastLinkData(menuData: VsMenuDataItem[]): FastLinkDataItem[] {
     return [
       ...prev,
       ...(cur.children?.length
-        ? [{ name: cur.menuName, path: cur.path }, ...genFastLinkData(cur.children)]
-        : [{ name: cur.menuName, path: cur.path }]),
+        ? [
+            ...(cur.menuType === 2 ? [{ name: cur.menuName, path: cur.path }] : []),
+            ...genFastLinkData(cur.children),
+          ]
+        : cur.menuType === 2
+          ? [{ name: cur.menuName, path: cur.path }]
+          : []),
     ]
   }, [])
 }

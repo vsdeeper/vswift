@@ -150,11 +150,9 @@ async function handleNavRecord(path: string) {
     return
   }
   const menuData = await useMenuDataStore().getMenuData()
-  const findMenuItem: VsMenuDataItem | undefined = findNodeObjectFromTreeData(
-    path,
-    menuData ?? [],
-    { id: 'path' },
-  )
+  const findMenuItem = findNodeObjectFromTreeData(path, menuData ?? [], { id: 'path' }) as
+    | VsMenuDataItem
+    | undefined
   if (findMenuItem && findMenuItem.visible === 1) {
     navRecordData.value.push({
       path,
