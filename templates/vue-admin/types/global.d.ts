@@ -36,15 +36,6 @@ declare global {
   }
 
   /**
-   * 自定义 import.meta.env 环境变量
-   * @interface ImportMetaEnv
-   * @property {string} ImportMetaEnv.VITE_MODE - 自定义模式
-   */
-  interface ImportMetaEnv extends Readonly<Record<string, string>> {
-    readonly VITE_MODE: 'dev' | 'test' | 'prod'
-  }
-
-  /**
    * 分页参数
    * @interface PagingParams
    * @property {number} PagingParams.pageIndex - 页码
